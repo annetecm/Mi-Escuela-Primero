@@ -1,9 +1,8 @@
 import React from 'react';
-import LoginPage from './components/loginpage';
-
+import RegisterAlly from './components/RegisterAlly';
 
 function App() {
-  return <LoginPage />;
+  return <RegisterAlly />;
 }
 
 export default App;
