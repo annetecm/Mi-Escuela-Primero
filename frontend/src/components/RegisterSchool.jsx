@@ -1,0 +1,81 @@
+import React, { useState } from 'react';
+import '../styles/RegisterSchool.css';
+import aliadoImg from '../assets/aliado.jpg';
+
+function RegisterSchool(){
+    return (
+        <div className="register-container">
+            <div className="image-section">
+                    <img src={aliadoImg} alt="Aliado foto" />
+            </div>
+            <div className="form-section">
+                <h1 className="title">Registrar mi escuela</h1>
+                <p className="label">Ingresa la información de tu centro educativo</p>
+                <div className="scroll">
+                <div className="heading">DATOS DE LA ESCUELA</div>
+                    <form className="form-grid">
+                        <div className="form-group">
+                            <label>Nombre de la escuela</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div className="form-group">
+                            <label>Clave CCT</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div className="form-group">
+                            <label>Nivel Educativo</label>
+                            <input className="form-input" type="email"/>
+                        </div>
+                        <label for="modalidad">Modalidad:</label>
+                        <div class="form-group">
+                            <label for="modalidad">Modalidad</label>
+                            <select className="selector">
+                                <option value="general">General</option>
+                                <option value="comunitaria">Comunitaria</option>
+                                <option value="indigena">Indígena</option>
+                                <option value="general_multigrado">General multigrado</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Control administrativo</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="sostenimiento">Sostenimiento</label>
+                            <select className="selector">
+                                <option value="estatal">Estatal</option>
+                                <option value="federal">Federal</option>
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label>Zona escolar</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div className="form-group">
+                            <label>Sector escolar</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                    </form>
+                    <p className='special-label'>Dirección</p>
+                    <form className="form-grid">
+                        <div className="form-group">
+                            <label>Calle y número</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div className="form-group">
+                            <label>Colonia</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                        <div className="form-group">
+                            <label>Municipio</label>
+                            <input className="form-input" type="text"/>
+                        </div>
+                    </form>
+                    <button className="continue-button">CONTINUAR</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default RegisterSchool;
