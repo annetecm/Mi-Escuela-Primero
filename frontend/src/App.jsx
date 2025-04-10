@@ -1,8 +1,8 @@
 import React from 'react';
-import RegisterAlly from './pages/RegisterAlly';
+import RegisterSchool from './pages/RegisterSchool';
 
 function App() {
-  return <RegisterAlly />;
+  return <RegisterSchool />;
 }
 
 export default App;
