@@ -2,19 +2,19 @@
     display: flex;
     height: 100vh;
     width: 100vw;
-}
+  }
   
-.image-section {
+  .image-section {
     flex: 1;
-}
+  }
   
-.image-section img {
+  .image-section img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-.form-section {
+  }
+  
+  .form-section {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -22,24 +22,55 @@
     padding: 60px;
     background-color: white;
     overflow: hidden;
-
-}
-
-.form-group select option {
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    font-family: "Montserrat", sans-serif;
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    background-color: #fff;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .form-group select option {
     color: #000;
     background-color: #fff;
-}
+  }
   
-.title {
+  .form-input {
+    background-color: #fff;
+    border: 1px solid #000;
+    padding: 10px;
+    border-radius: 5px;
+    color: #000;
+    font-size: 14px;
+  }
+  
+  .title {
     font-size: 30px;
-    font-family:'Montserrat', sans-serif ;
+    font-family: "Montserrat", sans-serif;
     margin-bottom: 30px;
     margin-top: 40px;
     text-align: center;
     color: #333;
-}
-
-.continue-button {
+  }
+  
+  .continue-button {
     width: 100%;
     padding: 14px;
     font-size: 16px;
@@ -50,77 +81,60 @@
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
     margin-top: 30px;
-}
-
-.form-grid {
+  }
+  
+  .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0 40px;
     width: 100%;
     max-width: none;
     margin-top: 30px;
-    font-family:'Montserrat', sans-serif ;
-}
-
-.form-group {
+    margin-bottom: 30px;
+    font-family: "Montserrat", sans-serif;
+  }
+  
+  /* Añadir estilo para la disposición en una sola columna */
+  .form-single-column {
     display: flex;
     flex-direction: column;
-    font-family: 'Montserrat', sans-serif;
-    margin-bottom: 20px;
-}
-  
-.form-group label {
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #000;
-}
-  
-.form-group select {
     width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-    background-color: #fff;
-    border: 1px solid #000000;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.form-input {
-    background-color: #fff;
-    border: 1px solid #000;
-    padding: 10px;
-    border-radius: 5px;
-    color: #000;
-    font-size: 14px;
-}
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-family: "Montserrat", sans-serif;
+  }
   
-.label{
-    font-family: 'Montserrat', sans-serif;
-    color:  #000;
+  .form-single-column .form-group {
+    width: 100%;
+  }
+  
+  .label {
+    font-family: "Montserrat", sans-serif;
+    color: #000;
     text-align: center;
     margin-bottom: 20px;
-}
-
-.scroll {
+  }
+  
+  .scroll {
     flex: 1;
     overflow-y: auto;
     margin-bottom: 20px;
-}
-
-.heading {
-    background-color: #F59D15;
+  }
+  
+  .heading {
+    background-color: #f59d15;
     color: white;
     font-weight: bold;
     padding: 10px;
     border-radius: 5px;
     margin: 20px 0 10px;
     text-align: center;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.heading-need{
+    font-family: "Montserrat", sans-serif;
+  }
+  
+  .heading-need {
     background-color: #183264;
     color: white;
     font-weight: bold;
@@ -128,20 +142,21 @@
     border-radius: 5px;
     margin: 20px 0 10px;
     text-align: center;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.special-label{
-    font-family: 'Montserrat', sans-serif;
+    font-family: "Montserrat", sans-serif;
+  }
+  
+  .special-label {
+    font-family: "Montserrat", sans-serif;
     color: #000;
     margin-top: 17px;
     font-weight: bold;
     text-decoration: underline;
-}
-
-html, body {
+  }
+  
+  html,
+  body {
     margin: 0;
     padding: 0;
     height: 100%;
     overflow: hidden;
-}
+  }
