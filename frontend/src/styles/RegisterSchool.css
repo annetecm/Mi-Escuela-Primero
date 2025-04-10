@@ -22,8 +22,8 @@
     padding: 60px;
     background-color: white;
     overflow: hidden;
-}
 
+}
 
 .form-group select option {
     color: #000;
@@ -40,7 +40,7 @@
 }
 
 .continue-button {
-    grid-column: span 2;
+    width: 100%;
     padding: 14px;
     font-size: 16px;
     font-weight: bold;
@@ -50,13 +50,14 @@
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-family:'Montserrat', sans-serif ;
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 30px;
 }
 
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px 40px;
+    gap: 0 40px;
     width: 100%;
     max-width: none;
     margin-top: 30px;
@@ -67,6 +68,7 @@
     display: flex;
     flex-direction: column;
     font-family: 'Montserrat', sans-serif;
+    margin-bottom: 20px;
 }
   
 .form-group label {
@@ -118,10 +120,21 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+.heading-need{
+    background-color: #183264;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 20px 0 10px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+}
+
 .special-label{
     font-family: 'Montserrat', sans-serif;
     color: #000;
-    margin-top: 35px;
+    margin-top: 17px;
     font-weight: bold;
     text-decoration: underline;
 }
