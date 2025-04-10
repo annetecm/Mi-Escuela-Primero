@@ -1,5 +1,5 @@
 import React from 'react';
-import RegisterSchool from './components/RegisterSchool';
+import RegisterSchool from './pages/RegisterSchool';
 
 function App() {
   return <RegisterSchool />;

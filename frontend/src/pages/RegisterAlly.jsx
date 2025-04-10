@@ -45,6 +45,14 @@ function RegisterAlly() {
           <p className="label">Persona física</p>
           <form className="form-grid">
             <div className="form-group">
+                <label>Correo</label>
+                <input className="form-input" type="text"/>
+            </div>
+            <div className="form-group">
+                <label>Contraseña</label>
+                <input className="form-input" type="text"/>
+            </div>
+            <div className="form-group">
               <label>Nombre completo</label>
               <input className="form-input" type="text"/>
             </div>
@@ -80,6 +88,16 @@ function RegisterAlly() {
           <>
             <p className="label">Persona moral</p>
             <div className="scroll">
+            <form className="form-grid">
+                <div className="form-group">
+                    <label>Correo</label>
+                    <input className="form-input" type="text"/>
+                </div>
+                <div className="form-group">
+                    <label>Contraseña</label>
+                    <input className="form-input" type="text"/>
+                </div>
+            </form>
             <div className="heading">DATOS DE LA INSTITUCIÓN</div>
               <form className="form-grid">
                 <div className="form-group">
