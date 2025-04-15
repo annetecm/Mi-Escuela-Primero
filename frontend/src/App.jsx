@@ -1,5 +1,5 @@
 import React from 'react';
-import RegisterSchool from './pages/RegisterSchool';
+import RegisterSchool from './pages/AllyRegSuccess';
 
 function App() {
   return <RegisterSchool />;
