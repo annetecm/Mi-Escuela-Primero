@@ -1,0 +1,31 @@
+.table-select-container {
+  margin-top: 10px;
+  overflow-x: auto;
+  font-family: 'Montserrat', sans-serif;
+  color: #333;
+}
+
+.table-select {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.table-select th,
+.table-select td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  color: #333;
+  background-color: #fff;
+}
+
+.table-select th {
+  background-color:#EB6012;
+  color: white;
+  font-weight: 600;
+}
+
+.table-select tr:hover {
+  background-color: #f9f9f9;
+}
