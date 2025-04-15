@@ -1,8 +1,8 @@
 import React from 'react';
-import RegisterSchool from './pages/AllyRegSuccess';
+import ListedAllies from './pages/ListedAllies';
 
 function App() {
-  return <RegisterSchool />;
+  return <ListedAllies />;
 }
 
 export default App;

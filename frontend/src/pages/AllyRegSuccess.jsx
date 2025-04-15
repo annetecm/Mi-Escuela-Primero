@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import './AllyRegSuccess.css';
-import checkImage from './assets/palomita.png'; // Ajusta la ruta si es diferente
+import '../styles/AllyRegSuccess.css';
+import checkImage from '../assets/palomita.png'; // Ajusta la ruta si es diferente
 
 
 export default function RegistroExitoso() {
