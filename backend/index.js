@@ -1,17 +1,19 @@
-const express = require("express");
+const express = require('express');
+const cors = require('cors');
 const app = express();
-const cors = require("cors");
 
-// Middleware
+// Configuración esencial
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
-app.use(cors());
 
-// Todas las rutas están ahora en escuela.js
-app.use("/api", require("./rutas/escuela")); // puedes usar "/api" o el prefijo que quieras
-app.use("/api/auth", require("./rutas/auth"));
+// Importa y usa las rutas CORRECTAMENTE
+const escuelaRouter = require('./rutas/escuela');
+app.use('/api/escuela', escuelaRouter); // Nota el prefijo completo aquí
 
 const PORT = 5000;
-
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

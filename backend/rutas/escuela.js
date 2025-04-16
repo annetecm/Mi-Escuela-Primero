@@ -2,8 +2,16 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 
+// En escuela.js
+router.post("/test-route", (req, res) => {
+  console.log("Datos recibidos:", req.body);
+  res.json({ received: true });
+});
+
 // Registro de usuario + escuela
 router.post("/register", async (req, res) => {
+  console.log("Received data:", JSON.stringify(req.body, null, 2)); // Log incoming data
+
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -11,8 +19,17 @@ router.post("/register", async (req, res) => {
     const { usuario, escuela } = req.body;
 
     // 1. Validaciones de usuario
-    if (!usuario?.correoElectronico || !usuario?.contraseña || !usuario?.nombre) {
+    console.log("Usuario recibido:", usuario);
+
+    if (!usuario) {
       return res.status(400).json({ error: "Faltan datos del usuario." });
+    }
+    
+    const camposRequeridosUsuario = ["correoElectronico", "contraseña", "nombre"];
+    for (const campo of camposRequeridosUsuario) {
+      if (!usuario[campo]) {
+        return res.status(400).json({ error: `Falta el campo de usuario: ${campo}` });
+      }
     }
 
     // 2. Verificar correo único
@@ -84,15 +101,14 @@ router.post("/register", async (req, res) => {
       throw new Error("Faltan los datos del director.");
     }
 
-    // 8. Insertar ApoyoPrevio (opcional)
-    if (escuela.apoyoPrevio) {
-      const { tipo, nombre, descripcion } = escuela.apoyoPrevio;
-      await client.query(
-        `INSERT INTO "ApoyoPrevio" ("CCT", "tipo", "nombre", "descripcion")
-         VALUES ($1, $2, $3, $4)`,
-        [CCT, tipo, nombre, descripcion]
-      );
-    }
+   // 8. Insertar ApoyoPrevio (opcional) 
+if (escuela.apoyoPrevio?.descripcion) {
+  await client.query(
+    `INSERT INTO "ApoyoPrevio" ("CCT", "descripcion")
+     VALUES ($1, $2)`,
+    [CCT, escuela.apoyoPrevio.descripcion]
+  );
+}
 
     // 9. Insertar TramiteGobierno (opcional)
     if (escuela.tramiteGobierno) {
@@ -106,7 +122,7 @@ router.post("/register", async (req, res) => {
 
     // 10. Insertar Supervisor (obligatorio)
     const {
-      fechaJubilacion: fjSup,
+      fechaJubilacion: fjRaw,
       posibleCambioZona,
       medioContacto,
       antiguedadZona,
@@ -114,6 +130,7 @@ router.post("/register", async (req, res) => {
       correoElectronico: correoSup,
       telefono: telSup,
     } = escuela.supervisor;
+    const fjSup = fjRaw ? fjRaw : null;
 
     await client.query(
       `INSERT INTO "Supervisor" ("CCT", "fechaJubilacion", "posibleCambioZona", "medioContacto", "antiguedadZona", "nombre", "correoElectronico", "telefono")
