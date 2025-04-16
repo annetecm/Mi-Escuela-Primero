@@ -1,8 +1,8 @@
 import React from 'react';
-import ListedAllies from './pages/ListedAllies';
+import Profile from './pages/SchoolProfile';
 
 function App() {
-  return <ListedAllies />;
+  return <Profile />;
 }
 
 export default App;
