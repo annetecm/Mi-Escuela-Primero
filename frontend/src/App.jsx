@@ -1,8 +1,8 @@
 import React from 'react';
-import Profile from './pages/SchoolProfile';
+import EditSchool from './pages/EditSchool.jsx';
 
 function App() {
-  return <Profile />;
+  return <EditSchool/>;
 }
 
 export default App;
