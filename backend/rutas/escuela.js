@@ -2,13 +2,13 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 
-// En escuela.js
+// Test route for debugging
 router.post("/test-route", (req, res) => {
   console.log("Datos recibidos:", req.body);
   res.json({ received: true });
 });
 
-// Registro de usuario + escuela
+// Register user and school
 router.post("/register", async (req, res) => {
   console.log("Received data:", JSON.stringify(req.body, null, 2)); // Log incoming data
 
@@ -18,7 +18,7 @@ router.post("/register", async (req, res) => {
 
     const { usuario, escuela } = req.body;
 
-    // 1. Validaciones de usuario
+    // 1. User validation
     console.log("Usuario recibido:", usuario);
 
     if (!usuario) {
@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
       }
     }
 
-    // 2. Verificar correo único
+    // 2. Verify if the email is unique
     const existingUser = await client.query(
       `SELECT * FROM "Usuario" WHERE "correoElectronico" = $1`,
       [usuario.correoElectronico]
@@ -41,10 +41,10 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "El correo electrónico ya está registrado." });
     }
 
-    // 3. Hashear contraseña
+    // 3. Hash password
     const hashedPassword = await bcrypt.hash(usuario.contraseña, 10);
 
-    // 4. Insertar Usuario
+    // 4. Insert user into the database
     const insertUsuario = await client.query(
       `INSERT INTO "Usuario" ("correoElectronico", "contraseña", "nombre", "estadoRegistro")
        VALUES ($1, $2, $3, 'pendiente') RETURNING "usuarioId"`,
@@ -54,7 +54,7 @@ router.post("/register", async (req, res) => {
     const usuarioId = insertUsuario.rows[0].usuarioId;
     if (!usuarioId) throw new Error("Error al generar el usuarioId");
 
-    // 5. Validaciones de escuela
+    // 5. School validation
     const camposEscuelaRequeridos = [
       'direccion', 'sostenimiento', 'zonaEscolar', 'sectorEscolar',
       'modalidad', 'nivelEducativo', 'CCT', 'numeroDocentes',
@@ -68,7 +68,7 @@ router.post("/register", async (req, res) => {
 
     const CCT = escuela.CCT;
 
-    // 6. Insertar Escuela
+    // 6. Insert school into the database
     const insertEscuela = await client.query(
       `INSERT INTO "Escuela" (
          "direccion", "sostenimiento", "zonaEscolar", "usuarioId",
@@ -93,7 +93,7 @@ router.post("/register", async (req, res) => {
       ]
     );
 
-    // 7. Validar existencia de supervisor y director (obligatorios)
+    // 7. Validate required fields for supervisor and director
     if (!escuela.supervisor) {
       throw new Error("Faltan los datos del supervisor.");
     }
@@ -101,7 +101,7 @@ router.post("/register", async (req, res) => {
       throw new Error("Faltan los datos del director.");
     }
 
-   // 8. Insertar ApoyoPrevio (opcional) 
+   // 8. Insert ApoyoPrevio (optional)
 if (escuela.apoyoPrevio?.descripcion) {
   await client.query(
     `INSERT INTO "ApoyoPrevio" ("CCT", "descripcion")
@@ -110,7 +110,7 @@ if (escuela.apoyoPrevio?.descripcion) {
   );
 }
 
-    // 9. Insertar TramiteGobierno (opcional)
+    // 9. Insert TramiteGobierno (optional)
     if (escuela.tramiteGobierno) {
       const { instancia, estado, folioOficial, nivelGobierno, descripcion } = escuela.tramiteGobierno;
       await client.query(
@@ -120,7 +120,7 @@ if (escuela.apoyoPrevio?.descripcion) {
       );
     }
 
-    // 10. Insertar Supervisor (obligatorio)
+    // 10. Insert Supervisor (not optional)
     const {
       fechaJubilacion: fjRaw,
       posibleCambioZona,
@@ -138,7 +138,7 @@ if (escuela.apoyoPrevio?.descripcion) {
       [CCT, fjSup, posibleCambioZona || false, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
     );
 
-    // 11. Insertar MesaDirectiva (opcional)
+    // 11. Insert MesaDirectiva (optional)
     if (escuela.mesaDirectiva) {
       await client.query(
         `INSERT INTO "MesaDirectiva" ("CCT", "personasCantidad")
@@ -147,7 +147,7 @@ if (escuela.apoyoPrevio?.descripcion) {
       );
     }
 
-    // 12. Insertar Director (obligatorio)
+    // 12. Insert Director (not optional)
     const {
       fechaJubilacion: fjDir,
       posibleCambioPlantel,
@@ -162,7 +162,7 @@ if (escuela.apoyoPrevio?.descripcion) {
       [CCT, fjDir, posibleCambioPlantel || false, nombreDir, correoDir, telDir]
     );
 
-    // 13. Confirmar transacción
+    // 13. Confirm transaction
     await client.query("COMMIT");
 
     res.status(201).json({

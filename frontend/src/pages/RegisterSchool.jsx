@@ -69,7 +69,7 @@ function RegisterSchool() {
     transporte: [],
     juridico: []
   });
-    // Add these missing state variables
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -97,7 +97,7 @@ function RegisterSchool() {
     setIsSubmitting(true);
     
     try {
-      // Add console.log to verify the data being sent
+      // console.log to verify the data being sent
       console.log("Submitting:", JSON.stringify({
         usuario: formData.usuario,
         escuela: {
