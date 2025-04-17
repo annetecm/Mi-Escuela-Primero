@@ -86,7 +86,7 @@ router.post("/register", async (req, res) => {
         escuela.modalidad,
         escuela.nivelEducativo,
         CCT,
-        escuela.tieneUSAER || false,
+        escuela.tieneUSAER,
         escuela.numeroDocentes,
         escuela.estudiantesPorGrupo,
         escuela.controlAdministrativo,
@@ -135,7 +135,7 @@ if (escuela.apoyoPrevio?.descripcion) {
     await client.query(
       `INSERT INTO "Supervisor" ("CCT", "fechaJubilacion", "posibleCambioZona", "medioContacto", "antiguedadZona", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [CCT, fjSup, posibleCambioZona || false, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
+      [CCT, fjSup, posibleCambioZona, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
     );
 
     // 11. Insert MesaDirectiva (optional)
@@ -149,17 +149,34 @@ if (escuela.apoyoPrevio?.descripcion) {
 
     // 12. Insert Director (not optional)
     const {
-      fechaJubilacion: fjDir,
+      fechaJubilacion: fjDirRaw,  // Usamos el mismo formato de nombrado
       posibleCambioPlantel,
       nombre: nombreDir,
       correoElectronico: correoDir,
       telefono: telDir,
     } = escuela.director;
+    const fjDir = fjDirRaw ? fjDirRaw : null;  // Misma lógica de conversión
+    
+    // Insertar necesidades
+if (req.body.necesidades && req.body.necesidades.length > 0) {
+  for (const necesidad of req.body.necesidades) {
+    await client.query(
+      `INSERT INTO "Necesidad" ("prioridad", "documentoId", "CCT", "categoria", "nombre")
+       VALUES ($1, NULL, $2, $3, $4)`,
+      [
+        necesidad.prioridad,
+        escuela.CCT, // Usamos el CCT de la escuela
+        necesidad.categoria,
+        necesidad.nombre
+      ]
+    );
+  }
+}
 
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [CCT, fjDir, posibleCambioPlantel || false, nombreDir, correoDir, telDir]
+      [CCT, fjDir, posibleCambioPlantel, nombreDir, correoDir, telDir]
     );
 
     // 13. Confirm transaction

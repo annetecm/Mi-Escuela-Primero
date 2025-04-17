@@ -1,8 +1,23 @@
-import React from 'react';
-import ListedAllies from './pages/ListedAllies';
+import React, { useState } from 'react';
+import LoginPage from './pages/LoginPage';
+import RegisterSchool from './pages/RegisterSchool';
 
 function App() {
-  return <ListedAllies />;
+  const [currentPage, setCurrentPage] = useState('login');
+
+  const handleRedirectToRegister = () => {
+    setCurrentPage('register-school');
+  };
+
+  return (
+    <>
+      {currentPage === 'login' && (
+        <LoginPage onRegisterSchool={handleRedirectToRegister} />
+        
+      )}
+      {currentPage === 'register-school' && <RegisterSchool />}
+    </>
+  );
 }
 
 export default App;
