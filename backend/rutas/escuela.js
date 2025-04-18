@@ -8,6 +8,9 @@ router.post("/test-route", (req, res) => {
   res.json({ received: true });
 });
 
+const { obtainPriorities} = require("../utils/ponderaciones");
+
+
 // Register user and school
 router.post("/register", async (req, res) => {
   console.log("Received data:", JSON.stringify(req.body, null, 2)); // Log incoming data
@@ -17,6 +20,8 @@ router.post("/register", async (req, res) => {
     await client.query("BEGIN");
 
     const { usuario, escuela } = req.body;
+    console.log("Necesidades recibidas desde frontend:", escuela.necesidades);
+
 
     // 1. User validation
     console.log("Usuario recibido:", usuario);
@@ -157,21 +162,7 @@ if (escuela.apoyoPrevio?.descripcion) {
     } = escuela.director;
     const fjDir = fjDirRaw ? fjDirRaw : null;  // Misma lógica de conversión
     
-    // Insertar necesidades
-if (req.body.necesidades && req.body.necesidades.length > 0) {
-  for (const necesidad of req.body.necesidades) {
-    await client.query(
-      `INSERT INTO "Necesidad" ("prioridad", "documentoId", "CCT", "categoria", "nombre")
-       VALUES ($1, NULL, $2, $3, $4)`,
-      [
-        necesidad.prioridad,
-        escuela.CCT, // Usamos el CCT de la escuela
-        necesidad.categoria,
-        necesidad.nombre
-      ]
-    );
-  }
-}
+    
 
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
@@ -179,7 +170,22 @@ if (req.body.necesidades && req.body.necesidades.length > 0) {
       [CCT, fjDir, posibleCambioPlantel, nombreDir, correoDir, telDir]
     );
 
-    // 13. Confirm transaction
+    //13. Insert Necesidad 
+    if (escuela.necesidades && escuela.necesidades.length > 0) {
+      for (const necesidad of escuela.necesidades) {
+        const prioridad = obtainPriorities(necesidad.categoria, necesidad.nombre);
+    
+        await client.query(
+          `INSERT INTO "Necesidad" ("CCT", "documentoId", "categoria", "nombre", "prioridad")
+           VALUES ($1, NULL, $2, $3, $4)`,
+          [CCT, necesidad.categoria, necesidad.nombre, prioridad]
+        );
+      }
+    }
+
+    
+
+    // 14. Confirm transaction
     await client.query("COMMIT");
 
     res.status(201).json({

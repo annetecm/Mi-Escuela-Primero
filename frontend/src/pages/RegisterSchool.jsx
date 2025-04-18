@@ -4,6 +4,8 @@ import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
 function RegisterSchool() {
+
+  
   // Add states for user data
   const [formData, setFormData] = useState({
     usuario: {
@@ -24,7 +26,7 @@ function RegisterSchool() {
       modalidad: "general",
       nivelEducativo: "",
       CCT: "",
-      tieneUSAER: false,
+      tieneUSAER: "",
       numeroDocentes: "",
       estudiantesPorGrupo: "",
       controlAdministrativo: "",
@@ -33,7 +35,7 @@ function RegisterSchool() {
         correoElectronico: "",
         telefono: "",
         fechaJubilacion: "",
-        posibleCambioPlantel: false,
+        posibleCambioPlantel: "",
         antiguedadPuesto: ""
       },
       supervisor: {
@@ -41,7 +43,7 @@ function RegisterSchool() {
         correoElectronico: "",
         telefono: "",
         fechaJubilacion: "",
-        posibleCambioZona: false,
+        posibleCambioZona: "",
         medioContacto: "whatsapp",
         antiguedadZona: ""
       },
@@ -70,6 +72,39 @@ function RegisterSchool() {
     juridico: []
   });
 
+
+  // Convert needsData to an arrray
+  const convertNecesidades = () => {
+    const categoriasMapeadas = {
+      formacionDocente: "Formación docente",
+      formacionFamilias: "Formación a familias",
+      formacionNiños: "Formación niñas y niños",
+      personalApoyo: "Personal de apoyo",
+      infraestructura: "Infraestructura",
+      materiales: "Materiales",
+      mobiliario: "Mobiliario",
+      alimentacion: "Alimentación",
+      transporte: "Transporte",
+      juridico: "Jurídico"
+    };
+
+    const finalNecesidades = [];
+
+  for (const categoria in needsData) {
+    const nombreCategoria = categoriasMapeadas[categoria];
+    const selectedNeeds = needsData[categoria];
+
+    selectedNeeds.forEach((nombre) => {
+      finalNecesidades.push({
+        categoria: nombreCategoria,
+        nombre
+      });
+    });
+  }
+
+  return finalNecesidades;
+};
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -96,6 +131,8 @@ function RegisterSchool() {
     e.preventDefault();
     setIsSubmitting(true);
     
+
+    
     try {
       // console.log to verify the data being sent
       console.log("Submitting:", JSON.stringify({
@@ -105,10 +142,10 @@ function RegisterSchool() {
           direccion: `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`,
           numeroDocentes: Number(formData.escuela.numeroDocentes),
           estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
-          tieneUSAER: Boolean(formData.escuela.tieneUSAER)
+          //tieneUSAER: Boolean(formData.escuela.tieneUSAER)
         }
       }, null, 2));
-  
+      console.log("Necesidades convertidas:", convertNecesidades());
       const response = await fetch("http://localhost:5000/api/escuela/register", {
         method: "POST",
         headers: {
@@ -121,7 +158,8 @@ function RegisterSchool() {
             direccion: `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`,
             numeroDocentes: Number(formData.escuela.numeroDocentes),
             estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
-            tieneUSAER: Boolean(formData.escuela.tieneUSAER)
+            necesidades: convertNecesidades(), 
+            //tieneUSAER: Boolean(formData.escuela.tieneUSAER)
           }
         }),
       });
@@ -209,7 +247,7 @@ function RegisterSchool() {
 
   const infraestructura = [
     "Agua (falla de agua, filtros de agua, bomba de agua nueva,tinaco o cisterna nueva, bebederos, etc.)",
-    "Luz (fallo eléctrico, conexión de luz, focos y cableado nuevo, paneles solares, etc.)",
+    //"Luz (fallo eléctrico, conexión de luz, focos y cableado nuevo, paneles solares, etc.)",
     "Suplentes de docentes frente a grupo",
     "Muros, techos o pisos (reconstrucción de muros cuarteados, tablaroca, plafón, cambio de pisos levantados,etc.)",
     "Adecuaciones para personas con discapacidad (rampas, etc.)",
@@ -239,7 +277,9 @@ function RegisterSchool() {
     "Estantes, libreros o cajoneras",
   ]
 
-  const alimentacion = ["Desayunos", "Fórmula"]
+  const alimentacion = [
+    "Desayunos", 
+    "Fórmula"]
 
   const transporte = [
     "Transporte (nuevas rutas de camiones, transporte escolar,entrega de bicis, etc.)",
@@ -630,16 +670,117 @@ function RegisterSchool() {
 </p>
 
 {/* Categorías de necesidades con sus títulos descriptivos */}
-<TableSelect title="Capacitación para docentes" needs={formacionDocente} />
-<TableSelect title="Talleres o formación para madres, padres o cuidadores" needs={formacionFamilias} />
-<TableSelect title="Actividades formativas para niñas y niños" needs={formacionNiños} />
-<TableSelect title="Apoyo para personal administrativo o de servicio" needs={personalApoyo} />
-<TableSelect title="Mejoras en infraestructura escolar" needs={infraestructura} />
-<TableSelect title="Materiales didácticos o escolares" needs={materiales} />
-<TableSelect title="Mobiliario escolar (sillas, mesas, pizarrones, etc.)" needs={mobiliario} />
-<TableSelect title="Apoyo en alimentación escolar" needs={alimentacion} />
-<TableSelect title="Necesidades de transporte escolar" needs={transporte} />
-<TableSelect title="Asesoría o acompañamiento jurídico" needs={juridico} />
+<TableSelect 
+title="Capacitación para docentes" 
+needs={formacionDocente}
+selectedNeeds = {needsData.formacionDocente}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    formacionDocente: selected,
+  }))
+} />
+<TableSelect 
+title="Talleres o formación para madres, padres o cuidadores" 
+needs={formacionFamilias} 
+selectedNeeds = {needsData.formacionFamilias}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    formacionFamilias: selected,
+  }))
+}   
+/>
+<TableSelect 
+title="Actividades formativas para niñas y niños" 
+needs={formacionNiños}
+selectedNeeds ={needsData.formacionNiños}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    formacionNiños: selected,
+  })) 
+}
+ />
+<TableSelect 
+title="Apoyo para personal administrativo o de servicio" 
+needs={personalApoyo} 
+selectedNeeds ={needsData.personalApoyo}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    personalApoyo: selected,
+  })) 
+}
+/>
+<TableSelect 
+title="Mejoras en infraestructura escolar" 
+needs={infraestructura} 
+selectedNeeds ={needsData.infraestructura}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    infraestructura: selected,
+  })) 
+}
+/>
+<TableSelect 
+title="Materiales didácticos o escolares" 
+needs={materiales} 
+selectedNeeds ={needsData.materiales}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    materiales: selected,
+  })) 
+}
+/>
+<TableSelect 
+title="Mobiliario escolar (sillas, mesas, pizarrones, etc.)" 
+needs={mobiliario}
+selectedNeeds ={needsData.mobiliario}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    mobiliario: selected,
+  })) 
+}
+ />
+<TableSelect 
+title="Apoyo en alimentación escolar" 
+needs={alimentacion} 
+selectedNeeds ={needsData.alimentacion}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    alimentacion: selected,
+  })) 
+}
+
+/>
+<TableSelect 
+title="Necesidades de transporte escolar" 
+needs={transporte}
+selectedNeeds ={needsData.transporte}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    transporte: selected,
+  }))
+}
+ />
+<TableSelect 
+title="Asesoría o acompañamiento jurídico" 
+needs={juridico} 
+selectedNeeds ={needsData.juridico}
+onChange={(selected) => 
+  setNeedsData((prev) => ({
+    ...prev,
+    juridico: selected,
+  })) 
+}
+
+/>
 
 <button 
         className="continue-button" 
