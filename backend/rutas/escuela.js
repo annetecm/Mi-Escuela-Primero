@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const router = require("express").Router(); 
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 
@@ -127,7 +127,7 @@ if (escuela.apoyoPrevio?.descripcion) {
 
     // 10. Insert Supervisor (not optional)
     const {
-      fechaJubilacion: fjRaw,
+      fechaJubilacion:fechaJubilacionSup,
       posibleCambioZona,
       medioContacto,
       antiguedadZona,
@@ -135,13 +135,14 @@ if (escuela.apoyoPrevio?.descripcion) {
       correoElectronico: correoSup,
       telefono: telSup,
     } = escuela.supervisor;
-    const fjSup = fjRaw ? fjRaw : null;
+    
 
     await client.query(
       `INSERT INTO "Supervisor" ("CCT", "fechaJubilacion", "posibleCambioZona", "medioContacto", "antiguedadZona", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [CCT, fjSup, posibleCambioZona, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
+      [CCT, fechaJubilacionSup || null, posibleCambioZona, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
     );
+    
 
     // 11. Insert MesaDirectiva (optional)
     if (escuela.mesaDirectiva) {
@@ -154,20 +155,19 @@ if (escuela.apoyoPrevio?.descripcion) {
 
     // 12. Insert Director (not optional)
     const {
-      fechaJubilacion: fjDirRaw,  // Usamos el mismo formato de nombrado
+      fechaJubilacion:fechaJubilacionDir,  
       posibleCambioPlantel,
       nombre: nombreDir,
       correoElectronico: correoDir,
       telefono: telDir,
     } = escuela.director;
-    const fjDir = fjDirRaw ? fjDirRaw : null;  // Misma lógica de conversión
     
     
-
+  
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [CCT, fjDir, posibleCambioPlantel, nombreDir, correoDir, telDir]
+      [CCT, fechaJubilacionDir||null, posibleCambioPlantel, nombreDir, correoDir, telDir]
     );
 
     //13. Insert Necesidad 

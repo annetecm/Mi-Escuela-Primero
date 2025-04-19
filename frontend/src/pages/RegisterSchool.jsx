@@ -74,6 +74,12 @@ function RegisterSchool() {
 
 
   // Convert needsData to an arrray
+
+/*/ 
+formData: Stores the user's input for the school and user details.
+needsData: Stores the selected needs for the school, categorized into various groups (e.g., "Formación docente," "Infraestructura").
+isSubmitting: Tracks whether the form is currently being submitted.
+/*/
   const convertNecesidades = () => {
     const categoriasMapeadas = {
       formacionDocente: "Formación docente",
@@ -94,12 +100,15 @@ function RegisterSchool() {
     const nombreCategoria = categoriasMapeadas[categoria];
     const selectedNeeds = needsData[categoria];
 
-    selectedNeeds.forEach((nombre) => {
+    for (let i = 0; i < selectedNeeds.length; i++) {
+      const nombre = selectedNeeds[i];
       finalNecesidades.push({
         categoria: nombreCategoria,
-        nombre
+        nombre: nombre
       });
-    });
+    }
+
+    
   }
 
   return finalNecesidades;
@@ -165,8 +174,7 @@ function RegisterSchool() {
       });
   
       const data = await response.json();
-      console.log("Server response:", data); // Add this to see backend response
-  
+      console.log("Server response:", data); 
       if (!response.ok) throw new Error(data.error || "Registration failed");
       
       alert("Registro exitoso. En espera de aprobación.");
