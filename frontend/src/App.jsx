@@ -1,8 +1,8 @@
 import React from 'react';
-import EditSchool from './pages/EditSchool.jsx';
+import EvidenceTimeline from './pages/EvidenceTimeline.jsx';
 
 function App() {
-  return <EditSchool/>;
+  return <EvidenceTimeline/>;
 }
 
 export default App;
