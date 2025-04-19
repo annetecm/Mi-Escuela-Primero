@@ -27,6 +27,7 @@ function App() {
       {currentPage === 'registration-success' && <AllyRegSuccess />}
     </>
   );
+
 }
 
 export default App;
