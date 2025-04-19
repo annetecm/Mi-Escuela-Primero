@@ -3,7 +3,7 @@ import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
-function RegisterSchool() {
+function RegisterSchool({onRegistrationSuccess}) {
 
   
   // Add states for user data
@@ -177,7 +177,8 @@ isSubmitting: Tracks whether the form is currently being submitted.
       console.log("Server response:", data); 
       if (!response.ok) throw new Error(data.error || "Registration failed");
       
-      alert("Registro exitoso. En espera de aprobación.");
+      //alert("Registro exitoso. En espera de aprobación.");
+      onRegistrationSuccess();
     } catch (err) {
       console.error("Registration error:", err);
       alert(`Error: ${err.message}`);
