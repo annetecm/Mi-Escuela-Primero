@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const router = require("express").Router(); 
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 
@@ -7,6 +7,9 @@ router.post("/test-route", (req, res) => {
   console.log("Datos recibidos:", req.body);
   res.json({ received: true });
 });
+
+const { obtainPriorities} = require("../utils/ponderaciones");
+
 
 // Register user and school
 router.post("/register", async (req, res) => {
@@ -17,6 +20,8 @@ router.post("/register", async (req, res) => {
     await client.query("BEGIN");
 
     const { usuario, escuela } = req.body;
+    console.log("Necesidades recibidas desde frontend:", escuela.necesidades);
+
 
     // 1. User validation
     console.log("Usuario recibido:", usuario);
@@ -86,7 +91,7 @@ router.post("/register", async (req, res) => {
         escuela.modalidad,
         escuela.nivelEducativo,
         CCT,
-        escuela.tieneUSAER || false,
+        escuela.tieneUSAER,
         escuela.numeroDocentes,
         escuela.estudiantesPorGrupo,
         escuela.controlAdministrativo,
@@ -122,7 +127,7 @@ if (escuela.apoyoPrevio?.descripcion) {
 
     // 10. Insert Supervisor (not optional)
     const {
-      fechaJubilacion: fjRaw,
+      fechaJubilacion:fechaJubilacionSup,
       posibleCambioZona,
       medioContacto,
       antiguedadZona,
@@ -130,13 +135,14 @@ if (escuela.apoyoPrevio?.descripcion) {
       correoElectronico: correoSup,
       telefono: telSup,
     } = escuela.supervisor;
-    const fjSup = fjRaw ? fjRaw : null;
+    
 
     await client.query(
       `INSERT INTO "Supervisor" ("CCT", "fechaJubilacion", "posibleCambioZona", "medioContacto", "antiguedadZona", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [CCT, fjSup, posibleCambioZona || false, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
+      [CCT, fechaJubilacionSup || null, posibleCambioZona, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
     );
+    
 
     // 11. Insert MesaDirectiva (optional)
     if (escuela.mesaDirectiva) {
@@ -149,20 +155,37 @@ if (escuela.apoyoPrevio?.descripcion) {
 
     // 12. Insert Director (not optional)
     const {
-      fechaJubilacion: fjDir,
+      fechaJubilacion:fechaJubilacionDir,  
       posibleCambioPlantel,
       nombre: nombreDir,
       correoElectronico: correoDir,
       telefono: telDir,
     } = escuela.director;
-
+    
+    
+  
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [CCT, fjDir, posibleCambioPlantel || false, nombreDir, correoDir, telDir]
+      [CCT, fechaJubilacionDir||null, posibleCambioPlantel, nombreDir, correoDir, telDir]
     );
 
-    // 13. Confirm transaction
+    //13. Insert Necesidad 
+    if (escuela.necesidades && escuela.necesidades.length > 0) {
+      for (const necesidad of escuela.necesidades) {
+        const prioridad = obtainPriorities(necesidad.categoria, necesidad.nombre);
+    
+        await client.query(
+          `INSERT INTO "Necesidad" ("CCT", "documentoId", "categoria", "nombre", "prioridad")
+           VALUES ($1, NULL, $2, $3, $4)`,
+          [CCT, necesidad.categoria, necesidad.nombre, prioridad]
+        );
+      }
+    }
+
+    
+
+    // 14. Confirm transaction
     await client.query("COMMIT");
 
     res.status(201).json({
