@@ -8,7 +8,7 @@ exports.up = function(knex) {
     table.string("sectorEscolar").notNullable();
     table.string("modalidad").notNullable(); 
     table.string("nivelEducativo").notNullable();
-    table.boolean("tieneUSAER").notNullable().defaultTo(false); 
+    table.string("tieneUSAER").notNullable(); 
     table.integer("numeroDocentes").notNullable();
     table.integer("estudiantesPorGrupo").notNullable(); 
     table.string("controlAdministrativo").notNullable();

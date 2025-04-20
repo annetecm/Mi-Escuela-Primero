@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import '../styles/TableSelect.css';
 
-export default function TableSelect({ needs = [], title = "Categorias de necesidades" }) {
-  const [selectedNeeds, setSelectedNeeds] = useState([]);
+export default function TableSelect({ 
+  needs = [], 
+  title = "Categorías de necesidades", 
+  selectedNeeds = [], 
+  onChange = () => {} 
+}) {
+
+  //const [selectedNeeds, setSelectedNeeds] = useState([]);
 
   const handleCheckboxChange = (need) => {
-    setSelectedNeeds((prevSelected) =>
+    const isSelected = selectedNeeds.includes(need);
+    const updated = isSelected
+      ? selectedNeeds.filter((n)=> n !== need)
+      : [...selectedNeeds, need];
+      onChange(updated); // call the onChange prop with the updated selected needs
+    /*/setSelectedNeeds((prevSelected) =>
       prevSelected.includes(need)
         ? prevSelected.filter((t) => t !== need)
         : [...prevSelected, need]
-    );
+    );/*/
   };
 
   return (
