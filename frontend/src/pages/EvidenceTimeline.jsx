@@ -59,6 +59,7 @@ export default function EvidenceTimeline() {
             <ul className="sidebar-menu">
               <li className="sidebar-item">Perfil</li>
               <li className="sidebar-item">Mis Aliados</li>
+              <li className="sidebar-item">Cerrar sesión</li>
             </ul>
           </nav>
         )}

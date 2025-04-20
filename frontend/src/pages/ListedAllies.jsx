@@ -51,6 +51,7 @@ export default function ListedAllies() {
             <ul>
               <li>Perfil</li>
               <li>Mis Aliados</li>
+              <li>Cerrar sesión</li>
             </ul>
           </nav>
         )}
