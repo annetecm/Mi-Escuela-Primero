@@ -7,16 +7,107 @@ function RegisterAlly() {
   const [tipoPersona, setTipoPersona] = useState('');
   const [step, setStep] = useState(1);
 
+  const [formData, setFormData] = useState({});
+  const [apoyosSeleccionados, setApoyosSeleccionados] = useState([]);
+
+
   const handleChange = (e) => {
     setTipoPersona(e.target.value);
   };
+  const handleInput = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const agregarApoyo = (categoria, seleccionados) => {
+    const nuevos = seleccionados.map(desc => ({
+      tipo: categoria,
+      caracteristicas: desc
+    }));
+    setApoyosSeleccionados(prev => [
+      ...prev.filter(a => a.tipo !== categoria), // Elimina selecciones anteriores de la misma categoría
+      ...nuevos
+    ]);
+  };
+  
 
   const handleContinue = () => {
     if (tipoPersona) {
       setStep(2);
     }
   };
+  const enviarFormulario = async () => {
+    const datos = {
+      usuario: {
+        correoElectronico: formData.correo,
+        contraseña: formData.contraseña,
+        nombre: formData.nombre
+      },
+      aliado: {
+        tipoDeApoyo: formData.tipoApoyo,
+        tipoId: tipoPersona === "fisica" ? formData.curp : formData.rfc
+      },
+      personaFisica: tipoPersona === "fisica" ? {
+        CURP: formData.curp,
+        institucionLaboral: formData.institucionLaboral,
+        razon: formData.razon,
+        correoElectronico: formData.correo,
+        telefono: formData.telefono
+      } : undefined,
+      personaMoral: tipoPersona === "moral" ? {
+        RFC: formData.rfc,
+        numeroEscritura: formData.numeroEscritura,
+        area: formData.area,
+        correoElectronico: formData.correo,
+        telefono: formData.telefono
+      } : undefined,
+      institucion: tipoPersona === "moral" ? {
+        giro: formData.giro,
+        propositoOrganizacion: formData.proposito,
+        domicilio: formData.domicilioInstitucion,
+        telefono: formData.telefono,
+        paginaWeb: formData.paginaWeb,
+        RFC: formData.rfc
+      } : undefined,
+      escrituraPublica: tipoPersona === "moral" ? {
+        numeroEscritura: formData.numeroEscritura,
+        fechaEscritura: formData.fechaEscritura,
+        otorgadaNotario: formData.otorgadaPor,
+        ciudad: formData.ciudad,
+        RFC: formData.rfc
+      } : undefined,
+      constanciaFiscal: tipoPersona === "moral" ? {
+        RFC: formData.rfc,
+        razonSocial: formData.razonSocial,
+        regimen: formData.regimen,
+        domicilio: formData.domicilioFiscal
+      } : undefined,
+      apoyos: apoyosSeleccionados
+    };
+    console.log('📦 Enviando datos:', JSON.stringify(datos, null, 2));
 
+    try {
+      const res = await fetch('http://localhost:5000/api/aliado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(datos)
+      });
+    
+      const text = await res.text(); // ← lee como texto sin asumir que es JSON
+      console.log('🧾 Respuesta cruda:', text);
+    
+      try {
+        const json = JSON.parse(text);
+        console.log('✅ JSON parseado:', json);
+        alert(json.message);
+      } catch (err) {
+        console.error('❌ No es JSON válido:', err);
+        alert('Respuesta no válida:\n' + text);
+      }
+    
+    } catch (error) {
+      console.error('❌ Error de red:', error);
+      alert('Error de red:\n' + error.message);
+    }
+  };    
   const formacionDocente = [
     "Convivencia escolar / Cultura de paz / Valores",
     "Educación inclusiva",
@@ -149,49 +240,48 @@ const juridico=[
             </button>
           </>
         )}
-        {step === 2 && tipoPersona === 'fisica' && (
-          <>
-            <p className="label">Persona física</p>
-            <div className="scroll">
-              <form className="form-grid">
-                <div className="form-group">
-                    <label>Correo</label>
-                    <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                    <label>Contraseña</label>
-                    <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>Nombre completo</label>
-                  <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>Número telefónico</label>
-                  <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>Correo electrónico</label>
-                  <input className="form-input" type="email"/>
-                </div>
-                <div className="form-group">
-                  <label>Tipo de apoyo a brindar</label>
-                  <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>CURP</label>
-                  <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>Institución donde labora</label>
-                  <input className="form-input" type="text"/>
-                </div>
-                <div className="form-group">
-                  <label>Razón por la que se inscribe</label>
-                  <input className="form-input" type="text"/>
-                </div>
-              </form>
-
+{step === 2 && tipoPersona === 'fisica' && (
+  <>
+    <p className="label">Persona física</p>
+    <div className="scroll">
+      <form className="form-grid">
+        <div className="form-group">
+          <label>Correo</label>
+          <input className="form-input" type="text" name="correo" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Contraseña</label>
+          <input className="form-input" type="text" name="contraseña" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Nombre completo</label>
+          <input className="form-input" type="text" name="nombre" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Número telefónico</label>
+          <input className="form-input" type="text" name="telefono" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Correo electrónico</label>
+          <input className="form-input" type="email" name="correo" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Tipo de apoyo a brindar</label>
+          <input className="form-input" type="text" name="tipoApoyo" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>CURP</label>
+          <input className="form-input" type="text" name="curp" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Institución donde labora</label>
+          <input className="form-input" type="text" name="institucionLaboral" onChange={handleInput} />
+        </div>
+        <div className="form-group">
+          <label>Razón por la que se inscribe</label>
+          <input className="form-input" type="text" name="razon" onChange={handleInput} />
+        </div>
+      </form>
               <div className="heading-need">REGISTRA TU APOYO</div>
               <p className='label'>Selecciona en qué necesidades podrías apoyar</p> 
               
@@ -206,8 +296,7 @@ const juridico=[
               <TableSelect title="Transporte" needs={transporte} />
               <TableSelect title="Jurídico" needs={juridico} />
             </div>
-            <button className="continue-button">CONTINUAR</button>
-          </>
+            <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}
         {step === 2 && tipoPersona === 'moral' && (
           <>
@@ -216,142 +305,132 @@ const juridico=[
             <form className="form-grid">
                 <div className="form-group">
                     <label>Correo</label>
-                    <input className="form-input" type="text"/>
-                </div>
+                    <input className="form-input" type="text" name="correo" onChange={handleInput} />                </div>
                 <div className="form-group">
                     <label>Contraseña</label>
-                    <input className="form-input" type="text"/>
-                </div>
+                    <input className="form-input" type="text" name="contraseña" onChange={handleInput} />                </div>
             </form>
             <div className="heading">DATOS DE LA INSTITUCIÓN</div>
               <form className="form-grid">
                 <div className="form-group">
                   <label>Nombre de la organización (empresa, OSC, etc)</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="nombreOrg" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Giro</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="giro" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Propósito de la organización</label>
-                  <input className="form-input" type="email" />
-                </div>
+                  <input className="form-input" type="text" name="proposito" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Domicilio</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="domicilioInstitucion" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Teléfono</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="telefono" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Página web oficial</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="paginaWeb" onChange={handleInput} />                </div>
               </form>
                 <div className="heading">ESCRITURA PÚBLICA</div>
               <form className="form-grid">
                 <div className="form-group">
                   <label>Número de escritura pública</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="numeroEscritura" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Fecha de escritura pública</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="fechaEscritura" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Otorgada por: (Nombre del notario)</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="otorgadaPor" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>En la ciudad de:</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="ciudad" onChange={handleInput} />                </div>
               </form>
               <div className="heading">CONSTANCIA FISCAL</div>
               <form className="form-grid">
                 <div className="form-group">
                   <label>RFC</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="rfc" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Razón Social</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="razonSocial" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Régimen</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="regimen" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Domicilio</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="domicilioFiscal" onChange={handleInput} />                </div>
               </form>
               <div className="heading">DATOS DEL REPRESENTANTE</div>
               <form className="form-grid">
                 <div className="form-group">
                   <label>Nombre completo</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="nombre" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Correo</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="correo" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Teléfono</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="telefono" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Área a la que pertenece en la organización</label>
-                  <input className="form-input" type="text" />
-                </div>
+                  <input className="form-input" type="text" name="area" onChange={handleInput} />                </div>
               </form>
                 <div className="heading-need">REGISTRA TU APOYO</div>
                 <p className='label'>Selecciona en que necesidades podrías apoyar</p> 
                 <TableSelect
                   title="Formación Docente"
                   needs={formacionDocente}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Formación Docente", seleccionados)}
                 />
                 <TableSelect
                   title="Formación a familias"
                   needs={formacionFamilias}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Formación a familias", seleccionados)}
                 />
                 <TableSelect
                   title="Formación niñas y niños"
                   needs={formacionNiños}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Formación niñas y niños", seleccionados)}
+                  
                 />
                 <TableSelect
                   title="Personal de apoyo"
                   needs={personalApoyo}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Personal de apoyo", seleccionados)}
                 />
                 <TableSelect
                   title="Infraestructura"
                   needs={infraestructura}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Infraestructura", seleccionados)}
                 />
                 <TableSelect
                   title="Materiales"
                   needs={materiales}
+                  onSelectionChange={(seleccionados) => agregarApoyo("Materiales", seleccionados)}
                 />
                 <TableSelect
                     title="Mobiliario"
                     needs={mobiliario}
+                    onSelectionChange={(seleccionados) => agregarApoyo("Mobiliario", seleccionados)}
                 />
                 <TableSelect
                     title="Alimentación"
                     needs={alimentacion}
+                    onSelectionChange={(seleccionados) => agregarApoyo("Alimentación", seleccionados)}
                 />
                 <TableSelect
                     title="Transporte"
                     needs={transporte}
+                    onSelectionChange={(seleccionados) => agregarApoyo("Transporte", seleccionados)}
                 />
                 <TableSelect
                     title="Jurídico"
                     needs={juridico}
+                    onSelectionChange={(seleccionados) => agregarApoyo("Jurídico", seleccionados)}
                 />
             </div>
-            <button className="continue-button">CONTINUAR</button>
-          </>
+            <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}
       </div>
     </div>

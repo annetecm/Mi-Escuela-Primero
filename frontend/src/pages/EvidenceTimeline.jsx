@@ -13,15 +13,30 @@ export default function EvidenceTimeline() {
 
   const toggleMenu = () => setMenuVisible(!menuVisible)
 
-  const handleFileUpload = (index, event) => {
-    const file = event.target.files[0]
-    if (file) {
-      const updated = [...evidences]
-      updated[index].file = file
-      updated[index].date = new Date().toLocaleDateString()
-      setEvidences(updated)
+  const handleFileUpload = async (index, event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+  
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("description", evidences[index].description);
+  
+    const res = await fetch("http://localhost:5000/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+  
+    const data = await res.json();
+  
+    if (data.url) {
+      const updated = [...evidences];
+      updated[index].file = data.url;
+      updated[index].date = new Date().toLocaleDateString();
+      setEvidences(updated);
+    } else {
+      console.error("Error al subir archivo:", data.error);
     }
-  }
+  };  
 
   const handleDescriptionChange = (index, value) => {
     const updated = [...evidences]
@@ -44,6 +59,7 @@ export default function EvidenceTimeline() {
             <ul className="sidebar-menu">
               <li className="sidebar-item">Perfil</li>
               <li className="sidebar-item">Mis Aliados</li>
+              <li className="sidebar-item">Cerrar sesión</li>
             </ul>
           </nav>
         )}
@@ -58,23 +74,38 @@ export default function EvidenceTimeline() {
             <div className="timeline-line"></div>
 
             {evidences.map((evidence, i) => (
-              <div key={i} className="timeline-step">
-                <label
-                  htmlFor={`upload-${i}`}
+            <div key={i} className="timeline-step">
+              {evidence.file ? (
+                <a
+                  href={evidence.file}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="upload-circle"
                   style={{
                     borderColor: ["#c62828", "#fbc02d", "#0288d1", "#1a237e"][i],
                   }}
                 >
-                  <span className="upload-icon">{evidence.file ? "✅" : "⬆️"}</span>
-                </label>
-                <input
-                  id={`upload-${i}`}
-                  type="file"
-                  className="hidden-input"
-                  onChange={(e) => handleFileUpload(i, e)}
-                />
-
+                  <span className="upload-icon">✅</span>
+                </a>
+              ) : (
+                <>
+                  <label
+                    htmlFor={`upload-${i}`}
+                    className="upload-circle"
+                    style={{
+                      borderColor: ["#c62828", "#fbc02d", "#0288d1", "#1a237e"][i],
+                    }}
+                  >
+                    <span className="upload-icon">⬆️</span>
+                  </label>
+                  <input
+                    id={`upload-${i}`}
+                    type="file"
+                    className="hidden-input"
+                    onChange={(e) => handleFileUpload(i, e)}
+                  />
+                </>
+              )}
                 <div className="upload-date">{evidence.date ? evidence.date : "FECHA"}</div>
 
                 {evidence.file && (
