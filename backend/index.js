@@ -9,11 +9,24 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Importa y usa las rutas CORRECTAMENTE
+
+// Imports and uses the routes
+const authRouter = require('./rutas/auth'); 
 const escuelaRouter = require('./rutas/escuela');
-app.use('/api/escuela', escuelaRouter); // Nota el prefijo completo aquí
+const uploadRoute = require('./rutas/upload');
+const aliadoRouter = require('./rutas/aliado');
+
+
+app.use('/api/auth', authRouter); 
+app.use('/api/escuela', escuelaRouter); 
+app.use('/api', uploadRoute);
+app.use('/api/aliado', aliadoRouter);
+
+
+
 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
