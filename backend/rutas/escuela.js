@@ -2,6 +2,7 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 
+
 // Test route for debugging
 router.post("/test-route", (req, res) => {
   console.log("Datos recibidos:", req.body);

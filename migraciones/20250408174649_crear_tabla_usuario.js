@@ -2,9 +2,12 @@
  * @param {import('knex')} knex
  */
 
-exports.up = function(knex) {
-    return knex.schema.createTable("Usuario", (table) => {
-      table.uuid("usuarioId").primary().defaultTo(knex.raw("uuid_generate_v4()"));
+exports.up = async function(knex) {
+
+await knex.raw('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
+    
+return knex.schema.createTable("Usuario", (table) => {
+      table.uuid("usuarioId").primary().defaultTo(knex.raw("gen_random_uuid()"));
       table.string("correoElectronico").notNullable();
       table.string("contraseña").notNullable();
       table.string("nombre").notNullable();
