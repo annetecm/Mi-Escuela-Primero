@@ -1,0 +1,86 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: white;
+    overflow: hidden; /* evita scroll innecesario */
+  }
+  
+  /* Contenedor general */
+  .registro-container {
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  /* Barra superior nueva */
+  .header {
+    background-color: #019847;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+  
+  .logo {
+    height: 60px;
+    width:auto;
+  
+  }
+
+  .contenido {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    bottom: 5%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 700px;
+    text-align: center;
+    padding-top: 24px;
+  }
+  
+  .check-icon {
+    font-size: 64px;
+    color: #0baf4f;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+  }
+  
+  .titulo {
+    font-size: 40px;
+    font-weight: 500;
+    color: #222;
+  }
+  
+  .titulo-verde {
+    color: #0baf4f;
+    font-weight: 600;
+  }
+  
+  .subtitulo {
+    color: #666;
+    font-weight: 600;
+    font-size: 17px;
+    margin-top: 8px;
+  }
+  
+  .que-sigue {
+    margin-top: 40px;
+    color: #008c44;
+    font-weight: bold;
+    font-size: 23px;
+  }
+  
+  .mensaje {
+    margin-top: 30px;
+    color: #333;
+    font-size: 18px;
+  }
+  
