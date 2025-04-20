@@ -504,22 +504,26 @@ isSubmitting: Tracks whether the form is currently being submitted.
     <label>¿Está próximo a jubilarse? Si sí, ¿cuándo?</label>
     <input 
       className="form-input" 
-      type="text" 
+      type="date" 
       name="escuela.director.fechaJubilacion"
       value={formData.escuela.director.fechaJubilacion}
       onChange={handleInputChange}
     />
   </div>
   <div className="form-group">
-    <label>¿Ha solicitado cambio de escuela?</label>
-    <input 
-      className="form-input" 
-      type="text" 
-      name="escuela.director.posibleCambioPlantel"
-      value={formData.escuela.director.posibleCambioPlantel}
-      onChange={handleInputChange}
-    />
-  </div>
+  <label>¿Ha solicitado cambio de escuela?</label>
+  <select
+    className="form-input"
+    name="escuela.director.posibleCambioPlantel"
+    value={formData.escuela.director.posibleCambioPlantel}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
 </div>
 
 {/* Sección de datos del supervisor */}
@@ -582,22 +586,25 @@ isSubmitting: Tracks whether the form is currently being submitted.
     <label>¿Está próximo a jubilarse? Si sí, ¿cuándo?</label>
     <input
       className="form-input"
-      type="text"
+      type="date"
       name="escuela.supervisor.fechaJubilacion"
       value={formData.escuela.supervisor.fechaJubilacion}
       onChange={handleInputChange}
     />
   </div>
   <div className="form-group">
-    <label>¿Ha solicitado cambio de zona?</label>
-    <input
-      className="form-input"
-      type="text"
-      name="escuela.supervisor.posibleCambioZona"
-      value={formData.escuela.supervisor.posibleCambioZona}
-      onChange={handleInputChange}
-    />
-  </div>
+  <label>¿Ha solicitado cambio de zona?</label>
+  <select
+    className="form-input"
+    name="escuela.supervisor.posibleCambioZona"
+    value={formData.escuela.supervisor.posibleCambioZona}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
+</div>
 </div>
 
 {/* Sección de datos del ciclo escolar */}
@@ -634,14 +641,17 @@ isSubmitting: Tracks whether the form is currently being submitted.
     />
   </div>
   <div className="form-group">
-    <label>¿Cuentan con USAER? (Si/No)</label>
-    <input
-      className="form-input"
-      type="text"
-      name="escuela.tieneUSAER"
-      value={formData.escuela.tieneUSAER}
-      onChange={handleInputChange}
-    />
+  <label>¿Cuentan con USAER?</label>
+  <select
+    className="form-input"
+    name="escuela.tieneUSAER"
+    value={formData.escuela.tieneUSAER}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
   </div>
   <div className="form-group">
     <label>

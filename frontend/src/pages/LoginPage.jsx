@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import fondo from '../assets/fondo.jpg';
 
-function LoginPage({ onRegisterSchool }) {
+function LoginPage({ onRegisterSchool, onRegisterAlly  }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,6 +12,11 @@ function LoginPage({ onRegisterSchool }) {
     e.preventDefault();
     onRegisterSchool();
   };
+  const handleRegistroAliado = (e) => {
+    e.preventDefault();
+    onRegisterAlly();
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,7 +98,7 @@ function LoginPage({ onRegisterSchool }) {
         <div className="extra-links">
           <p>¿Aún no tienes una cuenta?</p>
           <p>
-            Si te gustaría apoyar una escuela, <a href="#">crea una cuenta de aliado</a><br />
+            Si te gustaría apoyar una escuela, <a href="#" onClick={handleRegistroAliado}>crea una cuenta de aliado</a><br />
             Si tu escuela necesita apoyo, <a href="#"onClick={handleRegistroEscuela}>regístrala aquí</a>
           </p>
         </div>

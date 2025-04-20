@@ -21,8 +21,12 @@ router.post('/', async (req, res) => {
         institucion,
         escrituraPublica,
         constanciaFiscal,
+        representanteLegal,
+      
         apoyos
       } = req.body;
+
+
   
       console.log('🎯 Datos recibidos:', JSON.stringify(req.body, null, 2));
   
@@ -110,6 +114,19 @@ router.post('/', async (req, res) => {
           constanciaFiscal.regimen,
           constanciaFiscal.domicilio
         ]);
+        if (representanteLegal) {
+          await client.query(`
+            INSERT INTO "RepresentanteLegal" ("nombre", "correo", "telefono", "area", "RFC")
+            VALUES ($1, $2, $3, $4, $5);
+          `, [
+            representanteLegal.nombre,
+            representanteLegal.correo,
+            representanteLegal.telefono,
+            representanteLegal.area,
+            representanteLegal.RFC
+          ]);
+        }
+        
       }
   
       for (const apoyo of apoyos) {
