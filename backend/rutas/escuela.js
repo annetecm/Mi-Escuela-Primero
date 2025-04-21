@@ -92,7 +92,7 @@ router.post("/register", async (req, res) => {
         escuela.modalidad,
         escuela.nivelEducativo,
         CCT,
-        escuela.tieneUSAER,
+        escuela.tieneUSAER === "Si" ? true : false,
         escuela.numeroDocentes,
         escuela.estudiantesPorGrupo,
         escuela.controlAdministrativo,
@@ -141,8 +141,18 @@ if (escuela.apoyoPrevio?.descripcion) {
     await client.query(
       `INSERT INTO "Supervisor" ("CCT", "fechaJubilacion", "posibleCambioZona", "medioContacto", "antiguedadZona", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [CCT, fechaJubilacionSup || null, posibleCambioZona, medioContacto, antiguedadZona, nombreSup, correoSup, telSup]
+      [
+        CCT,
+        fechaJubilacionSup || null,
+        posibleCambioZona === "Si" ? true : false,
+        medioContacto,
+        antiguedadZona,
+        nombreSup,
+        correoSup,
+        telSup
+      ]
     );
+    
     
 
     // 11. Insert MesaDirectiva (optional)
@@ -168,8 +178,16 @@ if (escuela.apoyoPrevio?.descripcion) {
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [CCT, fechaJubilacionDir||null, posibleCambioPlantel, nombreDir, correoDir, telDir]
+      [
+        CCT,
+        fechaJubilacionDir || null,
+        posibleCambioPlantel === "Si" ? true : false,
+        nombreDir,
+        correoDir,
+        telDir
+      ]
     );
+    
 
     //13. Insert Necesidad 
     if (escuela.necesidades && escuela.necesidades.length > 0) {

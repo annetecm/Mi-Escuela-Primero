@@ -32,19 +32,19 @@ html, body {
     width:auto;
   
   }
-  /* Contenido centrado respecto al viewport menos la barra */
+
   .contenido {
     position: absolute;
     top: 50%;
     left: 50%;
+    bottom: 5%;
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 700px;
     text-align: center;
-    padding-top: 24px; /* espacio interno */
+    padding-top: 24px;
   }
   
-  /* Estilos del contenido */
   .check-icon {
     font-size: 64px;
     color: #0baf4f;
@@ -54,7 +54,7 @@ html, body {
   }
   
   .titulo {
-    font-size: 50px;
+    font-size: 40px;
     font-weight: 500;
     color: #222;
   }

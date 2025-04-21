@@ -5,7 +5,17 @@ import { useState } from "react";
 
 function RegisterSchool({onRegistrationSuccess}) {
 
-  
+  const [documentoEvidencia, setDocumentoEvidencia] = useState([]);
+  const [nombreArchivo, setNombreArchivo] = useState([]);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false); 
+  const [tramitePendiente, setTramitePendiente] = useState("no"); {/*Añadi estos 4*/}
+  const [datosTramite, setDatosTramite] = useState({ 
+    cual: "",
+    nivelGobierno: "",
+    instancia: "",
+    folio: ""
+  });
+
   // Add states for user data
   const [formData, setFormData] = useState({
     usuario: {
@@ -504,22 +514,26 @@ isSubmitting: Tracks whether the form is currently being submitted.
     <label>¿Está próximo a jubilarse? Si sí, ¿cuándo?</label>
     <input 
       className="form-input" 
-      type="text" 
+      type="date" 
       name="escuela.director.fechaJubilacion"
       value={formData.escuela.director.fechaJubilacion}
       onChange={handleInputChange}
     />
   </div>
   <div className="form-group">
-    <label>¿Ha solicitado cambio de escuela?</label>
-    <input 
-      className="form-input" 
-      type="text" 
-      name="escuela.director.posibleCambioPlantel"
-      value={formData.escuela.director.posibleCambioPlantel}
-      onChange={handleInputChange}
-    />
-  </div>
+  <label>¿Ha solicitado cambio de escuela?</label>
+  <select
+    className="form-input"
+    name="escuela.director.posibleCambioPlantel"
+    value={formData.escuela.director.posibleCambioPlantel}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
+</div>
+
 </div>
 
 {/* Sección de datos del supervisor */}
@@ -582,22 +596,25 @@ isSubmitting: Tracks whether the form is currently being submitted.
     <label>¿Está próximo a jubilarse? Si sí, ¿cuándo?</label>
     <input
       className="form-input"
-      type="text"
+      type="date"
       name="escuela.supervisor.fechaJubilacion"
       value={formData.escuela.supervisor.fechaJubilacion}
       onChange={handleInputChange}
     />
   </div>
   <div className="form-group">
-    <label>¿Ha solicitado cambio de zona?</label>
-    <input
-      className="form-input"
-      type="text"
-      name="escuela.supervisor.posibleCambioZona"
-      value={formData.escuela.supervisor.posibleCambioZona}
-      onChange={handleInputChange}
-    />
-  </div>
+  <label>¿Ha solicitado cambio de zona?</label>
+  <select
+    className="form-input"
+    name="escuela.supervisor.posibleCambioZona"
+    value={formData.escuela.supervisor.posibleCambioZona}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
+</div>
 </div>
 
 {/* Sección de datos del ciclo escolar */}
@@ -634,14 +651,17 @@ isSubmitting: Tracks whether the form is currently being submitted.
     />
   </div>
   <div className="form-group">
-    <label>¿Cuentan con USAER? (Si/No)</label>
-    <input
-      className="form-input"
-      type="text"
-      name="escuela.tieneUSAER"
-      value={formData.escuela.tieneUSAER}
-      onChange={handleInputChange}
-    />
+  <label>¿Cuentan con USAER?</label>
+  <select
+    className="form-input"
+    name="escuela.tieneUSAER"
+    value={formData.escuela.tieneUSAER}
+    onChange={handleInputChange}
+  >
+    <option value="">Seleccionar</option>
+    <option value="Si">Si</option>
+    <option value="No">No</option>
+  </select>
   </div>
   <div className="form-group">
     <label>
@@ -657,7 +677,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
   </div>
   <div className="form-group">
     <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Municipal? Si sí, ¿qué instancia y qué apoyo?
+      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Municipal? ¿Sí o no?, ¿qué instancia y qué apoyo?
     </label>
     <input
       className="form-input"
@@ -667,10 +687,143 @@ isSubmitting: Tracks whether the form is currently being submitted.
       onChange={handleInputChange}
     />
   </div>
+  <div className="form-group">
+    <label>
+      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Estatal? ¿Sí o no?, ¿qué instancia y qué apoyo?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+    <label>
+      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Federal? ¿Sí o no?, ¿qué instancia y qué apoyo?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+    <label>
+      En los últimos dos ciclos escolares, ¿han recibido apoyo de Instituciones Educativas? ¿Sí o no?, ¿Cuál institución y qué apoyo?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+    <label>
+      En los últimos dos ciclos escolares, ¿han recibido apoyo de Organizaciones de la sociedad civil? ¿Sí o no?, ¿Cuál OSC y qué apoyo?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+    <label>
+      En los últimos dos ciclos escolares, ¿han recibido apoyo de Empresas? ¿Sí o no?, ¿Qué empresas y qué apoyo?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+    <label>
+      ¿La escuela forma parte actualmente de algún programa? ¿Cuál?
+    </label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.descripcion"
+      value={formData.escuela.apoyoPrevio.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-group">
+  <label htmlFor="tramite-pendiente">
+    En el último ciclo escolar, ¿han realizado algún trámite/oficio al gobierno que esté pendiente de resolver?
+  </label>
+  <select
+    id="tramite-pendiente"
+    className="form-input"
+    value={tramitePendiente}
+    onChange={(e) => setTramitePendiente(e.target.value)}
+  >
+    <option value="si">Sí</option>
+    <option value="no">No</option>
+  </select>
 </div>
 
+{tramitePendiente === "si" && (
+  <div className="form-grid">
+    <div className="form-group">
+      <label>¿Cuál?</label>
+      <input
+        type="text"
+        className="form-input"
+        value={datosTramite.cual}
+        onChange={(e) =>
+          setDatosTramite((prev) => ({ ...prev, cual: e.target.value }))
+        }
+      />
+    </div>
+    <div className="form-group">
+      <label>Nivel de gobierno</label>
+      <input
+        type="text"
+        className="form-input"
+        value={datosTramite.nivelGobierno}
+        onChange={(e) =>
+          setDatosTramite((prev) => ({ ...prev, nivelGobierno: e.target.value }))
+        }
+      />
+    </div>
+    <div className="form-group">
+      <label>Instancia</label>
+      <input
+        type="text"
+        className="form-input"
+        value={datosTramite.instancia}
+        onChange={(e) =>
+          setDatosTramite((prev) => ({ ...prev, instancia: e.target.value }))
+        }
+      />
+    </div>
+    <div className="form-group">
+      <label>Folio</label>
+      <input
+        type="text"
+        className="form-input"
+        value={datosTramite.folio}
+        onChange={(e) =>
+          setDatosTramite((prev) => ({ ...prev, folio: e.target.value }))
+        }
+      />
+    </div>
+  </div>
+)}
 
-
+</div>
 
           {/* Sección de registro de necesidades prioritarias */}
 <div className="heading-need">REGISTRA LAS NECESIDADES DE TU ESCUELA</div>
@@ -788,8 +941,61 @@ onChange={(selected) =>
     juridico: selected,
   })) 
 }
-
 />
+
+<div className="documento-upload">
+    <div className="heading-need">SUBIR EVIDENCIAS</div>
+      <div className="upload-container">
+        <label htmlFor="evidencia" className="upload-button">
+          Sube evidencias de tus necesidades registradas
+        </label>
+        <input
+          type="file"
+          id="evidencia"
+          accept=".pdf,.jpg,.jpeg,.png"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files);
+            setDocumentoEvidencia(files);
+            setNombreArchivo(files.map(file => file.name));
+          }}
+          style={{ display: "none" }}
+        />
+
+        {nombreArchivo.length > 0 && (
+          <div className="archivo-seleccionado">
+            <span>Archivos seleccionados:</span>
+            <ul>
+              {nombreArchivo.map((nombre, idx) => (
+                <li key={idx}>{nombre}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+</div>
+<a
+  href="aviso-privacidad-2023.pdf"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="link-descarga"
+>
+  Ver aviso de privacidad (PDF)
+</a>
+
+<div className="consent-container">
+  <label className="consent-label">
+    <input 
+      type="checkbox" 
+      className="consent-checkbox" 
+      checked={aceptaTerminos} 
+      onChange={(e) => setAceptaTerminos(e.target.checked)} 
+    />
+    <span className="consent-text">
+      Leí y estoy de acuerdo con el aviso de privacidad de Mi Escuela Primero.
+    </span>
+  </label>
+</div>
 
 <button 
         className="continue-button" 

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import fondo from '../assets/fondo.jpg';
+import { useNavigate } from 'react-router-dom';
 
-function LoginPage({ onRegisterSchool }) {
+
+
+
+function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,10 +16,16 @@ function LoginPage({ onRegisterSchool }) {
     e.preventDefault();
     onRegisterSchool();
   };
+  const handleRegistroAliado = (e) => {
+    e.preventDefault();
+    onRegisterAlly();
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    console.log("✅ Enviando solicitud de login..."); // <-- Agrega esto
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -37,6 +47,7 @@ function LoginPage({ onRegisterSchool }) {
 
       localStorage.setItem('token', data.token);
       setIsLoggedIn(true);
+      onLoginSuccess(data.tipo); 
       alert('Login successful!');
       
     } catch (err) {
@@ -72,7 +83,7 @@ function LoginPage({ onRegisterSchool }) {
         <form onSubmit={handleSubmit}>
           <label htmlFor="email">CORREO ELECTRÓNICO</label>
           <input 
-            type="email" 
+            type="text" 
             id="email" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -93,7 +104,7 @@ function LoginPage({ onRegisterSchool }) {
         <div className="extra-links">
           <p>¿Aún no tienes una cuenta?</p>
           <p>
-            Si te gustaría apoyar una escuela, <a href="#">crea una cuenta de aliado</a><br />
+            Si te gustaría apoyar una escuela, <a href="#" onClick={handleRegistroAliado}>crea una cuenta de aliado</a><br />
             Si tu escuela necesita apoyo, <a href="#"onClick={handleRegistroEscuela}>regístrala aquí</a>
           </p>
         </div>

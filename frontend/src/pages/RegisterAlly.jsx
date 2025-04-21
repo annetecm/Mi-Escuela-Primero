@@ -3,13 +3,30 @@ import '../styles/RegisterAlly.css';
 import TableSelect from '../components/TableSelect';
 import aliadoImg from '../assets/aliado.jpg';
 
-function RegisterAlly() {
+  function RegisterAlly({ onRegistrationSuccess }) {
   const [tipoPersona, setTipoPersona] = useState('');
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({});
   const [apoyosSeleccionados, setApoyosSeleccionados] = useState([]);
 
+  const [documentoPersonaMoral, setDocumentoPersonaMoral] = useState(null);
+  const [nombreArchivo, setNombreArchivo] = useState(""); {/*Añadi estos 3*/}
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+
+  const [needsData, setNeedsData] = useState({
+    formacionDocente: [],
+    formacionFamilias: [],
+    formacionNiños: [],
+    personalApoyo: [],
+    infraestructura: [],
+    materiales: [],
+    mobiliario: [],
+    alimentacion: [],
+    transporte: [],
+    juridico: []
+  });
+  
 
   const handleChange = (e) => {
     setTipoPersona(e.target.value);
@@ -39,7 +56,7 @@ function RegisterAlly() {
       usuario: {
         correoElectronico: formData.correo,
         contraseña: formData.contraseña,
-        nombre: formData.nombre
+        nombre: tipoPersona === "moral" ? formData.nombreOrg : formData.nombre,      
       },
       aliado: {
         tipoDeApoyo: formData.tipoApoyo,
@@ -55,9 +72,9 @@ function RegisterAlly() {
       personaMoral: tipoPersona === "moral" ? {
         RFC: formData.rfc,
         numeroEscritura: formData.numeroEscritura,
-        area: formData.area,
-        correoElectronico: formData.correo,
-        telefono: formData.telefono
+        area: formData.representanteArea,
+        correoElectronico: formData.representanteCorreo, 
+        telefono: formData.telefono 
       } : undefined,
       institucion: tipoPersona === "moral" ? {
         giro: formData.giro,
@@ -80,6 +97,13 @@ function RegisterAlly() {
         regimen: formData.regimen,
         domicilio: formData.domicilioFiscal
       } : undefined,
+      representanteLegal: tipoPersona === "moral" ? {
+        nombre: formData.representanteNombre,
+        correo: formData.representanteCorreo,
+        telefono: formData.representanteTelefono,
+        area: formData.representanteArea,
+        RFC: formData.rfc
+      } : undefined,      
       apoyos: apoyosSeleccionados
     };
     console.log('📦 Enviando datos:', JSON.stringify(datos, null, 2));
@@ -98,6 +122,11 @@ function RegisterAlly() {
         const json = JSON.parse(text);
         console.log('✅ JSON parseado:', json);
         alert(json.message);
+        setTimeout(() => {
+          if (onRegistrationSuccess) {
+            onRegistrationSuccess(); // 👉 redirige al componente de éxito
+          }
+        }, 100);        
       } catch (err) {
         console.error('❌ No es JSON válido:', err);
         alert('Respuesta no válida:\n' + text);
@@ -284,17 +313,118 @@ const juridico=[
       </form>
               <div className="heading-need">REGISTRA TU APOYO</div>
               <p className='label'>Selecciona en qué necesidades podrías apoyar</p> 
-              
-              <TableSelect title="Formación Docente" needs={formacionDocente} />
-              <TableSelect title="Formación a familias" needs={formacionFamilias} />
-              <TableSelect title="Formación niñas y niños" needs={formacionNiños} />
-              <TableSelect title="Personal de apoyo" needs={personalApoyo} />
-              <TableSelect title="Infraestructura" needs={infraestructura} />
-              <TableSelect title="Materiales" needs={materiales} />
-              <TableSelect title="Mobiliario" needs={mobiliario} />
-              <TableSelect title="Alimentación" needs={alimentacion} />
-              <TableSelect title="Transporte" needs={transporte} />
-              <TableSelect title="Jurídico" needs={juridico} />
+              <TableSelect
+                title="Formación Docente"
+                needs={formacionDocente}
+                selectedNeeds={needsData.formacionDocente}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, formacionDocente: selected }));
+                  agregarApoyo("Formación Docente", selected);
+                }}
+              />
+              <TableSelect
+                title="Formación a familias"
+                needs={formacionFamilias}
+                selectedNeeds={needsData.formacionFamilias}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, formacionFamilias: selected }));
+                  agregarApoyo("Formación a familias", selected);
+                }}
+              />
+              <TableSelect
+                title="Formación niñas y niños"
+                needs={formacionNiños}
+                selectedNeeds={needsData.formacionNiños}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, formacionNiños: selected }));
+                  agregarApoyo("Formación niñas y niños", selected);
+                }}
+              />
+              <TableSelect
+                title="Personal de apoyo"
+                needs={personalApoyo}
+                selectedNeeds={needsData.personalApoyo}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, personalApoyo: selected }));
+                  agregarApoyo("Personal de apoyo", selected);
+                }}
+              />
+              <TableSelect
+                title="Infraestructura"
+                needs={infraestructura}
+                selectedNeeds={needsData.infraestructura}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, infraestructura: selected }));
+                  agregarApoyo("Infraestructura", selected);
+                }}
+              />
+              <TableSelect
+                title="Materiales"
+                needs={materiales}
+                selectedNeeds={needsData.materiales}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, materiales: selected }));
+                  agregarApoyo("Materiales", selected);
+                }}
+              />
+              <TableSelect
+                title="Mobiliario"
+                needs={mobiliario}
+                selectedNeeds={needsData.mobiliario}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, mobiliario: selected }));
+                  agregarApoyo("Mobiliario", selected);
+                }}
+              />
+              <TableSelect
+                title="Alimentación"
+                needs={alimentacion}
+                selectedNeeds={needsData.alimentacion}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, alimentacion: selected }));
+                  agregarApoyo("Alimentación", selected);
+                }}
+              />
+              <TableSelect
+                title="Transporte"
+                needs={transporte}
+                selectedNeeds={needsData.transporte}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, transporte: selected }));
+                  agregarApoyo("Transporte", selected);
+                }}
+              />
+              <TableSelect
+                title="Jurídico"
+                needs={juridico}
+                selectedNeeds={needsData.juridico}
+                onChange={(selected) => {
+                  setNeedsData(prev => ({ ...prev, juridico: selected }));
+                  agregarApoyo("Jurídico", selected);
+                }}
+              />
+              <a
+                href="aviso-privacidad-2023.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-descarga"
+              >
+                Ver aviso de privacidad (PDF)
+              </a>
+
+              <div className="consent-container">
+                <label className="consent-label">
+                  <input 
+                    type="checkbox" 
+                    className="consent-checkbox" 
+                    checked={aceptaTerminos} 
+                    onChange={(e) => setAceptaTerminos(e.target.checked)} 
+                  />
+                  <span className="consent-text">
+                    Leí y estoy de acuerdo con el aviso de privacidad, me comprometo a ayudar a la o las escuelas durante un ciclo escolar completo.
+                  </span>
+                </label>
+              </div>  
             </div>
             <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}
@@ -312,6 +442,10 @@ const juridico=[
             </form>
             <div className="heading">DATOS DE LA INSTITUCIÓN</div>
               <form className="form-grid">
+              <div className="form-group">
+              <label>RFC (se usará para todos los registros)</label>
+              <input className="form-input" type="text" name="rfc" onChange={handleInput} />
+            </div> 
                 <div className="form-group">
                   <label>Nombre de la organización (empresa, OSC, etc)</label>
                   <input className="form-input" type="text" name="nombreOrg" onChange={handleInput} />                </div>
@@ -338,7 +472,7 @@ const juridico=[
                   <input className="form-input" type="text" name="numeroEscritura" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Fecha de escritura pública</label>
-                  <input className="form-input" type="text" name="fechaEscritura" onChange={handleInput} />                </div>
+                  <input className="form-input" type="date" name="fechaEscritura" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Otorgada por: (Nombre del notario)</label>
                   <input className="form-input" type="text" name="otorgadaPor" onChange={handleInput} />                </div>
@@ -365,70 +499,160 @@ const juridico=[
               <form className="form-grid">
                 <div className="form-group">
                   <label>Nombre completo</label>
-                  <input className="form-input" type="text" name="nombre" onChange={handleInput} />                </div>
+                  <input className="form-input" type="text" name="representanteNombre" onChange={handleInput} />               </div>
                 <div className="form-group">
                   <label>Correo</label>
-                  <input className="form-input" type="text" name="correo" onChange={handleInput} />                </div>
+                  <input className="form-input" type="text" name="representanteCorreo" onChange={handleInput} />                  </div>
                 <div className="form-group">
                   <label>Teléfono</label>
-                  <input className="form-input" type="text" name="telefono" onChange={handleInput} />                </div>
+                  <input className="form-input" type="text" name="representanteTelefono" onChange={handleInput} />                </div>
                 <div className="form-group">
                   <label>Área a la que pertenece en la organización</label>
-                  <input className="form-input" type="text" name="area" onChange={handleInput} />                </div>
+                  <input className="form-input" type="text" name="representanteArea" onChange={handleInput} />                </div>
               </form>
+              <div className="form-group">
+                  <label>Tipo de apoyo a brindar</label>
+                  <input className="form-input" type="text" name="tipoApoyo" onChange={handleInput} />
+                </div>
                 <div className="heading-need">REGISTRA TU APOYO</div>
                 <p className='label'>Selecciona en que necesidades podrías apoyar</p> 
                 <TableSelect
                   title="Formación Docente"
                   needs={formacionDocente}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Formación Docente", seleccionados)}
+                  selectedNeeds={needsData.formacionDocente}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, formacionDocente: selected }));
+                    agregarApoyo("Formación Docente", selected);
+                  }}
                 />
                 <TableSelect
                   title="Formación a familias"
                   needs={formacionFamilias}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Formación a familias", seleccionados)}
+                  selectedNeeds={needsData.formacionFamilias}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, formacionFamilias: selected }));
+                    agregarApoyo("Formación a familias", selected);
+                  }}
                 />
                 <TableSelect
                   title="Formación niñas y niños"
                   needs={formacionNiños}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Formación niñas y niños", seleccionados)}
-                  
+                  selectedNeeds={needsData.formacionNiños}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, formacionNiños: selected }));
+                    agregarApoyo("Formación niñas y niños", selected);
+                  }}
                 />
                 <TableSelect
                   title="Personal de apoyo"
                   needs={personalApoyo}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Personal de apoyo", seleccionados)}
+                  selectedNeeds={needsData.personalApoyo}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, personalApoyo: selected }));
+                    agregarApoyo("Personal de apoyo", selected);
+                  }}
                 />
                 <TableSelect
                   title="Infraestructura"
                   needs={infraestructura}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Infraestructura", seleccionados)}
+                  selectedNeeds={needsData.infraestructura}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, infraestructura: selected }));
+                    agregarApoyo("Infraestructura", selected);
+                  }}
                 />
                 <TableSelect
                   title="Materiales"
                   needs={materiales}
-                  onSelectionChange={(seleccionados) => agregarApoyo("Materiales", seleccionados)}
+                  selectedNeeds={needsData.materiales}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, materiales: selected }));
+                    agregarApoyo("Materiales", selected);
+                  }}
                 />
                 <TableSelect
-                    title="Mobiliario"
-                    needs={mobiliario}
-                    onSelectionChange={(seleccionados) => agregarApoyo("Mobiliario", seleccionados)}
+                  title="Mobiliario"
+                  needs={mobiliario}
+                  selectedNeeds={needsData.mobiliario}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, mobiliario: selected }));
+                    agregarApoyo("Mobiliario", selected);
+                  }}
                 />
                 <TableSelect
-                    title="Alimentación"
-                    needs={alimentacion}
-                    onSelectionChange={(seleccionados) => agregarApoyo("Alimentación", seleccionados)}
+                  title="Alimentación"
+                  needs={alimentacion}
+                  selectedNeeds={needsData.alimentacion}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, alimentacion: selected }));
+                    agregarApoyo("Alimentación", selected);
+                  }}
                 />
                 <TableSelect
-                    title="Transporte"
-                    needs={transporte}
-                    onSelectionChange={(seleccionados) => agregarApoyo("Transporte", seleccionados)}
+                  title="Transporte"
+                  needs={transporte}
+                  selectedNeeds={needsData.transporte}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, transporte: selected }));
+                    agregarApoyo("Transporte", selected);
+                  }}
                 />
                 <TableSelect
-                    title="Jurídico"
-                    needs={juridico}
-                    onSelectionChange={(seleccionados) => agregarApoyo("Jurídico", seleccionados)}
+                  title="Jurídico"
+                  needs={juridico}
+                  selectedNeeds={needsData.juridico}
+                  onChange={(selected) => {
+                    setNeedsData(prev => ({ ...prev, juridico: selected }));
+                    agregarApoyo("Jurídico", selected);
+                  }}
                 />
+                <div className="documento-upload">
+                  <div className="heading-need">COMPROBANTE OFICIAL</div>
+                  <div className="upload-container">
+                    <label htmlFor="documento-persona-moral" className="upload-button">
+                      Sube un comprobante oficial de persona moral
+                    </label>
+                    <input
+                      type="file"
+                      id="documento-persona-moral"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setDocumentoPersonaMoral(file);
+                          setNombreArchivo(file.name);
+                        }
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    {nombreArchivo && (
+                      <div className="archivo-seleccionado">
+                        <span>Archivo seleccionado: {nombreArchivo}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <a
+                  href="aviso-privacidad-2023.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-descarga"
+                >
+                  Ver aviso de privacidad (PDF)
+                </a>
+                <div className="consent-container">
+                <label className="consent-label">
+                  <input 
+                    type="checkbox" 
+                    className="consent-checkbox" 
+                    checked={aceptaTerminos} 
+                    onChange={(e) => setAceptaTerminos(e.target.checked)} 
+                  />
+                  <span className="consent-text">
+                  Leí y estoy de acuerdo con el aviso de privacidad, me comprometo a ayudar a la o las escuelas durante un ciclo escolar completo.
+                  </span>
+                </label>
+              </div>
             </div>
             <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}

@@ -19,6 +19,10 @@ router.post("/login", async (req, res) => {
     }
 
     const usuario = result.rows[0];
+    const usuarioId = usuario.usuarioId ?? usuario.usuarioid;
+
+    console.log("📥 Usuario completo desde DB:", usuario);
+
 
     // 2. Verificar estado de aprobación
     if (usuario.estadoRegistro !== "aprobado") {
@@ -31,18 +35,44 @@ router.post("/login", async (req, res) => {
     if (!passwordMatch) {
       return res.status(401).json({ error: "Correo o contraseña incorrectos." });
     }
+    let tipoUsuario = null;
 
+    // Primero revisa si es ESCUELA
+// Primero revisa si es ESCUELA
+console.log("📥 Usuario completo desde DB:", usuario);
+console.log("🔑 ID leído:", usuarioId);
+const escuela = await pool.query(
+  `SELECT * FROM "Escuela" WHERE "usuarioId"::text = $1::text`,
+        [usuarioId]
+);
+console.log("🔍 Escuela encontrada:", escuela.rows);
+
+if (escuela.rows.length > 0) {
+  tipoUsuario = 'escuela';
+} else {
+  // Si no es escuela, revisa si es aliado
+  const aliado = await pool.query(
+    `SELECT * FROM "Aliado" WHERE "usuarioId" = $1`,
+        [usuarioId]
+  );
+  console.log("🧾 Aliado encontrado:", aliado.rows);
+
+  if (aliado.rows.length > 0) {
+    tipoUsuario = 'aliado';
+  }
+}
+    
     // 4. Generar token JWT
     const token = jwt.sign(
       {
-        usuarioId: usuario.usuarioid,
+        usuarioId: usuarioId,
         correo: usuario.correoelectronico,
+        tipo: tipoUsuario 
       },
       process.env.JWT_SECRET || "top",
       { expiresIn: "1d" }
     );
-
-    res.json({ mensaje: "Login exitoso", token });
+    res.json({ mensaje: "Login exitoso", token, tipo: tipoUsuario }); 
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).json({ error: "Error en el login." });
@@ -81,7 +111,7 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({ 
       mensaje: "Registro exitoso, pendiente de aprobación.",
-      usuarioId: result.rows[0].usuarioid
+      usuarioId: result.rows[0].usuarioId
     });
   } catch (err) {
     console.error("Error en registro:", err);

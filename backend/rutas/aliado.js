@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg.Pool
+const bcrypt = require("bcrypt");
 
 router.use((req, res, next) => {
   console.log(`📡 ${req.method} ${req.originalUrl}`);
@@ -21,8 +22,12 @@ router.post('/', async (req, res) => {
         institucion,
         escrituraPublica,
         constanciaFiscal,
+        representanteLegal,
+      
         apoyos
       } = req.body;
+
+
   
       console.log('🎯 Datos recibidos:', JSON.stringify(req.body, null, 2));
   
@@ -33,11 +38,13 @@ router.post('/', async (req, res) => {
         VALUES ($1, $2, $3, 'pendiente')
         RETURNING "usuarioId";
       `;
+      const hashedPassword = await bcrypt.hash(usuario.contraseña, 10);
       const usuarioResult = await client.query(insertUsuarioQuery, [
         usuario.correoElectronico,
-        usuario.contraseña,
+        hashedPassword,
         usuario.nombre
       ]);
+      
       const usuarioId = usuarioResult.rows[0].usuarioId;
   
       const aliadoResult = await client.query(`SELECT uuid_generate_v4() as id`);
@@ -110,6 +117,19 @@ router.post('/', async (req, res) => {
           constanciaFiscal.regimen,
           constanciaFiscal.domicilio
         ]);
+        if (representanteLegal) {
+          await client.query(`
+            INSERT INTO "RepresentanteLegal" ("nombre", "correo", "telefono", "area", "RFC")
+            VALUES ($1, $2, $3, $4, $5);
+          `, [
+            representanteLegal.nombre,
+            representanteLegal.correo,
+            representanteLegal.telefono,
+            representanteLegal.area,
+            representanteLegal.RFC
+          ]);
+        }
+        
       }
   
       for (const apoyo of apoyos) {
