@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg.Pool
+const bcrypt = require("bcrypt");
 
 router.use((req, res, next) => {
   console.log(`📡 ${req.method} ${req.originalUrl}`);
@@ -37,11 +38,13 @@ router.post('/', async (req, res) => {
         VALUES ($1, $2, $3, 'pendiente')
         RETURNING "usuarioId";
       `;
+      const hashedPassword = await bcrypt.hash(usuario.contraseña, 10);
       const usuarioResult = await client.query(insertUsuarioQuery, [
         usuario.correoElectronico,
-        usuario.contraseña,
+        hashedPassword,
         usuario.nombre
       ]);
+      
       const usuarioId = usuarioResult.rows[0].usuarioId;
   
       const aliadoResult = await client.query(`SELECT uuid_generate_v4() as id`);
