@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
-require('dotenv').config({ path: '../.env' }); // Ajusta la ruta según tu estructura
+require('dotenv').config({ path: '../.env' }); /
 
-// Configuración condicional para SSL
+// Cargar variables de entorno desde el archivo .env en la raíz del proyecto
 const sslConfig = process.env.NODE_ENV === 'production' ? { 
   rejectUnauthorized: false 
 } : false;
@@ -11,7 +11,7 @@ const pool = new Pool({
   ssl: sslConfig
 });
 
-// Verificación de conexión mejorada
+// Verify database connection
 pool.connect((err, client, release) => {
   if (err) {
     return console.error(' Error al conectar:', err.message);
