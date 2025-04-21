@@ -272,7 +272,7 @@ const juridico=[
 {step === 2 && tipoPersona === 'fisica' && (
   <>
     <p className="label">Persona física</p>
-    <div className="scroll">
+    <div className="content-wrapper">
       <form className="form-grid">
         <div className="form-group">
           <label>Correo</label>
@@ -431,7 +431,7 @@ const juridico=[
         {step === 2 && tipoPersona === 'moral' && (
           <>
             <p className="label">Persona moral</p>
-            <div className="scroll">
+            <div className="content-wrapper">
             <form className="form-grid">
                 <div className="form-group">
                     <label>Correo</label>

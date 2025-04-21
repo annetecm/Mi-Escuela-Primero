@@ -315,7 +315,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
       <div className="form-section">
         <h1 className="title">Registrar mi escuela</h1>
         <p className="label">Ingresa la información para crear tu cuenta</p>
-        <div className="scroll">
+        <div className="content-wrapper">
         {/* Sección de credenciales */}
 <div className="form-grid">
   <div className="form-group">

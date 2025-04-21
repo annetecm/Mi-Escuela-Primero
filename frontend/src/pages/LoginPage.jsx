@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import fondo from '../assets/fondo.jpg';
-import { useNavigate } from 'react-router-dom';
-
-
 
 
 function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {

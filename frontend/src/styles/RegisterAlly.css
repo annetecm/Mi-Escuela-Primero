@@ -10,6 +10,11 @@ html, body {
   overflow: hidden;
 }
 
+.content-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
 .register-container {
   display: flex;
   height: 100vh;
@@ -144,15 +149,6 @@ html, body {
   margin: 20px 0 10px;
   text-align: center;
   font-family: 'Montserrat', sans-serif;
-}
-
-.scroll {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  height: calc(100vh - 250px);
-  padding-right: 15px;
-  min-height: 400px;
 }
 
 .documento-upload {
