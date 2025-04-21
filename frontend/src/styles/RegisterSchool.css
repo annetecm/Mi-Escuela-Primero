@@ -22,13 +22,14 @@
     padding: 60px;
     background-color: white;
     overflow: hidden;
-  }
+    }
   
   .form-group {
     display: flex;
     flex-direction: column;
     font-family: "Montserrat", sans-serif;
     margin-bottom: 20px;
+
   }
   
   .form-group label {
@@ -92,11 +93,9 @@
     width: 100%;
     max-width: none;
     margin-top: 30px;
-    margin-bottom: 30px;
     font-family: "Montserrat", sans-serif;
   }
   
-  /* Añadir estilo para la disposición en una sola columna */
   .form-single-column {
     display: flex;
     flex-direction: column;
@@ -160,3 +159,69 @@
     height: 100%;
     overflow: hidden;
   }
+
+  /* Estilos para el checkbox de consentimiento */
+.consent-container {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.consent-label {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.consent-checkbox {
+  margin-top: 3px;
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  accent-color: #009933;
+}
+
+.consent-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.documento-upload {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  background-color: #F59D15;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s;
+  font-family: 'Montserrat', sans-serif;
+  width: 100%;
+  max-width: 400px;
+  display: block;
+}
+
+.upload-button:hover {
+  background-color: #fac87b;
+}
+
+.archivo-seleccionado {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+  font-family: 'Montserrat', sans-serif;
+}

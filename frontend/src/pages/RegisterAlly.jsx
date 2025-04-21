@@ -9,6 +9,11 @@ import aliadoImg from '../assets/aliado.jpg';
 
   const [formData, setFormData] = useState({});
   const [apoyosSeleccionados, setApoyosSeleccionados] = useState([]);
+
+  const [documentoPersonaMoral, setDocumentoPersonaMoral] = useState(null);
+  const [nombreArchivo, setNombreArchivo] = useState(""); {/*Añadi estos 3*/}
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+
   const [needsData, setNeedsData] = useState({
     formacionDocente: [],
     formacionFamilias: [],
@@ -398,7 +403,28 @@ const juridico=[
                   agregarApoyo("Jurídico", selected);
                 }}
               />
+              <a
+                href="aviso-privacidad-2023.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-descarga"
+              >
+                Ver aviso de privacidad (PDF)
+              </a>
 
+              <div className="consent-container">
+                <label className="consent-label">
+                  <input 
+                    type="checkbox" 
+                    className="consent-checkbox" 
+                    checked={aceptaTerminos} 
+                    onChange={(e) => setAceptaTerminos(e.target.checked)} 
+                  />
+                  <span className="consent-text">
+                    Leí y estoy de acuerdo con el aviso de privacidad, me comprometo a ayudar a la o las escuelas durante un ciclo escolar completo.
+                  </span>
+                </label>
+              </div>  
             </div>
             <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}
@@ -580,7 +606,53 @@ const juridico=[
                     agregarApoyo("Jurídico", selected);
                   }}
                 />
-
+                <div className="documento-upload">
+                  <div className="heading-need">COMPROBANTE OFICIAL</div>
+                  <div className="upload-container">
+                    <label htmlFor="documento-persona-moral" className="upload-button">
+                      Sube un comprobante oficial de persona moral
+                    </label>
+                    <input
+                      type="file"
+                      id="documento-persona-moral"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setDocumentoPersonaMoral(file);
+                          setNombreArchivo(file.name);
+                        }
+                      }}
+                      style={{ display: "none" }}
+                    />
+                    {nombreArchivo && (
+                      <div className="archivo-seleccionado">
+                        <span>Archivo seleccionado: {nombreArchivo}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <a
+                  href="aviso-privacidad-2023.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link-descarga"
+                >
+                  Ver aviso de privacidad (PDF)
+                </a>
+                <div className="consent-container">
+                <label className="consent-label">
+                  <input 
+                    type="checkbox" 
+                    className="consent-checkbox" 
+                    checked={aceptaTerminos} 
+                    onChange={(e) => setAceptaTerminos(e.target.checked)} 
+                  />
+                  <span className="consent-text">
+                  Leí y estoy de acuerdo con el aviso de privacidad, me comprometo a ayudar a la o las escuelas durante un ciclo escolar completo.
+                  </span>
+                </label>
+              </div>
             </div>
             <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
         )}
