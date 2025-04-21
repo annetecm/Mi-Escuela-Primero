@@ -1,19 +1,22 @@
 const { Pool } = require('pg');
+require('dotenv').config({ path: '../.env' }); 
+
+// Cargar variables de entorno desde el archivo .env en la raíz del proyecto
+const sslConfig = process.env.NODE_ENV === 'production' ? { 
+  rejectUnauthorized: false 
+} : false;
 
 const pool = new Pool({
-  user: 'fakeadmin',
-  host: 'localhost',
-  database: 'testdb',
-  password: 'fakeadmin', // pon la contraseña correcta
-  port: 5432,
-  ssl: false
+  connectionString: process.env.DATABASE_URL,
+  ssl: sslConfig
 });
 
+// Verify database connection
 pool.connect((err, client, release) => {
   if (err) {
-    return console.error('❌ Error al conectar:', err.message);
+    return console.error(' Error al conectar:', err.message);
   }
-  console.log('✅ Conexión a DB establecida');
+  console.log(' Conexión a DB establecida');
   release();
 });
 
