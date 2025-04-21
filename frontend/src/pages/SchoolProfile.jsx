@@ -2,8 +2,7 @@ import { useState } from "react"
 import logo from "../assets/logo1.png"
 import "../styles/SchoolProfile.css"
 
-export default function Profile() {
-    const [menuVisible, setMenuVisible] = useState(false)
+export default function Profile({ onEditClick }) {    const [menuVisible, setMenuVisible] = useState(false)
     const toggleMenu = () => setMenuVisible(!menuVisible)
   
     // Datos de ejemplo para la escuela y necesidades
@@ -46,7 +45,7 @@ export default function Profile() {
             <div className="profile-header">
               <div className="profile-header-left">
                 <h2 className="school-title">{escuela.nombre}</h2>
-                <button className="edit-button">
+                <button className="edit-button" onClick={onEditClick}>
                   <span className="edit-text">EDITAR INFORMACIÓN</span>
                   <span className="edit-icon">✏️</span>
                 </button>

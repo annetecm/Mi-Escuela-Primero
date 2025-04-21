@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import fondo from '../assets/fondo.jpg';
+import { useNavigate } from 'react-router-dom';
 
-function LoginPage({ onRegisterSchool, onRegisterAlly  }) {
+
+
+
+function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,6 +25,7 @@ function LoginPage({ onRegisterSchool, onRegisterAlly  }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    console.log("✅ Enviando solicitud de login..."); // <-- Agrega esto
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -42,6 +47,7 @@ function LoginPage({ onRegisterSchool, onRegisterAlly  }) {
 
       localStorage.setItem('token', data.token);
       setIsLoggedIn(true);
+      onLoginSuccess(data.tipo); 
       alert('Login successful!');
       
     } catch (err) {
@@ -77,7 +83,7 @@ function LoginPage({ onRegisterSchool, onRegisterAlly  }) {
         <form onSubmit={handleSubmit}>
           <label htmlFor="email">CORREO ELECTRÓNICO</label>
           <input 
-            type="email" 
+            type="text" 
             id="email" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
