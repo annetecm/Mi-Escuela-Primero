@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
       
       const usuarioId = usuarioResult.rows[0].usuarioId;
   
-      const aliadoResult = await client.query(`SELECT uuid_generate_v4() as id`);
+      const aliadoResult = await client.query(`SELECT gen_random_uuid() as id`);
       const aliadoId = aliadoResult.rows[0].id;
   
       await client.query(`
