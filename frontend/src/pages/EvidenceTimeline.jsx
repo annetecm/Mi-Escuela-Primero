@@ -18,25 +18,26 @@ export default function EvidenceTimeline() {
     if (!file) return;
   
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("description", evidences[index].description);
+    formData.append("archivo", file);
+    formData.append("tipo", "escuela"); 
+    formData.append("matchId", "match789");
   
-    const res = await fetch("http://localhost:5000/api/upload", {
+    const res = await fetch("http://localhost:5000/api/evidence/upload", {
       method: "POST",
       body: formData,
     });
   
     const data = await res.json();
   
-    if (data.url) {
+    if (res.ok) {
       const updated = [...evidences];
-      updated[index].file = data.url;
+      updated[index].file = URL.createObjectURL(file); // o usa una URL desde backend si la regresas
       updated[index].date = new Date().toLocaleDateString();
       setEvidences(updated);
     } else {
-      console.error("Error al subir archivo:", data.error);
+      console.error("Error al subir archivo:", data.reason || data.error);
     }
-  };  
+  };
 
   const handleDescriptionChange = (index, value) => {
     const updated = [...evidences]

@@ -16,6 +16,45 @@ function RegisterSchool({onRegistrationSuccess}) {
     folio: ""
   });
 
+  const handleFileUpload = async (event) => {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+  
+    const nuevosNombres = [];
+    const nuevasURLs = [];
+  
+    for (const file of files) {
+      const formDataToSend = new FormData();
+      formDataToSend.append("archivo", file);
+      formDataToSend.append("tipo", "escuela"); 
+      formDataToSend.append("id", formData.escuela.CCT);
+  
+      try {
+        const res = await fetch("http://localhost:5000/api/documents/upload", {
+          method: "POST",
+          body: formDataToSend,
+        });
+  
+        const data = await res.json();
+  
+        if (res.ok) {
+          nuevosNombres.push(file.name);
+          nuevasURLs.push(data.url || "Documento subido");
+          console.log("✅ Documento subido:", data);
+        } else {
+          throw new Error(data.reason || "Error al subir el documento");
+        }
+      } catch (err) {
+        console.error("❌ Error al subir documento:", err);
+        alert(`Error al subir "${file.name}": ${err.message}`);
+      }
+    }
+  
+    // Actualiza los estados al final
+    setNombreArchivo((prev) => [...prev, ...nuevosNombres]);
+    setDocumentoEvidencia((prev) => [...prev, ...nuevasURLs]);
+  };  
+
   // Add states for user data
   const [formData, setFormData] = useState({
     usuario: {
@@ -944,36 +983,33 @@ onChange={(selected) =>
 />
 
 <div className="documento-upload">
-    <div className="heading-need">SUBIR EVIDENCIAS</div>
-      <div className="upload-container">
-        <label htmlFor="evidencia" className="upload-button">
-          Sube evidencias de tus necesidades registradas
-        </label>
-        <input
-          type="file"
-          id="evidencia"
-          accept=".pdf,.jpg,.jpeg,.png"
-          multiple
-          onChange={(e) => {
-            const files = Array.from(e.target.files);
-            setDocumentoEvidencia(files);
-            setNombreArchivo(files.map(file => file.name));
-          }}
-          style={{ display: "none" }}
-        />
+  <div className="heading-need">SUBIR EVIDENCIAS</div>
+  <div className="upload-container">
+    <label htmlFor="evidencia" className="upload-button">
+      Sube evidencias de tus necesidades registradas
+    </label>
+    <input
+      type="file"
+      id="evidencia"
+      accept=".pdf,.jpg,.jpeg,.png"
+      multiple
+      onChange={handleFileUpload}
+      style={{ display: "none" }}
+    />
 
-        {nombreArchivo.length > 0 && (
-          <div className="archivo-seleccionado">
-            <span>Archivos seleccionados:</span>
-            <ul>
-              {nombreArchivo.map((nombre, idx) => (
-                <li key={idx}>{nombre}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+    {nombreArchivo.length > 0 && (
+      <div className="archivo-seleccionado">
+        <span>Archivos seleccionados:</span>
+        <ul>
+          {nombreArchivo.map((nombre, idx) => (
+            <li key={idx}>{nombre}</li>
+          ))}
+        </ul>
       </div>
+    )}
+  </div>
 </div>
+
 <a
   href="aviso-privacidad-2023.pdf"
   target="_blank"
@@ -1012,10 +1048,6 @@ onChange={(selected) =>
       </div>
   )
 }
-
-
-
-
 
 
 export default RegisterSchool
