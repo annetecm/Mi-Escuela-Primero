@@ -13,14 +13,16 @@ app.use(express.json());
 // Imports and uses the routes
 const authRouter = require('./rutas/auth'); 
 const escuelaRouter = require('./rutas/escuela');
-const uploadRoute = require('./rutas/upload');
+const uploadRouter = require('./rutas/evidence');
 const aliadoRouter = require('./rutas/aliado');
+const documentRouter= require('./rutas/documents');
 
 
 app.use('/api/auth', authRouter); 
 app.use('/api/escuela', escuelaRouter); 
-app.use('/api', uploadRoute);
+app.use('/api', uploadRouter);
 app.use('/api/aliado', aliadoRouter);
+app.use('/api', documentRouter);
 
 
 
