@@ -9,7 +9,6 @@ export default function Profile() {
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
-  // Datos de ejemplo para la escuela y necesidades
   const escuela = {
     id: 1,
     nombre: "Aliado 1",
@@ -19,67 +18,64 @@ export default function Profile() {
   };
 
   return (
-    <div className="app-container">
-      {/* Barra superior */}
-      <header className="header">
-        <button className="menu-button" onClick={toggleMenu}>
+    <div className="allyprofile-container">
+      <header className="allyprofile-header">
+        <button className="allyprofile-menu-button" onClick={toggleMenu}>
           &#9776;
         </button>
-        <div className="logo-container">
-          <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
+        <div className="allyprofile-logo-container">
+          <img src={logo || "/placeholder.svg"} alt="Logo" className="allyprofile-logo" />
         </div>
       </header>
 
-      <div className="main-layout">
-        {/* Menú lateral */}
-        <aside className={`sidebar ${menuVisible ? 'visible' : 'hidden'}`}>
-          <ul className="menu-list">
-            <li className="menu-item active" onClick={() => navigate('/aliado/perfil')}>Perfil</li>
-            <li className="menu-item" onClick={() => navigate('/aliado/mapa')}>Buscar escuelas</li>
-            <li className="menu-item" onClick={() => navigate('/listado/escuelas')}>Mis escuelas</li>
-            <li className="menu-item" onClick={() => navigate('/logout')}>Cerrar sesión</li>
+      <div className="allyprofile-main-layout">
+        <aside className={`allyprofile-sidebar ${menuVisible ? 'visible' : 'hidden'}`}>
+          <ul className="allyprofile-menu-list">
+            <li className="allyprofile-menu-item active" onClick={() => navigate('/aliado/perfil')}>Perfil</li>
+            <li className="allyprofile-menu-item" onClick={() => navigate('/aliado/mapa')}>Buscar escuelas</li>
+            <li className="allyprofile-menu-item" onClick={() => navigate('/listado/escuelas')}>Mis escuelas</li>
+            <li className="allyprofile-menu-item" onClick={() => navigate('/logout')}>Cerrar sesión</li>
           </ul>
         </aside>
 
-        {/* Contenido principal */}
-        <main className="main-content">
-          <div className="content-wrapper">
-            <h1 className="page-title">Mi Perfil</h1>
-            
-            <div className="profile-card">
-              <div className="profile-header">
-                <div className="profile-info">
-                  <h2 className="profile-name">{escuela.nombre}</h2>
-                  <button className="edit-button" onClick={() => navigate('/editar/aliado')}>
-                    <span className="edit-text">EDITAR INFORMACIÓN</span>
-                    <span className="edit-icon">✏️</span>
+        <main className="allyprofile-main-content">
+          <div className="allyprofile-content-wrapper">
+            <h1 className="allyprofile-page-title">Mi Perfil</h1>
+
+            <div className="allyprofile-profile-card">
+              <div className="allyprofile-profile-header">
+                <div className="allyprofile-profile-info">
+                  <h2 className="allyprofile-profile-name">{escuela.nombre}</h2>
+                  <button className="allyprofile-edit-button" onClick={() => navigate('/editar/aliado')}>
+                    <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
+                    <span className="allyprofile-edit-icon">✏️</span>
                   </button>
                 </div>
-                
-                <div className="profile-image-container">
-                  <img 
-                    src={escuela.imagen || "/placeholder.svg"} 
-                    alt="Imagen del aliado" 
-                    className="profile-image" 
+
+                <div className="allyprofile-profile-image-container">
+                  <img
+                    src={escuela.imagen || "/placeholder.svg"}
+                    alt="Imagen del aliado"
+                    className="allyprofile-profile-image"
                   />
                 </div>
               </div>
-              
-              <div className="profile-details">
-                <div className="detail-item">
-                  <div className="detail-label">
-                    <span className="detail-icon">📍</span>
-                    <span className="detail-text">UBICACIÓN</span>
+
+              <div className="allyprofile-profile-details">
+                <div className="allyprofile-detail-item">
+                  <div className="allyprofile-detail-label">
+                    <span className="allyprofile-detail-icon">📍</span>
+                    <span className="allyprofile-detail-text">UBICACIÓN</span>
                   </div>
-                  <div className="detail-value">{escuela.ubicacion}</div>
+                  <div className="allyprofile-detail-value">{escuela.ubicacion}</div>
                 </div>
-                
-                <div className="detail-item">
-                  <div className="detail-label">
-                    <span className="detail-icon">✉️</span>
-                    <span className="detail-text">CORREO</span>
+
+                <div className="allyprofile-detail-item">
+                  <div className="allyprofile-detail-label">
+                    <span className="allyprofile-detail-icon">✉️</span>
+                    <span className="allyprofile-detail-text">CORREO</span>
                   </div>
-                  <div className="detail-value">{escuela.correo}</div>
+                  <div className="allyprofile-detail-value">{escuela.correo}</div>
                 </div>
               </div>
             </div>
