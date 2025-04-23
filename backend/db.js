@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config({ path: '../.env' }); 
+require('dotenv').config();
 
 // Cargar variables de entorno desde el archivo .env en la raíz del proyecto
 const sslConfig = process.env.NODE_ENV === 'production' ? { 
