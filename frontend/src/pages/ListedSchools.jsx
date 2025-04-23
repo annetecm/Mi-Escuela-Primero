@@ -34,19 +34,19 @@ export default function ListedSchools() {
   const navigate = useNavigate()
 
   return (
-    <div className="app-container">
+    <div className="listedallies-container">
       {/* Barra superior */}
-      <header className="header">
-        <button className="menu-button" onClick={toggleMenu}>
+      <header className="listedallies-header">
+        <button className="listedallies-menu-button" onClick={toggleMenu}>
           &#9776;
         </button>
-        <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
+        <img src={logo || "/placeholder.svg"} alt="Logo" className="listedallies-logo" />
       </header>
 
-      <div className={`main-content ${menuVisible ? "menu-visible" : ""}`}>
+      <div className={`listedallies-main-content ${menuVisible ? "menu-visible" : ""}`}>
         {/* Menú lateral */}
         {menuVisible && (
-          <nav className="sidebar">
+          <nav className="listedallies-sidebar">
             <ul>
               <li onClick={() => navigate("/aliado/perfil")}>Perfil</li>
               <li onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
@@ -57,28 +57,28 @@ export default function ListedSchools() {
         )}
 
         {/* Contenido principal */}
-        <main className="content">
-          <h1 className="title">Mis Escuelas</h1>
+        <main className="listedallies-content">
+          <h1 className="listedallies-title">Mis Escuelas</h1>
 
-          <div className="cards-container">
+          <div className="listedallies-cards-container">
             {escuelas.map((escuela) => (
               <div
                 key={escuela.id}
-                className="card"
+                className="listedallies-card"
                 onClick={() => navigate(`/aliado/evidencia/${escuela.id}`)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="card-image">
+                <div className="listedallies-card-image">
                   <img src={escuela.imagen || "/placeholder.svg"} alt={escuela.nombre} />
                 </div>
-                <div className="card-info">
-                  <h2 className="card-title">{escuela.nombre}</h2>
-                  <div className="card-location">
-                    <span className="location-icon">📍</span>
+                <div className="listedallies-card-info">
+                  <h2 className="listedallies-card-title">{escuela.nombre}</h2>
+                  <div className="listedallies-card-location">
+                    <span className="listedallies-location-icon">📍</span>
                     <span>{escuela.ubicacion}</span>
                   </div>
-                  <button className="message-button" onClick={(e) => e.stopPropagation()}>
-                    <span className="message-icon">💬</span>
+                  <button className="listedallies-message-button" onClick={(e) => e.stopPropagation()}>
+                    <span className="listedallies-message-icon">💬</span>
                     <span>Enviar mensaje</span>
                   </button>
                 </div>

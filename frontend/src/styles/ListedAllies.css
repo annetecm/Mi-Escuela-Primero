@@ -11,14 +11,14 @@ body {
   line-height: 1.6;
 }
 
-.app-container {
+.listedallies-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
 /* Barra superior */
-.header {
+.listedallies-header {
   background-color: #019847;
   height: 60px;
   display: flex;
@@ -32,7 +32,7 @@ body {
   z-index: 100;
 }
 
-.menu-button {
+.listedallies-menu-button {
   background: none;
   border: none;
   color: white;
@@ -40,19 +40,19 @@ body {
   cursor: pointer;
 }
 
-.logo {
+.listedallies-logo {
   height: 60px;
   width: auto;
 }
 
-.main-content {
+.listedallies-main-content {
   display: flex;
   margin-top: 60px;
   min-height: calc(100vh - 60px);
   position: relative;
 }
 
-.sidebar {
+.listedallies-sidebar {
   position: fixed;
   top: 60px; /* Ajustar para que esté justo debajo del header */
   left: 0;
@@ -66,11 +66,11 @@ body {
   overflow-y: auto;
 }
 
-.sidebar ul {
+.listedallies-sidebar ul {
   list-style: none;
 }
 
-.sidebar li {
+.listedallies-sidebar li {
   padding: 12px 8px;
   color: #0baf4f;
   font-weight: 500;
@@ -79,11 +79,11 @@ body {
   margin-bottom: 5px;
 }
 
-.sidebar li:hover {
+.listedallies-sidebar li:hover {
   background-color: #d0f0dd;
 }
 
-.content {
+.listedallies-content {
   flex: 1;
   padding: 30px;
   margin-left: auto;
@@ -94,11 +94,11 @@ body {
 }
 
 /* Eliminar el ajuste de margen cuando el menú está visible */
-.menu-visible .content {
+.menu-visible .listedallies-content {
   margin-left: auto;
 }
 
-.title {
+.listedallies-title {
   text-align: center;
   font-size: 32px;
   margin-bottom: 5px;
@@ -106,7 +106,7 @@ body {
   color: #222;
 }
 
-.cards-container {
+.listedallies-cards-container {
   background-color: #f1f8f4;
   padding: 30px;
   border-radius: 12px;
@@ -120,7 +120,7 @@ body {
   overflow-y: auto;
 }
 
-.card {
+.listedallies-card {
   background-color: white;
   border-radius: 10px;
   width: 90%;
@@ -135,12 +135,12 @@ body {
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.card:hover {
+.listedallies-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-.card-image {
+.listedallies-card-image {
   width: 120px;
   height: 100px;
   background-color: #f0f0f0;
@@ -148,7 +148,7 @@ body {
   margin-right: 15px;
 }
 
-.card-image img {
+.listedallies-card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -156,26 +156,26 @@ body {
   border-radius: 8px;
 }
 
-.card-info {
+.listedallies-card-info {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-.card-title {
+.listedallies-card-title {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 10px;
 }
 
-.card-location {
+.listedallies-card-location {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
   color: #666;
 }
 
-.message-button {
+.listedallies-message-button {
   display: flex;
   align-items: center;
   background-color: #e8f5e9;
@@ -189,28 +189,28 @@ body {
   margin-left: auto;
 }
 
-.message-button:hover {
+.listedallies-message-button:hover {
   background-color: #d0f0dd;
 }
 
 @media (max-width: 768px) {
-  .content {
+  .listedallies-content {
     padding: 20px;
   }
 
-  .cards-container {
+  .listedallies-cards-container {
     padding: 15px;
     width: 90vw; /* Ajustar el ancho en pantallas más pequeñas */
   }
 
-  .card {
+  .listedallies-card {
     width: 95%;
     height: auto;
     flex-direction: column;
     padding: 20px;
   }
 
-  .card-image {
+  .listedallies-card-image {
     width: 120px;
     height: 100px;
     border-radius: 8px;
@@ -219,50 +219,48 @@ body {
     background-color: #f0f0f0;
   }
 
-  .card-image img {
+  .listedallies-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .card-info {
+  .listedallies-card-info {
     width: 100%;
     align-items: center;
     text-align: center;
   }
 
-  .message-button {
+  .listedallies-message-button {
     margin: 10px auto 0;
   }
 }
 
 @media (max-width: 480px) {
-  .card {
+  .listedallies-card {
     width: 100%;
   }
 
-  .sidebar {
+  .listedallies-sidebar {
     width: 180px; /* Mantener el mismo ancho en móviles */
   }
 }
 
-/* Scroll bonito en Chrome/Safari */
-.cards-container::-webkit-scrollbar {
+.listedallies-cards-container::-webkit-scrollbar {
   width: 6px;
 }
 
-.cards-container::-webkit-scrollbar-thumb {
+.listedallies-cards-container::-webkit-scrollbar-thumb {
   background-color: #a5d6a7;
   border-radius: 4px;
 }
 
-.cards-container::-webkit-scrollbar-track {
+.listedallies-cards-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Scroll personalizado en Firefox */
-.cards-container {
+.listedallies-cards-container {
   scrollbar-width: thin;
   scrollbar-color: #a5d6a7 transparent;
 }
