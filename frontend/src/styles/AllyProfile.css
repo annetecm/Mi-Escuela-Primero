@@ -1,252 +1,253 @@
-/* Reset y estilos base */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background-color: #fff;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Contenedor principal */
+.allyprofile-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Encabezado */
+.allyprofile-header {
+  background-color: #019847;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.allyprofile-menu-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.allyprofile-logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.allyprofile-logo {
+  height: 40px;
+  width: auto;
+}
+
+.allyprofile-logo-text {
+  color: white;
+  font-weight: bold;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+/* Layout principal */
+.allyprofile-main-layout {
+  display: flex;
+  margin-top: 60px;
+  min-height: calc(100vh - 60px);
+  position: relative;
+}
+
+/* Sidebar */
+.allyprofile-sidebar {
+  width: 200px;
+  background-color: #e8f5e9;
+  min-height: calc(100vh - 60px);
+  position: fixed;
+  top: 60px;
+  left: 0;
+  z-index: 90;
+  transition: transform 0.3s ease;
+}
+
+.allyprofile-sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.allyprofile-menu-list {
+  list-style: none;
+  padding: 20px 0;
+}
+
+.allyprofile-menu-item {
+  padding: 15px 20px;
+  color: #0baf4f;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.allyprofile-menu-item:hover,
+.allyprofile-menu-item.active {
+  background-color: #d0f0dd;
+}
+
+/* Contenido principal */
+.allyprofile-main-content {
+  flex: 1;
+  padding: 30px;
+  transition: margin-left 0.3s ease;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Cuando el menú está visible */
+.menu-visible .allyprofile-main-content {
+  margin-left: 200px; /* Ancho del sidebar */
+}
+
+.allyprofile-content-wrapper {
+  width: 100%;
+  max-width: 800px;
+}
+
+.allyprofile-page-title {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Tarjeta de perfil */
+.allyprofile-profile-card {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  width: 100%;
+}
+
+.allyprofile-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.allyprofile-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.allyprofile-profile-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.allyprofile-edit-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.allyprofile-edit-text {
+  margin-right: 8px;
+}
+
+.allyprofile-profile-image-container {
+  flex-shrink: 0;
+}
+
+.allyprofile-profile-image {
+  width: 180px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.allyprofile-profile-details {
+  margin-top: 20px;
+}
+
+.allyprofile-detail-item {
+  margin-bottom: 20px;
+}
+
+.allyprofile-detail-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.allyprofile-detail-icon {
+  margin-right: 10px;
+  color: #019847;
+}
+
+.allyprofile-detail-text {
+  font-weight: 600;
+  color: #555;
+}
+
+.allyprofile-detail-value {
+  padding-left: 26px;
+  color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .allyprofile-sidebar {
+    width: 240px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   }
-  
-  body {
-    font-family: "Montserrat", sans-serif;
-    background-color: #fff;
-    color: #333;
-    line-height: 1.6;
-    min-height: 100vh;
+
+  .menu-visible .allyprofile-main-content {
+    margin-left: 0;
   }
-  
-  /* Contenedor principal */
-  .app-container {
-    min-height: 100vh;
-    display: flex;
+
+  .allyprofile-profile-header {
     flex-direction: column;
   }
-  
-  /* Encabezado */
-  .header {
-    background-color: #019847;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-  }
-  
-  .menu-button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .logo-container {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo {
-    height: 40px;
-    width: auto;
-  }
-  
-  .logo-text {
-    color: white;
-    font-weight: bold;
-    margin-left: 10px;
-    font-size: 16px;
-  }
-  
-  /* Layout principal */
-  .main-layout {
-    display: center;
-    margin-top: 60px;
-    min-height: calc(100vh - 60px);
-    margin-left: 200px;
-  }
-  
-  /* Sidebar */
-  .sidebar {
-    width: 200px;
-    background-color: #e8f5e9;
-    min-height: calc(100vh - 60px);
-    position: fixed;
-    top: 60px;
-    left: 0;
-    z-index: 90;
-    transition: transform 0.3s ease;
-  }
-  
-  .sidebar.hidden {
-    transform: translateX(-100%);
-  }
-  
-  .menu-list {
-    list-style: none;
-    padding: 20px 0;
-  }
-  
-  .menu-item {
-    padding: 15px 20px;
-    color: #0baf4f;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-  
-  .menu-item:hover,
-  .menu-item.active {
-    background-color: #d0f0dd;
-  }
-  
-  /* Contenido principal */
-  .main-content {
-    flex: 1;
-    padding: 30px;
-    margin-left: 200px; /* Ancho del sidebar */
-    width: calc(100% - 200px);
-    display: flex;
-    justify-content: center;
-  }
-  
-  .content-wrapper {
-    width: 100%;
-    max-width: 800px; /* Limitar ancho máximo */
-  }
-  
-  .page-title {
-    font-size: 28px;
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-    font-weight: bold;
-  }
-  
-  /* Tarjeta de perfil */
-  .profile-card {
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    width: 100%;
-  }
-  
-  .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-  }
-  
-  .profile-info {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .profile-name {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .edit-button {
-    display: flex;
-    align-items: center;
-    background: none;
-    border: none;
-    color: #555;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 0;
-  }
-  
-  .edit-text {
-    margin-right: 8px;
-  }
-  
-  .profile-image-container {
-    flex-shrink: 0;
-  }
-  
-  .profile-image {
-    width: 180px;
-    height: auto;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-  
-  .profile-details {
+
+  .allyprofile-profile-image-container {
     margin-top: 20px;
+    align-self: center;
   }
-  
-  .detail-item {
-    margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .allyprofile-profile-card {
+    padding: 15px;
   }
-  
-  .detail-label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+
+  .allyprofile-logo-text {
+    display: none;
   }
-  
-  .detail-icon {
-    margin-right: 10px;
-    color: #019847;
+
+  .allyprofile-edit-text {
+    display: none;
   }
-  
-  .detail-text {
-    font-weight: 600;
-    color: #555;
-  }
-  
-  .detail-value {
-    padding-left: 26px;
-    color: #333;
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 240px;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-  
-    .main-content {
-      margin-left: 0;
-      width: 100%;
-      padding: 20px;
-    }
-  
-    .profile-header {
-      flex-direction: column;
-    }
-  
-    .profile-image-container {
-      margin-top: 20px;
-      align-self: center;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .profile-card {
-      padding: 15px;
-    }
-  
-    .logo-text {
-      display: none;
-    }
-  
-    .edit-text {
-      display: none;
-    }
-  }
-  
+}

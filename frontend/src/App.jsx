@@ -12,6 +12,7 @@
   import SignOut from './pages/SignOut';
   import PrivateRoute from './rutas/PrivateRoute';
   import EvidenceTimeline from './pages/EvidenceTimeline';
+  import SchoolCard from './pages/SchoolCard';
 
   function App() {
     return (
@@ -74,6 +75,14 @@
           element={
             <PrivateRoute allowedRoles={['aliado']}>
               <EvidenceTimeline />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tarjeta-escuela"
+          element={
+            <PrivateRoute allowedRoles={['aliado']}>
+              <SchoolCard />
             </PrivateRoute>
           }
         />
