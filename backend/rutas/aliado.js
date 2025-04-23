@@ -7,7 +7,7 @@ router.use((req, res, next) => {
   console.log(`📡 ${req.method} ${req.originalUrl}`);
   next();
 });
-// ✅ ESTA ES LA RUTA CORRECTA: POST /api/aliado
+//  ESTA ES LA RUTA CORRECTA: POST /api/aliado
 router.post('/', async (req, res) => {
     console.log('📩 POST recibido en /api/aliado');
     console.log('🧾 Cuerpo recibido:', req.body);
@@ -21,13 +21,11 @@ router.post('/', async (req, res) => {
         personaMoral,
         institucion,
         escrituraPublica,
-        constanciaFiscal,
-        representanteLegal,
-      
-        apoyos
+        constanciaFisica,
+        representante,
+        apoyos,
+        documento
       } = req.body;
-
-
   
       console.log('🎯 Datos recibidos:', JSON.stringify(req.body, null, 2));
   
@@ -112,21 +110,21 @@ router.post('/', async (req, res) => {
           INSERT INTO "ConstanciaFisica" ("RFC", "razonSocial", "regimen", "domicilio")
           VALUES ($1, $2, $3, $4);
         `, [
-          constanciaFiscal.RFC,
-          constanciaFiscal.razonSocial,
-          constanciaFiscal.regimen,
-          constanciaFiscal.domicilio
+          constanciaFisica.RFC,
+          constanciaFisica.razonSocial,
+          constanciaFisica.regimen,
+          constanciaFisica.domicilio
         ]);
-        if (representanteLegal) {
+        if (representante) {
           await client.query(`
-            INSERT INTO "RepresentanteLegal" ("nombre", "correo", "telefono", "area", "RFC")
+            INSERT INTO "Representante" ("nombreRep", "correoRep", "telefonoRep", "areaRep", "RFC")
             VALUES ($1, $2, $3, $4, $5);
           `, [
-            representanteLegal.nombre,
-            representanteLegal.correo,
-            representanteLegal.telefono,
-            representanteLegal.area,
-            representanteLegal.RFC
+            representante.nombre,
+            representante.correo,
+            representante.telefono,
+            representante.area,
+            representante.RFC
           ]);
         }
         
@@ -138,6 +136,20 @@ router.post('/', async (req, res) => {
           VALUES ($1, $2, $3);
         `, [aliadoId, apoyo.tipo, apoyo.caracteristicas]);
       }
+
+      if (documento && documento.length > 0) {
+        for (const doc of documento) {
+          await client.query(`
+            INSERT INTO "Documento" ("tipo", "ruta", "fechaCarga", "usuarioId", "nombre")
+            VALUES ($1, $2, NOW(), $3, $4);
+          `, [
+            doc.tipo,
+            doc.ruta,
+            usuarioId,
+            doc.nombre
+          ]);
+        }
+      }      
   
       await client.query('COMMIT');
   

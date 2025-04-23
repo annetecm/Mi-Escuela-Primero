@@ -3,7 +3,7 @@ import '../styles/PageAdmin.css';
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
 
-const PageAdmin = () => {
+const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('aliados');
   const [showMonitoreoMenu, setShowMonitoreoMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
@@ -30,9 +30,8 @@ const PageAdmin = () => {
     };
   }, [monitoreoMenuRef, createMenuRef]);
 
-
-   // Simulación de obtención de datos desde la base de datos
-   useEffect(() => {
+  // Simulación de obtención de datos desde la base de datos
+  useEffect(() => {
     const fetchData = async () => {
       try {
         // En un caso real, estas serían llamadas a una API o base de datos
@@ -86,16 +85,16 @@ const PageAdmin = () => {
   };
 
   if (isLoading) {
-    return <div className="loading">Cargando...</div>;
+    return <div className="admin-loading">Cargando...</div>;
   }
 
   return (
-    <div className="panel-container">
+    <div className="admin-panel-container">
       {/* Header */}
-      <header className="panel-header">
-        <div className="logo-container">
-          <img src={logo} alt="Logo" className="logo" />
-          <h1 className="header-title">Panel de control</h1>
+      <header className="admin-panel-header">
+        <div className="admin-logo-container">
+          <img src={logo} alt="Logo" className="admin-logo" />
+          <h1 className="admin-header-title">Panel de control</h1>
         </div>
         <div className="admin-info">
           <img src={adminData.avatarUrl} alt="Admin" className="admin-avatar" />
@@ -104,65 +103,65 @@ const PageAdmin = () => {
       </header>
 
       {/* Main Content */}
-      <div className="main-content">
+      <div className="admin-main-content">
         {/* Sidebar */}
-        <div className="sidebar">
-          <div className="sidebar-header">
-            <h2 className="sidebar-title">Monitoreo</h2>
-            <div className="menu-dots-container" ref={monitoreoMenuRef}>
+        <div className="admin-sidebar">
+          <div className="admin-sidebar-header">
+            <h2 className="admin-sidebar-title">Monitoreo</h2>
+            <div className="admin-menu-dots-container" ref={monitoreoMenuRef}>
               <button 
-                    className="menu-dots-button" 
+                    className="admin-menu-dots-button" 
                     onClick={handleMonitoreoMenuToggle}
                     aria-label="Menú de opciones"
                   >
                     &#8230;
                     </button>
                     {showMonitoreoMenu && (
-                      <div className="dropdown-menu">
-                        <button className="dropdown-item">Ver todos</button>
-                        <button className="dropdown-item">Ordenar por</button>
-                        <button className="dropdown-item">Filtrar</button>
-                        <button className="dropdown-item">Configuración</button>
+                      <div className="admin-dropdown-menu">
+                        <button className="admin-dropdown-item">Ver todos</button>
+                        <button className="admin-dropdown-item">Ordenar por</button>
+                        <button className="admin-dropdown-item">Filtrar</button>
+                        <button className="admin-dropdown-item">Configuración</button>
                       </div>
                   )}
               </div>
             </div>
 
           <button 
-            className={`menu-button ${activeTab === 'escuelas' ? 'active' : ''}`}
+            className={`admin-menu-button ${activeTab === 'escuelas' ? 'active' : ''}`}
             onClick={() => setActiveTab('escuelas')}
           >
-            <div className="button-content">
+            <div className="admin-button-content">
               <span>Escuelas</span>
-              <span className="icon">🎓</span>
+              <span className="admin-icon">🎓</span>
             </div>
           </button>
           
           <button 
-            className={`menu-button ${activeTab === 'aliados' ? 'active' : ''}`}
+            className={`admin-menu-button ${activeTab === 'aliados' ? 'active' : ''}`}
             onClick={() => setActiveTab('aliados')}
           >
-            <div className="button-content">
+            <div className="admin-button-content">
               <span>Aliados</span>
-              <span className="icon">👐</span>
+              <span className="admin-icon">👐</span>
             </div>
           </button>
 
-          <div className="create-button-container" ref={createMenuRef}>
+          <div className="admin-create-button-container" ref={createMenuRef}>
             <button 
-                className="create-button"
+                className="admin-create-button"
                 onClick={handleCreateMenuToggle}
               >
-                <div className="plus-icon">+</div>
+                <div className="admin-plus-icon">+</div>
                 <span>Crear cuenta</span>
               </button>
 
               {showCreateMenu && (
-              <div className="dropdown-menu">
-                <button className="dropdown-item" onClick={handleCreateAliadoClick}>
+              <div className="admin-dropdown-menu">
+                <button className="admin-dropdown-item" onClick={handleCreateAliadoClick}>
                   Crear cuenta de aliado
                 </button>
-                <button className="dropdown-item" onClick={handleCreateEscuelaClick}>
+                <button className="admin-dropdown-item" onClick={handleCreateEscuelaClick}>
                   Crear cuenta de escuela
                 </button>
               </div>
@@ -170,13 +169,12 @@ const PageAdmin = () => {
           </div>
         </div>
 
-
         {/* Content Area */}
-        <div className="content-area">
-          <div className="table-container">
-            <h2 className="table-title">Cuentas de aliado activas</h2>
+        <div className="admin-content-area">
+          <div className="admin-table-container">
+            <h2 className="admin-table-title">Cuentas de aliado activas</h2>
             
-            <table className="data-table">
+            <table className="admin-data-table">
               <thead>
                 <tr>
                   <th>Nombre</th>
@@ -188,19 +186,19 @@ const PageAdmin = () => {
               <tbody>
                 {aliados.map(aliado => (
                   <tr key={aliado.id}>
-                    <td className='aliado-name'>{aliado.nombre}</td>
+                    <td className='admin-aliado-name'>{aliado.nombre}</td>
                     <td>{aliado.telefono}</td>
-                    <td >{aliado.correo}</td>
-                    <td className='RFC'>{aliado.rfc}</td>
+                    <td>{aliado.correo}</td>
+                    <td className='admin-RFC'>{aliado.rfc}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
               {aliados.length > 5 && (
-                <div className="pagination">
-                  <button className="pagination-arrow">&lt;</button>
-                  <span className="pagination-info">Página 1 de {Math.ceil(aliados.length / 5)}</span>
-                  <button className="pagination-arrow">&gt;</button>
+                <div className="admin-pagination">
+                  <button className="admin-pagination-arrow">&lt;</button>
+                  <span className="admin-pagination-info">Página 1 de {Math.ceil(aliados.length / 5)}</span>
+                  <button className="admin-pagination-arrow">&gt;</button>
                 </div>
               )}
           </div>
@@ -210,4 +208,4 @@ const PageAdmin = () => {
   );
 };
 
-export default PageAdmin;
+export default AdminPage;

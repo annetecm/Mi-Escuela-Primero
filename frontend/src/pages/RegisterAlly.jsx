@@ -12,6 +12,7 @@ import aliadoImg from '../assets/aliado.jpg';
   const [apoyosSeleccionados, setApoyosSeleccionados] = useState([]);
 
   const [documentoPersonaMoral, setDocumentoPersonaMoral] = useState(null);
+  const [documentosSubidos, setDocumentosSubidos] = useState([]);
   const [nombreArchivo, setNombreArchivo] = useState(""); {/*Añadi estos 3*/}
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
 
@@ -55,7 +56,12 @@ import aliadoImg from '../assets/aliado.jpg';
     }
   };
 
-  const enviarFormulario = async () => {
+  const enviarFormulario = async (e) => {
+    e.preventDefault();
+    if (!aceptaTerminos) {
+      alert("Debes aceptar los términos para continuar.");
+      return;
+    }
     const datos = {
       usuario: {
         correoElectronico: formData.correo,
@@ -95,20 +101,21 @@ import aliadoImg from '../assets/aliado.jpg';
         ciudad: formData.ciudad,
         RFC: formData.rfc
       } : undefined,
-      constanciaFiscal: tipoPersona === "moral" ? {
+      constanciaFisica: tipoPersona === "moral" ? {
         RFC: formData.rfc,
         razonSocial: formData.razonSocial,
         regimen: formData.regimen,
         domicilio: formData.domicilioFiscal
       } : undefined,
-      representanteLegal: tipoPersona === "moral" ? {
+      representante: tipoPersona === "moral" ? {
         nombre: formData.representanteNombre,
         correo: formData.representanteCorreo,
         telefono: formData.representanteTelefono,
         area: formData.representanteArea,
         RFC: formData.rfc
       } : undefined,
-      apoyos: apoyosSeleccionados
+      apoyos: apoyosSeleccionados,
+      documento: documentosSubidos
     };
   
     console.log('📦 Enviando datos:', JSON.stringify(datos, null, 2));
@@ -436,7 +443,10 @@ const juridico=[
                 </label>
               </div>  
             </div>
-            <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
+            <button className="continue-button" onClick={enviarFormulario} disabled={!aceptaTerminos}>
+              CONTINUAR
+            </button>          
+            </>
         )}
         {step === 2 && tipoPersona === 'moral' && (
           <>
@@ -622,19 +632,50 @@ const juridico=[
                     <label htmlFor="documento-persona-moral" className="upload-button">
                       Sube un comprobante oficial de persona moral
                     </label>
+
                     <input
                       type="file"
                       id="documento-persona-moral"
                       accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files[0];
                         if (file) {
                           setDocumentoPersonaMoral(file);
                           setNombreArchivo(file.name);
+
+                          const formData = new FormData();
+                          formData.append("archivo", file);
+                          formData.append("tipo", "aliado");
+                          formData.append("id", "temporal");
+
+                          try {
+                            const res = await fetch("/api/documents/upload", {
+                              method: "POST",
+                              body: formData,
+                            });
+
+                            const data = await res.json();
+                            if (res.ok) {
+                              const nuevoDoc = {
+                                tipo: file.type.split("/")[1],
+                                ruta: data.url,
+                                nombre: file.name,
+                              };
+                              setDocumentosSubidos((prev) => [...prev, nuevoDoc]);
+                              console.log(" Documento guardado:", nuevoDoc);
+                            } else {
+                              console.error(" Error al subir documento:", data.reason);
+                              alert("Hubo un error al subir el archivo.");
+                            }
+                          } catch (err) {
+                            console.error("Error de red:", err);
+                            alert("Error al subir el archivo. Intenta nuevamente.");
+                          }
                         }
                       }}
                       style={{ display: "none" }}
                     />
+
                     {nombreArchivo && (
                       <div className="archivo-seleccionado">
                         <span>Archivo seleccionado: {nombreArchivo}</span>
@@ -642,6 +683,7 @@ const juridico=[
                     )}
                   </div>
                 </div>
+
                 <a
                   href="aviso-privacidad-2023.pdf"
                   target="_blank"
@@ -664,7 +706,10 @@ const juridico=[
                 </label>
               </div>
             </div>
-            <button className="continue-button" onClick={enviarFormulario}>CONTINUAR</button>          </>
+            <button className="continue-button" onClick={enviarFormulario} disabled={!aceptaTerminos}>
+              CONTINUAR
+            </button>          
+            </>
         )}
       </div>
     </div>

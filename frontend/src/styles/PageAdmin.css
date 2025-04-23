@@ -1,4 +1,3 @@
-/* PanelControl.css */
 * {
   font-family: 'Montserrat', sans-serif;
   padding: 0;
@@ -10,7 +9,7 @@ button:hover, button, button:focus {
   outline: none;
 }
 
-.panel-container {
+.admin-panel-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -18,7 +17,7 @@ button:hover, button, button:focus {
   background-color: #f5f5f5;
 }
 /* Loading State */
-.loading {
+.admin-loading {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -27,7 +26,7 @@ button:hover, button, button:focus {
   color: #439846;
 }
 /* Header Styles */
-.panel-header {
+.admin-panel-header {
   background-color: #439846;
   max-height:110px;
   color: white;
@@ -38,49 +37,49 @@ button:hover, button, button:focus {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.logo-container {
+.admin-logo-container {
   display: flex;
   align-items: center;
 }
 
-.logo {
+.admin-logo {
   margin-right: 15px;
   height:90%;
   width:85px;
 }
 
-.header-title {
+.admin-header-title {
   font-size: 2.5em;
   font-weight: normal;
   margin: 0;
 }
 
-.admin-info {
+.admin-admin-info {
   display: flex;
   align-items: center;
 }
 
-.admin-avatar {
+.admin-admin-avatar {
   border-radius: 50%;
   margin-right: 10px;
   height:80%;
   width:65px;
 }
 
-.admin-name {
+.admin-admin-name {
   font-size: 1.2em;
   font-weight: 700;
 }
 
 /* Main Content Layout */
-.main-content {
+.admin-main-content {
   display: flex;
   flex: 1;
   padding: 20px;
 }
 
 /* Sidebar Styles */
-.sidebar {
+.admin-sidebar {
   width: 30%;
   background-color: white;
   border-radius: 8px;
@@ -90,25 +89,25 @@ button:hover, button, button:focus {
   box-shadow: 0 2px 5px black;
 }
 
-.sidebar-header {
+.admin-sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.sidebar-title {
+.admin-sidebar-title {
   font-size: 1.5em;
   color: black;
   margin-top: 0;
   margin-bottom: 20px;
 }
 /* Three Dots Menu */
-.menu-dots-container {
+.admin-menu-dots-container {
   position: relative;
 }
 
-.menu-dots-button {
+.admin-menu-dots-button {
   background: none;
   border: none;
   font-size: 2em;
@@ -117,12 +116,12 @@ button:hover, button, button:focus {
   padding: 0px 10px;
 }
 
-.menu-dots-button:hover {
+.admin-menu-dots-button:hover {
   color: grey;
 }
 
 /* Dropdown Menu Styles */
-.dropdown-menu {
+.admin-dropdown-menu {
   position: absolute;
   right: 0;
   top: 100%;
@@ -133,7 +132,7 @@ button:hover, button, button:focus {
   z-index: 10;
 }
 
-.dropdown-item {
+.admin-dropdown-item {
   display: block;
   width: 100%;
   text-align: left;
@@ -145,19 +144,19 @@ button:hover, button, button:focus {
   color: black;
 }
 
-.dropdown-item:hover {
+.admin-dropdown-item:hover {
   background-color: #f5f5f5;
   color:  #439846;
 }
 
-.create-dropdown {
+.admin-create-dropdown {
   top: 0;
   left: 100%;
   margin-left: 10px;
 }
 
 
-.menu-button {
+.admin-menu-button {
   display: block;
   width: 100%;
   background-color:#439846;
@@ -170,28 +169,28 @@ button:hover, button, button:focus {
   transition: background-color 0.3s;
 }
 
-.menu-button:hover {
+.admin-menu-button:hover {
   color: #439846;
   background-color: white;
 }
 
-.menu-button.active {
+.admin-menu-button.active {
   box-shadow: 0 4px 6px black;
 }
 
-.create-button-container {
+.admin-create-button-container {
   position: relative;
   margin-top: 40px;
 }
 
-.button-content {
+.admin-button-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 1.5em;
 }
 
-.create-button {
+.admin-create-button {
   display: flex;
   align-items: center;
   background: none;
@@ -203,7 +202,7 @@ button:hover, button, button:focus {
   font-size: 1.5em;
 }
 
-.plus-icon {
+.admin-plus-icon {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -217,14 +216,14 @@ button:hover, button, button:focus {
   font-weight: 300;
 }
 
-.icon{
+.admin-icon{
   font-size: 2em;
   margin-left: 10px;
   
 }
 
 /* Content Area Styles */
-.content-area {
+.admin-content-area {
   flex: 1;
   background-color: white;
   border-radius: 8px;
@@ -233,26 +232,26 @@ button:hover, button, button:focus {
   margin-right: 3%;
 }
 
-.table-container {
+.admin-table-container {
   /*border: 2px solid black;*/
   border-radius: 8px;
   padding: 10px;
 }
 
-.table-title {
+.admin-table-title {
   font-size: 1.5em;
   color: #333;
   margin-top: 0;
   margin-bottom: 20px;
 }
 
-.data-table {
+.admin-data-table {
   width: 100%;
   border-collapse: collapse;
   color:black;
 }
 
-.data-table th {
+.admin-data-table th {
   background-color:#439846;
   color: white;
   text-align: left;
@@ -260,34 +259,34 @@ button:hover, button, button:focus {
   font-size: 1.2em;
 }
 
-.aliado-name{
+.admin-aliado-name{
   font-weight:600 !important;
   font-size: 1.2em;
 }
 
-.data-table td {
+.admin-data-table td {
   padding: 12px 15px;
   border-bottom: 1px solid black;
   font-weight: 500;
 }
 
-.data-table tr:last-child td {
+.admin-data-table tr:last-child td {
   border-bottom: none;
 }
 
-.RFC {
+.admin-RFC {
   color: blue;
 }
 
 /* Pagination Styles */
-.pagination {
+.admin-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
 }
 
-.pagination-arrow {
+.admin-pagination-arrow {
   background: none;
   border: none;
   font-size: 1.2em;
@@ -296,9 +295,8 @@ button:hover, button, button:focus {
   padding: 5px 10px;
 }
 
-.pagination-info {
+.admin-pagination-info {
   margin: 0 15px;
   font-size: 1.2em;
   color: #666;
 }
-
