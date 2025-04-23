@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/AllyMap.css';
 import logo from '../assets/logo1.png'; 
 import escuela from '../assets/escuelaLogo.png'
@@ -26,7 +27,8 @@ const schools = [
   }
 ];
 
-export default function SchoolMap() {
+export default function AllyMap() {
+    const navigate = useNavigate();
     const [menuVisible, setMenuVisible] = useState(false);
     const toggleMenu = () => setMenuVisible(!menuVisible);
   
@@ -44,12 +46,12 @@ export default function SchoolMap() {
         {menuVisible && (
           <nav className="sidebar">
             <ul>
-              <li>Perfil</li>
-              <li>Buscar escuelas</li>
-              <li>Mis escuelas</li>
-              <li>Cerrar sesión</li>
+            <li onClick={() => navigate('/aliado/perfil')}>Perfil</li>
+            <li onClick={() => navigate('/aliado/mapa')}>Buscar escuelas</li>
+            <li onClick={() => navigate('/listado/escuelas')}>Mis escuelas</li>
+            <li onClick={() => navigate('/logout')}>Cerrar sesión</li>
             </ul>
-          </nav>
+        </nav>
         )}
   
         {/* Contenido principal */}

@@ -1,35 +1,24 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/LoginPage.css';
 import fondo from '../assets/fondo.jpg';
 
-
-function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {
+function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleRegistroEscuela = (e) => {
-    e.preventDefault();
-    onRegisterSchool();
-  };
-  const handleRegistroAliado = (e) => {
-    e.preventDefault();
-    onRegisterAlly();
-  };
-
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    console.log("✅ Enviando solicitud de login..."); // <-- Agrega esto
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           correoElectronico: email,
           contraseña: password
@@ -42,32 +31,30 @@ function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {
         throw new Error(data.error || 'Login failed');
       }
 
-      localStorage.setItem('token', data.token);
-      setIsLoggedIn(true);
-      onLoginSuccess(data.tipo); 
-      alert('Login successful!');
-      
+      login(data.token, data.tipo);
+
+      if (data.tipo === 'aliado') {
+        navigate('/aliado/perfil');
+      } else if (data.tipo === 'escuela') {
+        navigate('/escuela/perfil');
+      } else {
+        navigate('/');
+      }      
+
     } catch (err) {
       setError(err.message);
     }
   };
 
-  if (isLoggedIn) {
-    return (
-      <div className="login-container" style={{ backgroundImage: `url(${fondo})` }}>
-        <div className="login-box">
-          <h1>¡Bienvenido!</h1>
-          <p>Has iniciado sesión correctamente.</p>
-          <button onClick={() => {
-            localStorage.removeItem('token');
-            setIsLoggedIn(false);
-          }}>
-            Cerrar sesión
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleRegistroAliado = (e) => {
+    e.preventDefault();
+    navigate('/register-ally');
+  };
+
+  const handleRegistroEscuela = (e) => {
+    e.preventDefault();
+    navigate('/register-school');
+  };
 
   return (
     <div className="login-container" style={{ backgroundImage: `url(${fondo})` }}>
@@ -102,7 +89,7 @@ function LoginPage({ onRegisterSchool, onRegisterAlly, onLoginSuccess   }) {
           <p>¿Aún no tienes una cuenta?</p>
           <p>
             Si te gustaría apoyar una escuela, <a href="#" onClick={handleRegistroAliado}>crea una cuenta de aliado</a><br />
-            Si tu escuela necesita apoyo, <a href="#"onClick={handleRegistroEscuela}>regístrala aquí</a>
+            Si tu escuela necesita apoyo, <a href="#" onClick={handleRegistroEscuela}>regístrala aquí</a>
           </p>
         </div>
       </div>
