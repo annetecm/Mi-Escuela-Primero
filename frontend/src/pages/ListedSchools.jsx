@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import "../styles/ListedAllies.css"
 import logo from "../assets/logo1.png"
 
@@ -11,21 +12,26 @@ export default function ListedSchools() {
       id: 1,
       nombre: "Escuela 1",
       ubicacion: "Ciudad de México",
-      imagen: "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
+      imagen:
+        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
     },
     {
       id: 2,
       nombre: "Escuela 2",
       ubicacion: "Guadalajara",
-      imagen: "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
+      imagen:
+        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
     },
     {
       id: 3,
       nombre: "Escuela 3",
       ubicacion: "Monterrey",
-      imagen: "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
+      imagen:
+        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
     },
   ]
+
+  const navigate = useNavigate()
 
   return (
     <div className="app-container">
@@ -37,15 +43,15 @@ export default function ListedSchools() {
         <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
       </header>
 
-      <div className="main-content">
+      <div className={`main-content ${menuVisible ? "menu-visible" : ""}`}>
         {/* Menú lateral */}
         {menuVisible && (
           <nav className="sidebar">
             <ul>
-              <li>Perfil</li>
-              <li>Buscar escuelas</li>
-              <li>Mis escuelas</li>
-              <li>Cerrar sesión</li>
+              <li onClick={() => navigate("/aliado/perfil")}>Perfil</li>
+              <li onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
+              <li onClick={() => navigate("/listado/escuelas")}>Mis escuelas</li>
+              <li onClick={() => navigate("/logout")}>Cerrar sesión</li>
             </ul>
           </nav>
         )}
@@ -56,9 +62,14 @@ export default function ListedSchools() {
 
           <div className="cards-container">
             {escuelas.map((escuela) => (
-              <div key={escuela.id} className="card">
+              <div
+                key={escuela.id}
+                className="card"
+                onClick={() => navigate(`/aliado/evidencia/${escuela.id}`)}
+                style={{ cursor: "pointer" }}
+              >
                 <div className="card-image">
-                <img src={escuela.imagen} alt={escuela.nombre} />
+                  <img src={escuela.imagen || "/placeholder.svg"} alt={escuela.nombre} />
                 </div>
                 <div className="card-info">
                   <h2 className="card-title">{escuela.nombre}</h2>
@@ -66,7 +77,7 @@ export default function ListedSchools() {
                     <span className="location-icon">📍</span>
                     <span>{escuela.ubicacion}</span>
                   </div>
-                  <button className="message-button">
+                  <button className="message-button" onClick={(e) => e.stopPropagation()}>
                     <span className="message-icon">💬</span>
                     <span>Enviar mensaje</span>
                   </button>

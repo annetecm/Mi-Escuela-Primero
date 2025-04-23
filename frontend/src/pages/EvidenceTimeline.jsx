@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import "../styles/EvidenceTimeline.css";
 import logo from "../assets/logo1.png";
 
 export default function EvidenceTimeline() {
+
   const [menuVisible, setMenuVisible] = useState(false)
   const [evidences, setEvidences] = useState([
     { file: null, date: null, description: "" },
@@ -12,6 +15,8 @@ export default function EvidenceTimeline() {
   ])
 
   const toggleMenu = () => setMenuVisible(!menuVisible)
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   const handleFileUpload = async (index, event) => {
     const file = event.target.files[0];
@@ -56,11 +61,12 @@ export default function EvidenceTimeline() {
 
       <div className="main-content">
         {menuVisible && (
-          <nav className="sidebar-mini">
-            <ul className="sidebar-menu">
-              <li className="sidebar-item">Perfil</li>
-              <li className="sidebar-item">Mis Aliados</li>
-              <li className="sidebar-item">Cerrar sesión</li>
+          <nav className="sidebar">
+            <ul>
+              <li onClick={() => navigate('/aliado/perfil')}>Perfil</li>
+              <li onClick={() => navigate('/aliado/mapa')}>Buscar escuelas</li>
+              <li onClick={() => navigate('/listado/escuelas')}>Mis escuelas</li>
+              <li onClick={() => navigate('/logout')}>Cerrar sesión</li>  
             </ul>
           </nav>
         )}

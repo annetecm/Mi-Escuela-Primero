@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/RegisterAlly.css';
 import TableSelect from '../components/TableSelect';
 import aliadoImg from '../assets/aliado.jpg';
 
-  function RegisterAlly({ onRegistrationSuccess }) {
+  function RegisterAlly() {
   const [tipoPersona, setTipoPersona] = useState('');
   const [step, setStep] = useState(1);
 
@@ -13,6 +14,8 @@ import aliadoImg from '../assets/aliado.jpg';
   const [documentoPersonaMoral, setDocumentoPersonaMoral] = useState(null);
   const [nombreArchivo, setNombreArchivo] = useState(""); {/*Añadi estos 3*/}
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
+
+  const navigate = useNavigate();
 
   const [needsData, setNeedsData] = useState({
     formacionDocente: [],
@@ -51,12 +54,13 @@ import aliadoImg from '../assets/aliado.jpg';
       setStep(2);
     }
   };
+
   const enviarFormulario = async () => {
     const datos = {
       usuario: {
         correoElectronico: formData.correo,
         contraseña: formData.contraseña,
-        nombre: tipoPersona === "moral" ? formData.nombreOrg : formData.nombre,      
+        nombre: tipoPersona === "moral" ? formData.nombreOrg : formData.nombre,
       },
       aliado: {
         tipoDeApoyo: formData.tipoApoyo,
@@ -73,8 +77,8 @@ import aliadoImg from '../assets/aliado.jpg';
         RFC: formData.rfc,
         numeroEscritura: formData.numeroEscritura,
         area: formData.representanteArea,
-        correoElectronico: formData.representanteCorreo, 
-        telefono: formData.telefono 
+        correoElectronico: formData.representanteCorreo,
+        telefono: formData.telefono
       } : undefined,
       institucion: tipoPersona === "moral" ? {
         giro: formData.giro,
@@ -103,40 +107,46 @@ import aliadoImg from '../assets/aliado.jpg';
         telefono: formData.representanteTelefono,
         area: formData.representanteArea,
         RFC: formData.rfc
-      } : undefined,      
+      } : undefined,
       apoyos: apoyosSeleccionados
     };
+  
     console.log('📦 Enviando datos:', JSON.stringify(datos, null, 2));
-
+  
     try {
       const res = await fetch('http://localhost:5000/api/aliado', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datos)
       });
-    
-      const text = await res.text(); // ← lee como texto sin asumir que es JSON
+  
+      const text = await res.text();
       console.log('🧾 Respuesta cruda:', text);
-    
+  
       try {
         const json = JSON.parse(text);
         console.log('✅ JSON parseado:', json);
+  
+        if (!json.message || json.message === 'undefined' || json.message === null || json.message.trim() === '') {
+          alert('Hubo un problema con el registro. Intenta de nuevo.');
+          return;
+        }
+  
         alert(json.message);
         setTimeout(() => {
-          if (onRegistrationSuccess) {
-            onRegistrationSuccess(); // 👉 redirige al componente de éxito
-          }
-        }, 100);        
+          navigate('/registration-success');
+        }, 100);
       } catch (err) {
         console.error('❌ No es JSON válido:', err);
-        alert('Respuesta no válida:\n' + text);
+        alert('Respuesta no válida del servidor:\n' + text);
       }
-    
+  
     } catch (error) {
       console.error('❌ Error de red:', error);
       alert('Error de red:\n' + error.message);
     }
-  };    
+  };
+     
   const formacionDocente = [
     "Convivencia escolar / Cultura de paz / Valores",
     "Educación inclusiva",

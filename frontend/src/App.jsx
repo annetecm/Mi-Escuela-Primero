@@ -1,56 +1,86 @@
-import React, { useState } from 'react';
-import LoginPage from './pages/LoginPage';
-import RegisterSchool from './pages/RegisterSchool';
-import AllyRegSuccess from './pages/AllyRegSuccess';
-import RegisterAlly from './pages/RegisterAlly'; 
-import SchoolProfile from './pages/SchoolProfile';
-import AllyProfile from './pages/AllyProfile';
-import EditSchool from './pages/EditSchool';
+  import { Routes, Route } from 'react-router-dom';
+  import LoginPage from './pages/LoginPage';
+  import RegisterSchool from './pages/RegisterSchool';
+  import AllyRegSuccess from './pages/AllyRegSuccess';
+  import RegisterAlly from './pages/RegisterAlly';
+  import SchoolProfile from './pages/SchoolProfile';
+  import AllyProfile from './pages/AllyProfile';
+  import EditSchool from './pages/EditSchool';
+  import AllyMap from './pages/AllyMap';
+  import ListedSchools from './pages/ListedSchools';
+  import EditPhysical from './pages/EditPhysical';
+  import SignOut from './pages/SignOut';
+  import PrivateRoute from './rutas/PrivateRoute';
+  import EvidenceTimeline from './pages/EvidenceTimeline';
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('login');
-  const [userType, setUserType] = useState(null); // ❌
+  function App() {
+    return (
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/register-school" element={<RegisterSchool />} />
+        <Route path="/register-ally" element={<RegisterAlly />} />
+        <Route path="/registration-success" element={<AllyRegSuccess />} />
 
-  const handleRedirectToRegisterSchool = () => {
-    setCurrentPage('register-school');
-  };
-  const handleRedirectToRegisterAlly = () => {
-    setCurrentPage('register-ally');
-  };
+        {/* ALIADO */}
+        <Route path="/aliado/perfil" element={
+        <PrivateRoute allowedRoles={['aliado']}>
+          <AllyProfile />
+        </PrivateRoute>
+        } />
+        <Route
+          path="/aliado/mapa"
+          element={
+            <PrivateRoute allowedRoles={['aliado']}>
+              <AllyMap />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/listado/escuelas"
+          element={
+            <PrivateRoute allowedRoles={['aliado']}>
+              <ListedSchools />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/editar/aliado"
+          element={
+            <PrivateRoute allowedRoles={['aliado']}>
+              <EditPhysical />
+            </PrivateRoute>
+          }
+        />
 
-  const handleRegistrationSuccess = () => {
-    setCurrentPage('registration-success');
+        {/* ESCUELA */}
+        <Route
+          path="/perfil/escuela"
+          element={
+            <PrivateRoute allowedRoles={['escuela']}>
+              <SchoolProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/editar/escuela"
+          element={
+            <PrivateRoute allowedRoles={['escuela']}>
+              <EditSchool />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/aliado/evidencia/:id"
+          element={
+            <PrivateRoute allowedRoles={['aliado']}>
+              <EvidenceTimeline />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/logout" element={<SignOut />} />
+        <Route path="/unauthorized" element={<h1>Acceso no autorizado</h1>} />
+      </Routes>
+    );
   }
 
-
-
-  return (
-    <>
-      {currentPage === 'login' && (
-        <LoginPage 
-        onRegisterSchool={handleRedirectToRegisterSchool} 
-        onRegisterAlly={handleRedirectToRegisterAlly}
-        onLoginSuccess={(tipo) => {
-        setUserType(tipo);      
-        setCurrentPage(tipo === 'escuela' ? 'school-profile' : 'ally-profile'); 
-        }}
-      />
-      )}
-      {currentPage === 'register-school' && (
-        <RegisterSchool onRegistrationSuccess={handleRegistrationSuccess} />
-      )}
-      {currentPage === 'register-ally' && (
-        <RegisterAlly onRegistrationSuccess={handleRegistrationSuccess}/>
-      )}
-      {currentPage === 'registration-success' && <AllyRegSuccess />}
-      {currentPage === 'school-profile' && (
-          <SchoolProfile onEditClick={() => setCurrentPage('edit-school')} />
-        )}
-      {currentPage === 'edit-school' && <EditSchool />}
-      {currentPage === 'ally-profile' && <AllyProfile />}
-
-    </>
-  );
-}
-
-export default App;
+  export default App;
