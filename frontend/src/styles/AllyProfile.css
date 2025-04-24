@@ -147,13 +147,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 .allyprofile-profile-info {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 5px;
 }
 
 .allyprofile-profile-name {
@@ -170,7 +170,6 @@ body {
   color: #555;
   font-size: 14px;
   cursor: pointer;
-  padding: 0;
 }
 
 .allyprofile-edit-text {
@@ -189,7 +188,7 @@ body {
 }
 
 .allyprofile-profile-details {
-  margin-top: 20px;
+  margin-top: 0px;
 }
 
 .allyprofile-detail-item {
@@ -240,7 +239,7 @@ body {
 
 @media (max-width: 480px) {
   .allyprofile-profile-card {
-    padding: 15px;
+    padding: 20px;
   }
 
   .allyprofile-logo-text {

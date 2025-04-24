@@ -312,7 +312,7 @@ const juridico=[
           <input className="form-input" type="email" name="correo" onChange={handleInput} />
         </div>
         <div className="form-group">
-          <label>Tipo de apoyo a brindar</label>
+          <label>Tipo de apoyo a brindar (descripción)</label>
           <input className="form-input" type="text" name="tipoApoyo" onChange={handleInput} />
         </div>
         <div className="form-group">
@@ -420,6 +420,65 @@ const juridico=[
                   agregarApoyo("Jurídico", selected);
                 }}
               />
+              <div className="documento-upload">
+              <div className="heading-need">COMPROBANTE OFICIAL</div>
+              <div className="upload-container">
+                <label htmlFor="documento-persona-fisica" className="upload-button">
+                  Sube tu CURP y copia de tu INE
+                </label>
+                <input
+                  type="file"
+                  id="documento-persona-fisica"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  multiple
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files);
+                    for (const file of files) {
+                      const formData = new FormData();
+                      formData.append("archivo", file);
+                      formData.append("tipo", "aliado");
+                      formData.append("id", "temporal");
+
+                      try {
+                        const res = await fetch("/api/documents/upload", {
+                          method: "POST",
+                          body: formData,
+                        });
+
+                        const data = await res.json();
+                        if (res.ok) {
+                          const nuevoDoc = {
+                            tipo: file.type.split("/")[1],
+                            ruta: data.url,
+                            nombre: file.name,
+                          };
+                          setDocumentosSubidos((prev) => [...prev, nuevoDoc]);
+                          console.log("📄 Documento guardado:", nuevoDoc);
+                        } else {
+                          console.error("❌ Error al subir documento:", data.reason);
+                          alert("Hubo un error al subir el archivo.");
+                        }
+                      } catch (err) {
+                        console.error("❌ Error de red:", err);
+                        alert("Error al subir el archivo. Intenta nuevamente.");
+                      }
+                    }
+                  }}
+                  style={{ display: "none" }}
+                />
+                {documentosSubidos.length > 0 && (
+                  <div className="archivo-seleccionado">
+                    <strong>Archivos seleccionados:</strong>
+                    <ul>
+                      {documentosSubidos.map((doc, idx) => (
+                        <li key={idx}>{doc.nombre}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
               <a
                 href="aviso-privacidad-2023.pdf"
                 target="_blank"
@@ -531,7 +590,7 @@ const juridico=[
                   <input className="form-input" type="text" name="representanteArea" onChange={handleInput} />                </div>
               </form>
               <div className="form-group">
-                  <label>Tipo de apoyo a brindar</label>
+                  <label>Tipo de apoyo a brindar (descripción)</label>
                   <input className="form-input" type="text" name="tipoApoyo" onChange={handleInput} />
                 </div>
                 <div className="heading-need">REGISTRA TU APOYO</div>
