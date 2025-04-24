@@ -14,13 +14,14 @@ const { obtainPriorities} = require("../utils/ponderaciones");
 
 // Register user and school
 router.post("/register", async (req, res) => {
+  console.log("Documento recibido:", documento);
   console.log("Received data:", JSON.stringify(req.body, null, 2)); // Log incoming data
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    const { usuario, escuela } = req.body;
+    const { usuario, escuela, documento } = req.body;
     console.log("Necesidades recibidas desde frontend:", escuela.necesidades);
 
 
@@ -202,7 +203,25 @@ if (escuela.apoyoPrevio?.descripcion) {
       }
     }
 
-    
+    if (documento && documento.length > 0) {
+      for (const doc of documento) {
+        try{
+        console.log("📝 Documento a insertar:", doc);
+        await client.query(`
+          INSERT INTO "Documento" ("tipo", "ruta", "fechaCarga", "usuarioId", "nombre")
+          VALUES ($1, $2, NOW(), $3, $4);
+        `, [
+          doc.tipo,
+          doc.ruta,
+          usuarioId,
+          doc.nombre
+        ]);
+        console.log("✅ Documento insertado:", doc.nombre);
+      } catch (insertErr) {
+        console.error("❌ Error al insertar documento:", insertErr);
+      }
+      }
+    } 
 
     // 14. Confirm transaction
     await client.query("COMMIT");

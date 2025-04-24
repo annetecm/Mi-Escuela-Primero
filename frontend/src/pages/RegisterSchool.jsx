@@ -4,7 +4,7 @@ import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
-function RegisterSchool({onRegistrationSuccess=()=>{}}) {
+function RegisterSchool() {
   const navigate = useNavigate();
 
   const [documentoEvidencia, setDocumentoEvidencia] = useState([]);
@@ -22,8 +22,8 @@ function RegisterSchool({onRegistrationSuccess=()=>{}}) {
     const files = Array.from(event.target.files);
     if (!files.length) return;
   
+    const nuevasEvidencias = [];
     const nuevosNombres = [];
-    const nuevasURLs = [];
   
     for (const file of files) {
       const formDataToSend = new FormData();
@@ -32,6 +32,7 @@ function RegisterSchool({onRegistrationSuccess=()=>{}}) {
       formDataToSend.append("id", formData.escuela.CCT);
   
       try {
+        console.log(" DocumentoEvidencia a enviar:", documentoEvidencia);
         const res = await fetch("http://localhost:5000/api/documents/upload", {
           method: "POST",
           body: formDataToSend,
@@ -41,22 +42,23 @@ function RegisterSchool({onRegistrationSuccess=()=>{}}) {
   
         if (res.ok) {
           nuevosNombres.push(file.name);
-          nuevasURLs.push(data.url || "Documento subido");
-          console.log("✅ Documento subido:", data);
+          nuevasEvidencias.push({
+            nombre: file.name,
+            ruta: data.url,
+            tipo: file.type,
+          });
+          console.log("Documento subido:", data);
         } else {
           throw new Error(data.reason || "Error al subir el documento");
         }
-
-        
       } catch (err) {
-        console.error("❌ Error al subir documento:", err);
+        console.error(" Error al subir documento:", err);
         alert(`Error al subir "${file.name}": ${err.message}`);
       }
     }
-  
     // Actualiza los estados al final
     setNombreArchivo((prev) => [...prev, ...nuevosNombres]);
-    setDocumentoEvidencia((prev) => [...prev, ...nuevasURLs]);
+    setDocumentoEvidencia((prev) => [...prev, ...nuevasEvidencias]);
   };  
 
   // Add states for user data
@@ -82,6 +84,7 @@ function RegisterSchool({onRegistrationSuccess=()=>{}}) {
       tieneUSAER: "",
       numeroDocentes: "",
       estudiantesPorGrupo: "",
+      numeroDocentesEspeciales: "",
       controlAdministrativo: "",
       director: {
         nombre: "",
@@ -221,8 +224,8 @@ isSubmitting: Tracks whether the form is currently being submitted.
             numeroDocentes: Number(formData.escuela.numeroDocentes),
             estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
             necesidades: convertNecesidades(), 
-            //tieneUSAER: Boolean(formData.escuela.tieneUSAER)
-          }
+          },
+          documento: documentoEvidencia
         }),
       });
   
@@ -238,14 +241,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
     setIsSubmitting(false);
   }
 };
-      
-      
-
-
-  
-  
-  
-
+    
   const formacionDocente = [
     "Convivencia escolar / Cultura de paz / Valores",
     "Educación inclusiva",
@@ -666,7 +662,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
 <div className="heading">DATOS DE LA ESCUELA CICLO 2024-2025</div>
 <div className="form-single-column">
   <div className="form-group">
-    <label>Numero de estudiantes por grupo (en promedio)</label>
+    <label>Número de estudiantes por grupo (en promedio)</label>
     <input
       className="form-input"
       type="text"
