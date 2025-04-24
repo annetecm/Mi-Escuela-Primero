@@ -36,7 +36,7 @@ function LoginPage() {
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');
       } else if (data.tipo === 'escuela') {
-        navigate('/escuela/perfil');
+        navigate('/perfil/escuela');
       } else {
         navigate('/');
       }      

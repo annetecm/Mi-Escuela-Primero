@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg.Pool
 const bcrypt = require("bcrypt");
+const verifyToken = require('../middlewares/authMiddleware');
 
 router.use((req, res, next) => {
   console.log(`📡 ${req.method} ${req.originalUrl}`);
   next();
 });
-//  ESTA ES LA RUTA CORRECTA: POST /api/aliado
+// Registro
 router.post('/', async (req, res) => {
     console.log('📩 POST recibido en /api/aliado');
     console.log('🧾 Cuerpo recibido:', req.body);
@@ -27,7 +28,7 @@ router.post('/', async (req, res) => {
         documento
       } = req.body;
   
-      console.log('🎯 Datos recibidos:', JSON.stringify(req.body, null, 2));
+      console.log(' Datos recibidos:', JSON.stringify(req.body, null, 2));
   
       await client.query('BEGIN');
   
@@ -153,22 +154,50 @@ router.post('/', async (req, res) => {
   
       await client.query('COMMIT');
   
-      // ✅ Solo se manda una respuesta si todo sale bien
+      // Solo se manda una respuesta si todo sale bien
       return res.status(201).json({ message: 'Aliado registrado correctamente' });
   
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('❌ Error al registrar aliado:', error);
+      console.error('Error al registrar aliado:', error);
   
-      // ✅ Solo se manda una respuesta si hay error
+      // Solo se manda una respuesta si hay error
       if (!res.headersSent) {
         return res.status(500).json({ error: 'Error al registrar al aliado' });
       }
     } finally {
       client.release();
+    }  
+});
+
+router.get('/perfil', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        u.nombre, 
+        u."correoElectronico", 
+        a."tipoDeApoyo",
+        ARRAY_AGG(ap."caracteristicas") AS apoyos
+      FROM "Usuario" u
+      JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
+      LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
+      WHERE u."usuarioId" = $1
+      GROUP BY u.nombre, u."correoElectronico", a."tipoDeApoyo";
+    `, [usuarioId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado' });
     }
-    
-  });
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al obtener perfil de aliado:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
   module.exports = router;
 
   

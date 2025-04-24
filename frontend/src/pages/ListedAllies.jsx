@@ -51,7 +51,7 @@ export default function ListedAllies() {
         {menuVisible && (
           <nav className="sidebar">
             <ul>
-              <li onClick={() => navigate("/escuela/perfil")}>Perfil</li>
+              <li onClick={() => navigate("/perfil/escuela")}>Perfil</li>
               <li onClick={() => navigate("/listado/aliados")}>Mis Aliados</li>
               <li onClick={() => navigate("/logout")}>Cerrar sesión</li>
             </ul>
