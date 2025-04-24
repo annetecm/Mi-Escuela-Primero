@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import "../styles/ListedAllies.css"
 import logo from "../assets/logo1.png"
@@ -6,6 +6,19 @@ import logo from "../assets/logo1.png"
 export default function ListedSchools() {
   const [menuVisible, setMenuVisible] = useState(false)
   const toggleMenu = () => setMenuVisible(!menuVisible)
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("usuario"));
+    if (user?.id) {
+      fetch(`http://localhost:5000/api/matches/escuelas/${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          setEscuelas(data);
+        })
+        .catch(err => console.error("Error cargando escuelas:", err));
+    }
+  }, []);
+  
 
   const escuelas = [
     {

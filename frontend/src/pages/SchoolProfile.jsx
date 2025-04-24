@@ -1,8 +1,12 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import logo from "../assets/logo1.png"
 import "../styles/SchoolProfile.css"
 
-export default function Profile({ onEditClick }) {    const [menuVisible, setMenuVisible] = useState(false)
+export default function SchoolProfile() {    
+    const navigate = useNavigate();
+    const [menuVisible, setMenuVisible] = useState(true)
+
     const toggleMenu = () => setMenuVisible(!menuVisible)
   
     // Datos de ejemplo para la escuela y necesidades
@@ -22,21 +26,20 @@ export default function Profile({ onEditClick }) {    const [menuVisible, setMen
           <button className="menu-button" onClick={toggleMenu}>
             &#9776;
           </button>
-          <img src={logo} alt="Logo" className="logo" />
+          <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
         </header>
   
-        <div className="main-content">
+        <div className="main-layout">
           {/* Menú lateral */}
-          {menuVisible && (
-            <nav className="sidebar">
-              <ul>
-                <li>Perfil</li>
-                <li>Mis Aliados</li>
-                <li>Cerrar sesión</li>
-              </ul>
-            </nav>
-          )}
-  
+          <aside className={`sidebar ${menuVisible ? 'visible' : 'hidden'}`}>
+          <ul className="menu-list">
+            <li className="menu-item active" onClick={() => navigate('/escuela>/perfil')}>Perfil</li>
+            <li className="menu-item" onClick={() => navigate('/listado/aliados')}>Mis aliados</li>
+            <li className="menu-item" onClick={() => navigate('/logout')}>Cerrar sesión</li>
+          </ul>
+        </aside>
+            
+             
           {/* Contenido principal */}
           <main className="content">
             <h1 className="profile-title">Mi Perfil</h1>
@@ -45,13 +48,18 @@ export default function Profile({ onEditClick }) {    const [menuVisible, setMen
             <div className="profile-header">
               <div className="profile-header-left">
                 <h2 className="school-title">{escuela.nombre}</h2>
-                <button className="edit-button" onClick={onEditClick}>
+                <button className="edit-button" onClick={() => navigate('/editar/escuela')}>
                   <span className="edit-text">EDITAR INFORMACIÓN</span>
                   <span className="edit-icon">✏️</span>
                 </button>
               </div>
-              <div className="school-image-container">
-                <img src={escuela.imagen || "/placeholder.svg"} alt="Imagen de la escuela" className="school-image" />
+              <div className="profile-image-container">
+                <img src={escuela.imagen || "/placeholder.svg"} alt="Imagen de la escuela" className="school-image" 
+                onError={(e) => {
+                  e.target.src = '/placeholder.svg';
+                  e.target.onerror = null;
+                }}
+              />
               </div>
             </div>
               <div className="profile-details">

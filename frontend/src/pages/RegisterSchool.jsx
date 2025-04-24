@@ -1,9 +1,11 @@
 import "../styles/RegisterSchool.css"
+import { useNavigate } from "react-router-dom";
 import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
-function RegisterSchool({onRegistrationSuccess}) {
+function RegisterSchool({onRegistrationSuccess=()=>{}}) {
+  const navigate = useNavigate();
 
   const [documentoEvidencia, setDocumentoEvidencia] = useState([]);
   const [nombreArchivo, setNombreArchivo] = useState([]);
@@ -44,6 +46,8 @@ function RegisterSchool({onRegistrationSuccess}) {
         } else {
           throw new Error(data.reason || "Error al subir el documento");
         }
+
+        
       } catch (err) {
         console.error("❌ Error al subir documento:", err);
         alert(`Error al subir "${file.name}": ${err.message}`);
@@ -225,16 +229,18 @@ isSubmitting: Tracks whether the form is currently being submitted.
       const data = await response.json();
       console.log("Server response:", data); 
       if (!response.ok) throw new Error(data.error || "Registration failed");
+    
+    navigate("/registration-success");
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert(`Error: ${err.message}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
       
-      //alert("Registro exitoso. En espera de aprobación.");
-      onRegistrationSuccess();
-    } catch (err) {
-      console.error("Registration error:", err);
-      alert(`Error: ${err.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      
+
 
   
   

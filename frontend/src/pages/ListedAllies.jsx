@@ -1,10 +1,12 @@
-import { useState } from "react"
-import "../styles/ListedAllies.css"
-import logo from "../assets/logo1.png"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/ListedAllies.css";
+import logo from "../assets/logo1.png";
 
 export default function ListedAllies() {
   const [menuVisible, setMenuVisible] = useState(false)
   const toggleMenu = () => setMenuVisible(!menuVisible)
+  const navigate = useNavigate()
 
   // Datos de ejemplo para los aliados
   const aliados = [
@@ -44,14 +46,14 @@ export default function ListedAllies() {
         <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
       </header>
 
-      <div className="main-content">
+      <div className={`main-content ${menuVisible ? "menu-visible" : ""}`}>
         {/* Menú lateral */}
         {menuVisible && (
           <nav className="sidebar">
             <ul>
-              <li>Perfil</li>
-              <li>Mis Aliados</li>
-              <li>Cerrar sesión</li>
+              <li onClick={() => navigate("/escuela/perfil")}>Perfil</li>
+              <li onClick={() => navigate("/listado/aliados")}>Mis Aliados</li>
+              <li onClick={() => navigate("/logout")}>Cerrar sesión</li>
             </ul>
           </nav>
         )}
@@ -62,9 +64,11 @@ export default function ListedAllies() {
 
           <div className="cards-container">
             {aliados.map((aliado) => (
-              <div key={aliado.id} className="card">
+              <div
+               key={aliado.id} 
+               className="card">
                 <div className="card-image">
-                <img src={aliado.imagen} alt={aliado.nombre} />
+                <img src={aliado.imagen || "/placeholder.svg"} alt={aliado.nombre} />
                 </div>
                 <div className="card-info">
                   <h2 className="card-title">{aliado.nombre}</h2>
