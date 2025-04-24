@@ -14,7 +14,7 @@ const { obtainPriorities} = require("../utils/ponderaciones");
 
 // Register user and school
 router.post("/register", async (req, res) => {
-  console.log("Documento recibido:", documento);
+  
   console.log("Received data:", JSON.stringify(req.body, null, 2)); // Log incoming data
 
   const client = await pool.connect();
