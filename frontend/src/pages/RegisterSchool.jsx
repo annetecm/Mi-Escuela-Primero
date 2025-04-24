@@ -4,7 +4,9 @@ import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
+
 function RegisterSchool() {
+
   const navigate = useNavigate();
 
   const [documentoEvidencia, setDocumentoEvidencia] = useState([]);
@@ -51,6 +53,8 @@ function RegisterSchool() {
         } else {
           throw new Error(data.reason || "Error al subir el documento");
         }
+
+        
       } catch (err) {
         console.error(" Error al subir documento:", err);
         alert(`Error al subir "${file.name}": ${err.message}`);
@@ -241,7 +245,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
     setIsSubmitting(false);
   }
 };
-    
+
   const formacionDocente = [
     "Convivencia escolar / Cultura de paz / Valores",
     "Educación inclusiva",
