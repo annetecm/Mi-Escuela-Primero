@@ -111,11 +111,23 @@ function RegisterSchool() {
         personasCantidad: ""
       },
       apoyoPrevio: {
-
-        descripcion: "",
-
+        gobiernoMunicipal: { nombre: "", descripcion: "" },
+        gobiernoEstatal: { nombre: "", descripcion: "" },
+        gobiernoFederal: { nombre: "", descripcion: "" },
+        institucionesEducativas: { nombre: "", descripcion: "" },
+        osc: { nombre: "", descripcion: "" },
+        empresas: { nombre: "", descripcion: "" },
+        programas: { nombre: "", descripcion: "" }
       }
+      
     },
+    
+
+    
+
+    
+
+    
   
   });
 
@@ -131,6 +143,8 @@ function RegisterSchool() {
     transporte: [],
     juridico: []
   });
+
+  
 
 
   // Convert needsData to an arrray
@@ -174,6 +188,8 @@ isSubmitting: Tracks whether the form is currently being submitted.
   return finalNecesidades;
 };
 
+
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -203,6 +219,29 @@ isSubmitting: Tracks whether the form is currently being submitted.
 
     
     try {
+      const tiposMap = {
+        gobiernoMunicipal: "Gobierno Municipal",
+        gobiernoEstatal: "Gobierno Estatal",
+        gobiernoFederal: "Gobierno Federal",
+        institucionesEducativas: "Instituciones Educativas",
+        osc: "Organizaciones de la sociedad civil",
+        empresas: "Empresas",
+        programas: "Programas"
+      };
+  
+      const apoyoPrevioArray = Object.entries(formData.escuela.apoyoPrevio)
+        .filter(([_, datos]) => {
+          const nombre = (datos?.nombre ?? "").trim();
+          const descripcion = (datos?.descripcion ?? "").trim();
+          return nombre !== "" || descripcion !== "";
+        })
+        .map(([clave, datos]) => ({
+          tipo: tiposMap[clave],
+          nombre: datos?.nombre ?? "",
+          descripcion: datos?.descripcion ?? ""
+        }));
+      
+
       // console.log to verify the data being sent
       console.log("Submitting:", JSON.stringify({
         usuario: formData.usuario,
@@ -220,6 +259,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
         headers: {
           "Content-Type": "application/json",
         },
+        
         body: JSON.stringify({
           usuario: formData.usuario,
           escuela: {
@@ -228,8 +268,19 @@ isSubmitting: Tracks whether the form is currently being submitted.
             numeroDocentes: Number(formData.escuela.numeroDocentes),
             estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
             necesidades: convertNecesidades(), 
+            apoyoPrevio: apoyoPrevioArray
           },
-          documento: documentoEvidencia
+          documento: documentoEvidencia,
+          tramiteGobierno: tramitePendiente === "si"
+    ? {
+        descripcion: datosTramite.cual,
+        nivelGobierno: datosTramite.nivelGobierno,
+        instancia: datosTramite.instancia,
+        folioOficial: datosTramite.folio,
+        estado: "pendiente"
+    }
+    : undefined
+    
         }),
       });
   
@@ -720,89 +771,183 @@ isSubmitting: Tracks whether the form is currently being submitted.
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Municipal? ¿Sí o no?, ¿qué instancia y qué apoyo?
-    </label>
+ 
+  <div className="heading">APOYOS RECIBIDOS EN LOS ÚLTIMOS DOS CICLOS ESCOLARES</div>
+
+{/* Gobierno Municipal */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Municipal?</label>
+  <div className="form-subgroup">
+    <label>¿Qué instancia o dependencia?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoMunicipal.nombre"
+      value={formData.escuela.apoyoPrevio.gobiernoMunicipal.nombre}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Estatal? ¿Sí o no?, ¿qué instancia y qué apoyo?
-    </label>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoMunicipal.descripcion"
+      value={formData.escuela.apoyoPrevio.gobiernoMunicipal.descripcion}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Federal? ¿Sí o no?, ¿qué instancia y qué apoyo?
-    </label>
+</div>
+
+{/* Gobierno Estatal */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Estatal?</label>
+  <div className="form-subgroup">
+    <label>¿Qué instancia o dependencia?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoEstatal.nombre"
+      value={formData.escuela.apoyoPrevio.gobiernoEstatal.nombre}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo de Instituciones Educativas? ¿Sí o no?, ¿Cuál institución y qué apoyo?
-    </label>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoEstatal.descripcion"
+      value={formData.escuela.apoyoPrevio.gobiernoEstatal.descripcion}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo de Organizaciones de la sociedad civil? ¿Sí o no?, ¿Cuál OSC y qué apoyo?
-    </label>
+</div>
+
+{/* Gobierno Federal */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo del Gobierno Federal?</label>
+  <div className="form-subgroup">
+    <label>¿Qué instancia o dependencia?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoFederal.nombre"
+      value={formData.escuela.apoyoPrevio.gobiernoFederal.nombre}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      En los últimos dos ciclos escolares, ¿han recibido apoyo de Empresas? ¿Sí o no?, ¿Qué empresas y qué apoyo?
-    </label>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.gobiernoFederal.descripcion"
+      value={formData.escuela.apoyoPrevio.gobiernoFederal.descripcion}
       onChange={handleInputChange}
     />
   </div>
-  <div className="form-group">
-    <label>
-      ¿La escuela forma parte actualmente de algún programa? ¿Cuál?
-    </label>
+</div>
+
+{/* Instituciones Educativas */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo de Instituciones Educativas?</label>
+  <div className="form-subgroup">
+    <label>¿Qué institucion?</label>
     <input
       className="form-input"
       type="text"
-      name="escuela.apoyoPrevio.descripcion"
-      value={formData.escuela.apoyoPrevio.descripcion}
+      name="escuela.apoyoPrevio.institucionesEducativas.nombre"
+      value={formData.escuela.apoyoPrevio.institucionesEducativas.nombre}
       onChange={handleInputChange}
     />
+  </div>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.institucionesEducativas.descripcion"
+      value={formData.escuela.apoyoPrevio.institucionesEducativas.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+</div>
+
+{/* Organizaciones de la Sociedad Civil */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo de Organizaciones de la sociedad civil?</label>
+  <div className="form-subgroup">
+    <label>¿Qué organización?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.osc.nombre"
+      value={formData.escuela.apoyoPrevio.osc.nombre}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.osc.descripcion"
+      value={formData.escuela.apoyoPrevio.osc.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+</div>
+
+{/* Empresas */}
+<div className="form-group">
+  <label>En los últimos dos ciclos escolares, ¿han recibido apoyo de Empresas?</label>
+  <div className="form-subgroup">
+    <label>¿Qué empresa?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.empresas.nombre"
+      value={formData.escuela.apoyoPrevio.empresas.nombre}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibió?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.empresas.descripcion"
+      value={formData.escuela.apoyoPrevio.empresas.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+</div>
+
+{/* Programas */}
+<div className="form-group">
+  <label>¿La escuela forma parte actualmente de algún programa?</label>
+  <div className="form-subgroup">
+    <label>¿Qué programa?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.programas.nombre"
+      value={formData.escuela.apoyoPrevio.programas.nombre}
+      onChange={handleInputChange}
+    />
+  </div>
+  <div className="form-subgroup">
+    <label>¿Qué apoyo se recibe?</label>
+    <input
+      className="form-input"
+      type="text"
+      name="escuela.apoyoPrevio.programas.descripcion"
+      value={formData.escuela.apoyoPrevio.programas.descripcion}
+      onChange={handleInputChange}
+    />
+  </div>
+
   </div>
   <div className="form-group">
   <label htmlFor="tramite-pendiente">
