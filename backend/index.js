@@ -18,6 +18,7 @@ const uploadRouter = require('./rutas/evidence');
 const aliadoRouter = require('./rutas/aliado');
 const documentRouter= require('./rutas/documents');
 const conexionRouter = require('./rutas/conexion');
+const adminRouter = require('./rutas/admin');
 
 
 app.use('/api/auth', authRouter); 
@@ -26,10 +27,11 @@ app.use('/api', uploadRouter);
 app.use('/api/aliado', aliadoRouter);
 app.use('/api', documentRouter);
 app.use('/api', conexionRouter);
-
+app.use('/api/admin', adminRouter);
 
 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log("hola");
 });
