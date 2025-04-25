@@ -225,3 +225,26 @@
   color: #333;
   font-family: 'Montserrat', sans-serif;
 }
+.form-subgroup {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.form-subgroup label {
+  font-weight: 500;
+  font-size: 14px;
+  margin-right: 10px;
+  color: #000;
+  width: 200px;
+}
+
+.form-subgroup input {
+  flex: 1;
+}
+.form-subgroup {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

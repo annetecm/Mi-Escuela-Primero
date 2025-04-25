@@ -21,7 +21,7 @@ router.post("/register", async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const { usuario, escuela, documento } = req.body;
+    const { usuario, escuela, documento, tramiteGobierno } = req.body;
     console.log("Necesidades recibidas desde frontend:", escuela.necesidades);
 
 
@@ -109,23 +109,31 @@ router.post("/register", async (req, res) => {
     }
 
    // 8. Insert ApoyoPrevio (optional)
-if (escuela.apoyoPrevio?.descripcion) {
-  await client.query(
-    `INSERT INTO "ApoyoPrevio" ("CCT", "descripcion")
-     VALUES ($1, $2)`,
-    [CCT, escuela.apoyoPrevio.descripcion]
-  );
-}
-
+   if (Array.isArray(escuela.apoyoPrevio)) {
+    for (const apoyo of escuela.apoyoPrevio) {
+      await client.query(
+        `INSERT INTO "ApoyoPrevio" ("CCT", "tipo", "nombre", "descripcion")
+         VALUES ($1, $2, $3, $4)`,
+        [CCT, apoyo.tipo, apoyo.nombre || "", apoyo.descripcion]
+      );
+    }
+  }
+  
+  
     // 9. Insert TramiteGobierno (optional)
-    if (escuela.tramiteGobierno) {
-      const { instancia, estado, folioOficial, nivelGobierno, descripcion } = escuela.tramiteGobierno;
+    if (req.body.tramiteGobierno) {
+      const { instancia, estado, folioOficial, nivelGobierno, descripcion } = req.body.tramiteGobierno;
       await client.query(
         `INSERT INTO "TramiteGobierno" ("CCT", "instancia", "estado", "folioOficial", "nivelGobierno", "descripcion")
          VALUES ($1, $2, $3, $4, $5, $6)`,
         [CCT, instancia, estado, folioOficial, nivelGobierno, descripcion]
       );
     }
+  
+  
+
+    
+    
 
     // 10. Insert Supervisor (not optional)
     const {
