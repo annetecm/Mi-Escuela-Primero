@@ -8,6 +8,7 @@
   import EditSchool from './pages/EditSchool';
   import AllyMap from './pages/AllyMap';
   import ListedSchools from './pages/ListedSchools';
+  import ListedAllies from './pages/ListedAllies';
   import EditPhysical from './pages/EditPhysical';
   import SignOut from './pages/SignOut';
   import PrivateRoute from './rutas/PrivateRoute';
@@ -73,7 +74,7 @@
 
         {/* ESCUELA */}
         <Route
-          path="/perfil/escuela"
+          path="/escuela/perfil"
           element={
             <PrivateRoute allowedRoles={['escuela']}>
               <SchoolProfile />
@@ -96,6 +97,23 @@
             </PrivateRoute>
           }
         />
+         <Route
+        path="/listado/aliados"
+        element={
+          <PrivateRoute allowedRoles={['escuela']}>
+            <ListedAllies />
+          </PrivateRoute>
+        }
+        />
+
+      <Route
+        path="/evidencia/:id"
+        element={
+          <PrivateRoute allowedRoles={['aliado']}>
+            <EvidenceTimeline />
+          </PrivateRoute>
+        }
+      />
         <Route
           path="/tarjeta-escuela"
           element={

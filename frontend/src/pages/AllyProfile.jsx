@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo1.png';
+import aliado from '../assets/aliadoperfil.jpg';
 import "../styles/AllyProfile.css";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [menuVisible, setMenuVisible] = useState(true);
+  const [perfil, setPerfil] = useState(null);
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
-  const escuela = {
-    id: 1,
-    nombre: "Aliado 1",
-    imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCplsH2TEMpONjrzhN4tJ4xQJRZYRxMX1ILQ&s",
-    ubicacion: "Guadalajara",
-    correo: "aliado1@ejemplo.com",
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+  
+    fetch("http://localhost:5000/api/aliado/perfil", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => setPerfil(data))
+      .catch(err => console.error("Error al cargar perfil:", err));
+  }, []);
+  
+
+  if (!perfil) return <div className="allyprofile-main-content">Cargando perfil...</div>;
 
   return (
     <div className="allyprofile-container">
@@ -45,7 +56,7 @@ export default function Profile() {
             <div className="allyprofile-profile-card">
               <div className="allyprofile-profile-header">
                 <div className="allyprofile-profile-info">
-                  <h2 className="allyprofile-profile-name">{escuela.nombre}</h2>
+                  <h2 className="allyprofile-profile-name">{perfil.nombre}</h2>
                   <button className="allyprofile-edit-button" onClick={() => navigate('/editar/aliado')}>
                     <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
                     <span className="allyprofile-edit-icon">✏️</span>
@@ -54,7 +65,7 @@ export default function Profile() {
 
                 <div className="allyprofile-profile-image-container">
                   <img
-                    src={escuela.imagen || "/placeholder.svg"}
+                    src={aliado}
                     alt="Imagen del aliado"
                     className="allyprofile-profile-image"
                   />
@@ -64,10 +75,10 @@ export default function Profile() {
               <div className="allyprofile-profile-details">
                 <div className="allyprofile-detail-item">
                   <div className="allyprofile-detail-label">
-                    <span className="allyprofile-detail-icon">📍</span>
-                    <span className="allyprofile-detail-text">UBICACIÓN</span>
+                    <span className="allyprofile-detail-icon">📝</span>
+                    <span className="allyprofile-detail-text">DESCRIPCIÓN DEL APOYO A BRINDAR</span>
                   </div>
-                  <div className="allyprofile-detail-value">{escuela.ubicacion}</div>
+                  <div className="allyprofile-detail-value">{perfil.tipoDeApoyo}</div>
                 </div>
 
                 <div className="allyprofile-detail-item">
@@ -75,8 +86,22 @@ export default function Profile() {
                     <span className="allyprofile-detail-icon">✉️</span>
                     <span className="allyprofile-detail-text">CORREO</span>
                   </div>
-                  <div className="allyprofile-detail-value">{escuela.correo}</div>
+                  <div className="allyprofile-detail-value">{perfil.correoElectronico}</div>
                 </div>
+
+                {perfil.apoyos && perfil.apoyos.length > 0 && (
+                <div className="allyprofile-detail-item">
+                  <div className="allyprofile-detail-label">
+                    <span className="allyprofile-detail-icon">📌</span>
+                    <span className="allyprofile-detail-text">NECESIDADES QUE PUEDO APOYAR:</span>
+                  </div>
+                  <ul className="allyprofile-detail-value">
+                    {perfil.apoyos.map((apoyo, idx) => (
+                      <li key={idx}>{apoyo}</li>
+                    ))}
+                  </ul>
+                </div>
+                )}
               </div>
             </div>
           </div>

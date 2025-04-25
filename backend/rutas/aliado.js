@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg.Pool
 const bcrypt = require("bcrypt");
+const verifyToken = require('../middlewares/authMiddleware');
 
 router.use((req, res, next) => {
-  console.log(`📡 ${req.method} ${req.originalUrl}`);
+  console.log(` ${req.method} ${req.originalUrl}`);
   next();
 });
-//  ESTA ES LA RUTA CORRECTA: POST /api/aliado
+// Registro
 router.post('/', async (req, res) => {
     console.log('📩 POST recibido en /api/aliado');
     console.log('🧾 Cuerpo recibido:', req.body);
@@ -27,7 +28,7 @@ router.post('/', async (req, res) => {
         documento
       } = req.body;
   
-      console.log('🎯 Datos recibidos:', JSON.stringify(req.body, null, 2));
+      console.log(' Datos recibidos:', JSON.stringify(req.body, null, 2));
   
       await client.query('BEGIN');
   
@@ -153,22 +154,121 @@ router.post('/', async (req, res) => {
   
       await client.query('COMMIT');
   
-      // ✅ Solo se manda una respuesta si todo sale bien
+      // Solo se manda una respuesta si todo sale bien
       return res.status(201).json({ message: 'Aliado registrado correctamente' });
   
     } catch (error) {
       await client.query('ROLLBACK');
-      console.error('❌ Error al registrar aliado:', error);
+      console.error('Error al registrar aliado:', error);
   
-      // ✅ Solo se manda una respuesta si hay error
+      // Solo se manda una respuesta si hay error
       if (!res.headersSent) {
         return res.status(500).json({ error: 'Error al registrar al aliado' });
       }
     } finally {
       client.release();
+    }  
+});
+
+router.get('/perfil', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        u.nombre, 
+        u."correoElectronico", 
+        a."tipoDeApoyo",
+        ARRAY_AGG(ap."caracteristicas") AS apoyos
+      FROM "Usuario" u
+      JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
+      LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
+      WHERE u."usuarioId" = $1
+      GROUP BY u.nombre, u."correoElectronico", a."tipoDeApoyo";
+    `, [usuarioId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado' });
     }
-    
-  });
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al obtener perfil de aliado:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    // Obtener apoyos del aliado
+    const aliadoResult = await db.query(`
+      SELECT a."aliadoId", ARRAY_AGG(ap."caracteristicas") AS apoyos
+      FROM "Aliado" a
+      LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
+      WHERE a."usuarioId" = $1
+      GROUP BY a."aliadoId";
+    `, [usuarioId]);
+
+    if (aliadoResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado' });
+    }
+
+    const { apoyos } = aliadoResult.rows[0];
+
+    // Buscar TODAS las escuelas aprobadas con o sin coincidencias
+    const result = await db.query(`
+      SELECT 
+        u."nombre" AS nombre_escuela,
+        u."usuarioId",
+        e."CCT",
+        COALESCE(SUM(n."prioridad"), 0) AS puntaje,
+        COALESCE(STRING_AGG(n."nombre", ', '), '') AS coincidencias
+      FROM "Usuario" u
+      JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
+      LEFT JOIN "Necesidad" n 
+        ON n."CCT" = e."CCT"
+        AND n."nombre" = ANY($1)
+      WHERE u."estadoRegistro" = 'aprobado'
+      GROUP BY u."nombre", u."usuarioId", e."CCT"
+      ORDER BY puntaje DESC;
+    `, [apoyos]);
+
+    return res.json(result.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener escuelas recomendadas:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+//Endpoint sacar info de escuela para SchoolCard
+router.get('/escuela/:cct', async (req, res) => {
+  const { cct } = req.params;
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        u."nombre" AS nombre_escuela,
+        e."direccion",
+        ARRAY_AGG(n."nombre") AS necesidades
+      FROM "Escuela" e
+      JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
+      LEFT JOIN "Necesidad" n ON n."CCT" = e."CCT"
+      WHERE e."CCT" = $1
+      GROUP BY u."nombre", e."direccion";
+    `, [cct]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Escuela no encontrada' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Error al obtener datos de escuela:", err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
   module.exports = router;
 
   

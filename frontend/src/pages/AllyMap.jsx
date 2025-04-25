@@ -1,42 +1,29 @@
-"use client"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import "../styles/AllyMap.css"
 import logo from "../assets/logo1.png"
-import escuela from "../assets/escuelaLogo.png"
-
-const schools = [
-  {
-    name: "Nombre Escuela",
-    description: "Ejemplo sobre sinopsis y pequeño contexto sobre la escuela y sus problemáticas.",
-  },
-  {
-    name: "Nombre Escuela",
-    description: "Ejemplo sobre sinopsis y pequeño contexto sobre la escuela y sus problemáticas.",
-  },
-  {
-    name: "Nombre Escuela",
-    description: "Ejemplo sobre sinopsis y pequeño contexto sobre la escuela y sus problemáticas.",
-  },
-  {
-    name: "Nombre Escuela",
-    description: "Ejemplo sobre sinopsis y pequeño contexto sobre la escuela y sus problemáticas.",
-  },
-  {
-    name: "Nombre Escuela",
-    description: "Ejemplo sobre sinopsis y pequeño contexto sobre la escuela y sus problemáticas.",
-  },
-]
+import escuelaImg from "../assets/escuelaLogo.png"
 
 export default function AllyMap() {
   const navigate = useNavigate()
   const [menuVisible, setMenuVisible] = useState(false)
+  const [schools, setSchools] = useState([]);
   const toggleMenu = () => setMenuVisible(!menuVisible)
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/aliado/escuelas-recomendadas", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => setSchools(data))
+      .catch(err => console.error("Error al cargar escuelas:", err));
+  }, []);
   return (
     <div className={`allymap-container ${menuVisible ? "menu-visible" : ""}`}>
-      {/* Header */}
       <header className="allymap-header">
         <button className="allymap-menu-button" onClick={toggleMenu}>
           &#9776;
@@ -44,7 +31,6 @@ export default function AllyMap() {
         <img src={logo || "/placeholder.svg"} alt="Logo" className="allymap-logo" />
       </header>
 
-      {/* Menú del header - siempre renderizado pero visible según estado */}
       <nav className="allymap-sidebar" style={{ display: menuVisible ? "block" : "none" }}>
         <ul>
           <li onClick={() => navigate("/aliado/perfil")}>Perfil</li>
@@ -54,14 +40,12 @@ export default function AllyMap() {
         </ul>
       </nav>
 
-      {/* Contenido principal */}
       <div className="allymap-main-content allymap-container-row">
-        {/* Menú lateral de escuelas */}
         <div className="allymap-school-sidebar">
           <div className="allymap-search-bar">
             <input type="text" placeholder="Ingresa una ubicación" />
           </div>
-          <h3>Escuelas cerca de la ubicación ingresada</h3>
+          <h3>Escuelas compatibles con tus apoyos</h3>
           <div className="allymap-school-list">
             {schools.map((school, index) => (
               <button
@@ -69,18 +53,18 @@ export default function AllyMap() {
                 className="allymap-school-card"
                 onClick={() => navigate("/tarjeta-escuela", { state: { school } })}
               >
-                <img src={escuela || "/placeholder.svg"} alt="LogoEscuela" />
+                <img src={escuelaImg || "/placeholder.svg"} alt="LogoEscuela" />
                 <div className="allymap-school-info">
-                  {/* Título dentro de la tarjeta de cada escuela */}
-                  <h4 className="allymap-school-name">{school.name}</h4>
-                  <p>{school.description}</p>
+                <h4 className="allymap-school-name">{school.nombre_escuela}</h4>
+                {school.coincidencias && school.coincidencias.trim() !== '' && (
+                  <p><strong>Coincidencias:</strong> {school.coincidencias}</p>
+                )}
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Mapa */}
         <div className="allymap-map">
           <img
             src="https://img.freepik.com/foto-gratis/resumen-superficie-texturas-muro-piedra-hormigon-blanco_74190-8189.jpg"
@@ -90,5 +74,5 @@ export default function AllyMap() {
         </div>
       </div>
     </div>
-  )
+  );
 }
