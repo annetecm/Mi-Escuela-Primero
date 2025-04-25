@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const verifyToken = require('../middlewares/authMiddleware');
 
 router.use((req, res, next) => {
-  console.log(`📡 ${req.method} ${req.originalUrl}`);
+  console.log(` ${req.method} ${req.originalUrl}`);
   next();
 });
 // Registro
@@ -202,7 +202,7 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
   const usuarioId = req.usuario.usuarioId;
 
   try {
-    // 1. Obtener aliadoId y apoyos (características)
+    // Obtener apoyos del aliado
     const aliadoResult = await db.query(`
       SELECT a."aliadoId", ARRAY_AGG(ap."caracteristicas") AS apoyos
       FROM "Aliado" a
@@ -215,34 +215,60 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Aliado no encontrado' });
     }
 
-    const { aliadoId, apoyos } = aliadoResult.rows[0];
+    const { apoyos } = aliadoResult.rows[0];
 
-    if (!apoyos || apoyos.length === 0) {
-      return res.status(200).json([]); // No hay apoyos, no se puede recomendar nada
-    }
-
-    // 2. Buscar escuelas con necesidades que coincidan con los apoyos del aliado
-    const necesidadesResult = await db.query(`
+    // Buscar TODAS las escuelas aprobadas con o sin coincidencias
+    const result = await db.query(`
       SELECT 
-        n."CCT",
         u."nombre" AS nombre_escuela,
-        SUM(n."prioridad") AS puntaje,
-        STRING_AGG(n."nombre", ', ') AS coincidencias
-      FROM "Necesidad" n
-      JOIN "Escuela" e ON e."CCT" = n."CCT"
-      JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
-      WHERE n."nombre" = ANY($1)
-      GROUP BY n."CCT", u."nombre"
+        u."usuarioId",
+        e."CCT",
+        COALESCE(SUM(n."prioridad"), 0) AS puntaje,
+        COALESCE(STRING_AGG(n."nombre", ', '), '') AS coincidencias
+      FROM "Usuario" u
+      JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
+      LEFT JOIN "Necesidad" n 
+        ON n."CCT" = e."CCT"
+        AND n."nombre" = ANY($1)
+      WHERE u."estadoRegistro" = 'aprobado'
+      GROUP BY u."nombre", u."usuarioId", e."CCT"
       ORDER BY puntaje DESC;
     `, [apoyos]);
 
-    return res.json(necesidadesResult.rows);
+    return res.json(result.rows);
   } catch (err) {
     console.error('❌ Error al obtener escuelas recomendadas:', err);
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
+//Endpoint sacar info de escuela para SchoolCard
+router.get('/escuela/:cct', async (req, res) => {
+  const { cct } = req.params;
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        u."nombre" AS nombre_escuela,
+        e."direccion",
+        ARRAY_AGG(n."nombre") AS necesidades
+      FROM "Escuela" e
+      JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
+      LEFT JOIN "Necesidad" n ON n."CCT" = e."CCT"
+      WHERE e."CCT" = $1
+      GROUP BY u."nombre", e."direccion";
+    `, [cct]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Escuela no encontrada' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Error al obtener datos de escuela:", err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
   module.exports = router;
 
   
