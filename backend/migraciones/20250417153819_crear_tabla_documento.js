@@ -1,6 +1,7 @@
-exports.up = function(knex){
+exports.up = async function(knex){
+    await knex.raw('CREATE EXTENSION IF NOT EXISTS "pgcrypto"'); 
     return knex.schema.createTable('Documento',(table)=>{
-        table.increments('documentoId').primary();
+        table.uuid('documentoId').primary().defaultTo(knex.raw('gen_random_uuid()')); 
         table.string('tipo').notNullable();
         table.string('ruta').notNullable();
         table.string('fechaCarga').notNullable();

@@ -204,8 +204,8 @@ router.post("/register", async (req, res) => {
         const prioridad = obtainPriorities(necesidad.categoria, necesidad.nombre);
     
         await client.query(
-          `INSERT INTO "Necesidad" ("CCT", "documentoId", "categoria", "nombre", "prioridad")
-           VALUES ($1, NULL, $2, $3, $4)`,
+          `INSERT INTO "Necesidad" ("CCT", "categoria", "nombre", "prioridad")
+           VALUES ($1, $2, $3, $4)`,
           [CCT, necesidad.categoria, necesidad.nombre, prioridad]
         );
       }
