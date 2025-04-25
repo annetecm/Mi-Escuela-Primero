@@ -8,41 +8,17 @@ export default function ListedSchools() {
   const toggleMenu = () => setMenuVisible(!menuVisible)
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("usuario"));
-    if (user?.id) {
-      fetch(`http://localhost:5000/api/matches/escuelas/${user.id}`)
-        .then(res => res.json())
-        .then(data => {
-          setEscuelas(data);
-        })
-        .catch(err => console.error("Error cargando escuelas:", err));
-    }
-  }, []);
+    const token = localStorage.getItem("token");
   
-
-  const escuelas = [
-    {
-      id: 1,
-      nombre: "Escuela 1",
-      ubicacion: "Ciudad de México",
-      imagen:
-        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
-    },
-    {
-      id: 2,
-      nombre: "Escuela 2",
-      ubicacion: "Guadalajara",
-      imagen:
-        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
-    },
-    {
-      id: 3,
-      nombre: "Escuela 3",
-      ubicacion: "Monterrey",
-      imagen:
-        "https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg",
-    },
-  ]
+    fetch("http://localhost:5000/api/mis-conexiones", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setEscuelas(data);
+      })
+      .catch(err => console.error("Error cargando conexiones:", err));
+  }, []);
 
   const navigate = useNavigate()
 
@@ -74,29 +50,28 @@ export default function ListedSchools() {
           <h1 className="listedallies-title">Mis Escuelas</h1>
 
           <div className="listedallies-cards-container">
-            {escuelas.map((escuela) => (
-              <div
-                key={escuela.id}
-                className="listedallies-card"
-                onClick={() => navigate(`/aliado/evidencia/${escuela.id}`)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="listedallies-card-image">
-                  <img src={escuela.imagen || "/placeholder.svg"} alt={escuela.nombre} />
-                </div>
-                <div className="listedallies-card-info">
-                  <h2 className="listedallies-card-title">{escuela.nombre}</h2>
-                  <div className="listedallies-card-location">
-                    <span className="listedallies-location-icon">📍</span>
-                    <span>{escuela.ubicacion}</span>
-                  </div>
-                  <button className="listedallies-message-button" onClick={(e) => e.stopPropagation()}>
-                    <span className="listedallies-message-icon">💬</span>
-                    <span>Enviar mensaje</span>
-                  </button>
-                </div>
+          {escuelas.map((conexion) => (
+          <div
+            key={conexion.conexionId}
+            className="listedallies-card"
+            onClick={() => navigate(`/evidencia/${conexion.conexionId}`)}
+            style={{ cursor: "pointer" }}
+          >
+            <div className="listedallies-card-image">
+              <img
+                src="https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg"
+                alt={conexion.nombreEscuela}
+              />
+            </div>
+            <div className="listedallies-card-info">
+              <h2 className="listedallies-card-title">{conexion.nombreEscuela}</h2>
+              <div className="listedallies-card-location">
+                <span className="listedallies-location-icon">📍</span>
+                <span>{conexion.necesidad}</span> {/* ← Aquí pones la necesidad */}
               </div>
-            ))}
+            </div>
+          </div>
+          ))}
           </div>
         </main>
       </div>

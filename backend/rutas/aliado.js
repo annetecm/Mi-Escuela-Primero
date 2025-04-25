@@ -202,22 +202,23 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
   const usuarioId = req.usuario.usuarioId;
 
   try {
-    // Obtener apoyos del aliado
-    const aliadoResult = await db.query(`
-      SELECT a."aliadoId", ARRAY_AGG(ap."caracteristicas") AS apoyos
+    // 🔹 1. PRIMERO: obtener apoyos del aliado
+    const apoyosResult = await db.query(`
+      SELECT ARRAY_AGG(ap."caracteristicas") AS apoyos
       FROM "Aliado" a
       LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
       WHERE a."usuarioId" = $1
-      GROUP BY a."aliadoId";
+      GROUP BY a."aliadoId"
     `, [usuarioId]);
 
-    if (aliadoResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Aliado no encontrado' });
+    if (apoyosResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado o no tiene apoyos registrados' });
     }
 
-    const { apoyos } = aliadoResult.rows[0];
+    const { apoyos } = apoyosResult.rows[0];
+    const apoyoArray = Array.isArray(apoyos) ? apoyos : [];
 
-    // Buscar TODAS las escuelas aprobadas con o sin coincidencias
+    // 🔹 2. SEGUNDO: ahora sí buscar las escuelas usando esos apoyos
     const result = await db.query(`
       SELECT 
         u."nombre" AS nombre_escuela,
@@ -229,11 +230,15 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
       JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
       LEFT JOIN "Necesidad" n 
         ON n."CCT" = e."CCT"
-        AND n."nombre" = ANY($1)
+        AND n."nombre" = ANY($1::text[])
+        AND n."necesidadId" NOT IN (
+          SELECT "necesidadId" FROM "Conexion"
+          WHERE "estado" IN ('pendiente', 'finalizado')
+        )
       WHERE u."estadoRegistro" = 'aprobado'
       GROUP BY u."nombre", u."usuarioId", e."CCT"
       ORDER BY puntaje DESC;
-    `, [apoyos]);
+    `, [apoyoArray]);
 
     return res.json(result.rows);
   } catch (err) {
@@ -251,12 +256,13 @@ router.get('/escuela/:cct', async (req, res) => {
       SELECT 
         u."nombre" AS nombre_escuela,
         e."direccion",
+        e."nivelEducativo",
         ARRAY_AGG(n."nombre") AS necesidades
       FROM "Escuela" e
       JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
       LEFT JOIN "Necesidad" n ON n."CCT" = e."CCT"
       WHERE e."CCT" = $1
-      GROUP BY u."nombre", e."direccion";
+      GROUP BY u."nombre", e."direccion", e."nivelEducativo";
     `, [cct]);
 
     if (result.rows.length === 0) {
@@ -269,6 +275,41 @@ router.get('/escuela/:cct', async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
+//Para sacar ids necesidades de la escuela se usa en el match
+router.get('/ids-necesidades/:cct', verifyToken, async (req, res) => {
+  const { cct } = req.params;
+  try {
+    const result = await db.query(`
+      SELECT "necesidadId", "nombre" FROM "Necesidad"
+      WHERE "CCT" = $1
+    `, [cct]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener necesidades:", err);
+    res.status(500).json({ error: "Error al obtener necesidades" });
+  }
+});
+
+//Para sacar id de apoyos del aliado se usa en el match
+router.get('/ids-apoyos', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+  try {
+    const result = await db.query(`
+      SELECT ap."apoyoId", ap."caracteristicas"
+      FROM "Apoyo" ap
+      JOIN "Aliado" a ON ap."aliadoId" = a."aliadoId"
+      WHERE a."usuarioId" = $1
+    `, [usuarioId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error al obtener apoyos:", err);
+    res.status(500).json({ error: "Error al obtener apoyos" });
+  }
+});
+
+
+
   module.exports = router;
 
   
