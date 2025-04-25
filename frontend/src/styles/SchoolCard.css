@@ -26,15 +26,16 @@
 }
 
 .schoolcard-sidebar {
-  position: absolute;
+  position: fixed;
   top: 60px;
   left: 0;
   width: 200px;
+  height: calc(100vh - 60px);
   background-color: #e8f5e9;
   border-bottom: 1px solid #b2dfdb;
   z-index: 99;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
+  padding: 20px;
 }
 
 .schoolcard-sidebar ul {
@@ -86,12 +87,11 @@ body, html, #root {
   padding: 40px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 60%; /* <- lo importante aquí */
+  width: 60%;
   max-width: 1000px;
   flex-wrap: wrap;
-  height: 350px;
 }
 
 .schoolcard-school-content {
@@ -107,14 +107,17 @@ body, html, #root {
 }
 
 .schoolcard-school-subtitle {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 10px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 15px 0 8px;
 }
 
 .schoolcard-school-list {
-  margin-left: 20px;
-  color: #555;
+  margin-top: 10px;
+  padding-left: 20px;
+  color: #333;
+  line-height: 1.6;
 }
 
 .schoolcard-school-info-card {
@@ -140,7 +143,7 @@ body, html, #root {
 
 .schoolcard-school-image img {
   width: 220px;
-  height: 150px;
+  height: auto;
   object-fit: cover;
   border-radius: 10px;
   margin-bottom: 15px;
@@ -171,3 +174,16 @@ body, html, #root {
   color: #444;
 }
 
+.schoolcard-school-meta {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.schoolcard-img {
+  width: 220px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}

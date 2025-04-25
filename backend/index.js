@@ -17,6 +17,7 @@ const escuelaRouter = require('./rutas/escuela');
 const uploadRouter = require('./rutas/evidence');
 const aliadoRouter = require('./rutas/aliado');
 const documentRouter= require('./rutas/documents');
+const conexionRouter = require('./rutas/conexion');
 const adminRouter = require('./rutas/admin');
 
 
@@ -25,6 +26,7 @@ app.use('/api/escuela', escuelaRouter);
 app.use('/api', uploadRouter);
 app.use('/api/aliado', aliadoRouter);
 app.use('/api', documentRouter);
+app.use('/api', conexionRouter);
 app.use('/api/admin', adminRouter);
 
 
