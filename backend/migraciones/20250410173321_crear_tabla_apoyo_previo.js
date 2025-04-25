@@ -5,6 +5,8 @@ exports.up = function(knex) {
     table.string("nombre").notNullable();
     table.text("descripcion").notNullable();
   });
+
+  table.primary(["CCT", "tipo"]);
 };
 
 exports.down = function(knex) {
