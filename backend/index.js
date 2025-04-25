@@ -17,6 +17,7 @@ const escuelaRouter = require('./rutas/escuela');
 const uploadRouter = require('./rutas/evidence');
 const aliadoRouter = require('./rutas/aliado');
 const documentRouter= require('./rutas/documents');
+const adminRouter = require('./rutas/admin');
 
 
 app.use('/api/auth', authRouter); 
@@ -24,10 +25,11 @@ app.use('/api/escuela', escuelaRouter);
 app.use('/api', uploadRouter);
 app.use('/api/aliado', aliadoRouter);
 app.use('/api', documentRouter);
-
+app.use('/api/admin', adminRouter);
 
 
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log("hola");
 });
