@@ -1,7 +1,6 @@
 ﻿# Node modules
 **/node_modules/
 /node_modules/
-/node_modules/
 
 # Environment files
 /backend/.env
