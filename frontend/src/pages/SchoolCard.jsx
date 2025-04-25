@@ -16,40 +16,27 @@ export default function SchoolCard() {
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const handleButtonClick = () => setButtonText("¡Se hizo match!");
 
-  // Simular carga de datos desde "backend"
   useEffect(() => {
-    if (school) {
-      // Simulación de llamada a la API
-      setTimeout(() => {
-        setSchoolInfo({
-          name: school.name,
-          needs: [
-            "Infraestructura básica",
-            "Material didáctico",
-            "Formación docente",
-            "Alimentación escolar",
-            "Mobiliario para aulas"
-          ]
-        });
-      }, 500); // simula tiempo de espera
+    if (school?.CCT) {
+      const token = localStorage.getItem("token");
+  
+      fetch(`http://localhost:5000/api/aliado/escuela/${school.CCT}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          setSchoolInfo({
+            name: data.nombre_escuela,
+            direccion: data.direccion,
+            needs: data.necesidades || []
+          });
+        })
+        .catch(err => console.error("❌ Error al obtener escuela:", err));
     }
   }, [school]);
-
-  if (!school) {
-    return (
-      <div className="schoolcard-container">
-        <header className="schoolcard-header">
-          <button className="schoolcard-menu-button" onClick={toggleMenu}>
-            &#9776;
-          </button>
-          <img src={logo} alt="Logo" className="schoolcard-logo" />
-        </header>
-        <div className="schoolcard-main-content">
-          <h2>No se encontró información de la escuela 🏫</h2>
-        </div>
-      </div>
-    );
-  }
+  
 
   return (
     <div className="schoolcard-container">
@@ -77,7 +64,9 @@ export default function SchoolCard() {
         <div className="schoolcard-school-card">
           <div className="schoolcard-school-content">
             <h2 className="schoolcard-school-title">{schoolInfo ? schoolInfo.name : 'Cargando...'}</h2>
-
+            {schoolInfo?.direccion && (
+              <p className="schoolcard-school-address"><strong>Dirección:</strong> {schoolInfo.direccion}</p>
+            )}
             <h3 className="schoolcard-school-subtitle">Necesidades:</h3>
             <ol className="schoolcard-school-list">
               {(schoolInfo?.needs || []).map((need, idx) => (

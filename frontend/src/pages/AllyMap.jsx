@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import "../styles/AllyMap.css"
 import logo from "../assets/logo1.png"
-import escuela from "../assets/escuelaLogo.png"
+import escuelaImg from "../assets/escuelaLogo.png"
 
 export default function AllyMap() {
   const navigate = useNavigate()
@@ -55,9 +55,10 @@ export default function AllyMap() {
               >
                 <img src={escuelaImg || "/placeholder.svg"} alt="LogoEscuela" />
                 <div className="allymap-school-info">
-                  <h4 className="allymap-school-name">{school.nombre_escuela}</h4>
-                  <p><strong>Puntaje:</strong> {school.puntaje}</p>
+                <h4 className="allymap-school-name">{school.nombre_escuela}</h4>
+                {school.coincidencias && school.coincidencias.trim() !== '' && (
                   <p><strong>Coincidencias:</strong> {school.coincidencias}</p>
+                )}
                 </div>
               </button>
             ))}
