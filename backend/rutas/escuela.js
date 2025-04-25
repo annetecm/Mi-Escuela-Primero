@@ -1,7 +1,7 @@
 const router = require("express").Router(); 
 const pool = require("../db");
 const bcrypt = require("bcrypt");
-
+const verifyToken = require("../middlewares/authMiddleware");
 
 // Test route for debugging
 router.post("/test-route", (req, res) => {
@@ -255,6 +255,41 @@ router.post("/register", async (req, res) => {
   } finally {
     client.release();
   }
+
+
 });
+
+
+
+router.get("/perfil", verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.nombre, 
+        u."correoElectronico", 
+        e."direccion", 
+        e."nivelEducativo",
+        e."CCT",
+        ARRAY_AGG(n."nombre") AS necesidades
+      FROM "Usuario" u
+      JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
+      LEFT JOIN "Necesidad" n ON n."CCT" = e."CCT"
+      WHERE u."usuarioId" = $1
+      GROUP BY u.nombre, u."correoElectronico", e."direccion", e."nivelEducativo", e."CCT"
+    `, [usuarioId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Escuela no encontrada" });
+    }
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error("❌ Error al obtener perfil de escuela:", err);
+    return res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 
 module.exports = router;

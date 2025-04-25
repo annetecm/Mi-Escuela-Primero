@@ -36,11 +36,13 @@ function LoginPage() {
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');
       } else if (data.tipo === 'escuela') {
-        navigate('/perfil/escuela');
+        navigate('escuela/perfil');
+      }else if(data.tipo === 'administrador'){
+        navigate('/administrador/perfil');
       } else {
         navigate('/');
-      }      
-
+      } 
+      
     } catch (err) {
       setError(err.message);
     }
