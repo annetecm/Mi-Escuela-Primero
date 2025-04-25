@@ -198,6 +198,51 @@ router.get('/perfil', verifyToken, async (req, res) => {
   }
 });
 
+router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    // 1. Obtener aliadoId y apoyos (características)
+    const aliadoResult = await db.query(`
+      SELECT a."aliadoId", ARRAY_AGG(ap."caracteristicas") AS apoyos
+      FROM "Aliado" a
+      LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
+      WHERE a."usuarioId" = $1
+      GROUP BY a."aliadoId";
+    `, [usuarioId]);
+
+    if (aliadoResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado' });
+    }
+
+    const { aliadoId, apoyos } = aliadoResult.rows[0];
+
+    if (!apoyos || apoyos.length === 0) {
+      return res.status(200).json([]); // No hay apoyos, no se puede recomendar nada
+    }
+
+    // 2. Buscar escuelas con necesidades que coincidan con los apoyos del aliado
+    const necesidadesResult = await db.query(`
+      SELECT 
+        n."CCT",
+        u."nombre" AS nombre_escuela,
+        SUM(n."prioridad") AS puntaje,
+        STRING_AGG(n."nombre", ', ') AS coincidencias
+      FROM "Necesidad" n
+      JOIN "Escuela" e ON e."CCT" = n."CCT"
+      JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
+      WHERE n."nombre" = ANY($1)
+      GROUP BY n."CCT", u."nombre"
+      ORDER BY puntaje DESC;
+    `, [apoyos]);
+
+    return res.json(necesidadesResult.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener escuelas recomendadas:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
   module.exports = router;
 
   
