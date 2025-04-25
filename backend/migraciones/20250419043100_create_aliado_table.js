@@ -3,7 +3,7 @@
 exports.up = async function(knex) {
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
   return knex.schema.createTable("Aliado", (table) => {
-    table.uuid("aliadoId").primary().defaultTo(knex.raw("gen_random_uuid()"));
+    table.text("aliadoId").primary();
     table.string("tipoDeApoyo").notNullable();
     table.uuid("usuarioId").notNullable().references("usuarioId").inTable("Usuario").onDelete("CASCADE");
     table.string("tipoId").notNullable(); // CURP o RFC
