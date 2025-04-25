@@ -14,6 +14,8 @@
   import PrivateRoute from './rutas/PrivateRoute';
   import EvidenceTimeline from './pages/EvidenceTimeline';
   import SchoolCard from './pages/SchoolCard';
+  import AdminPage from './pages/PageAdmin';
+  import RegisterAdmin from './pages/RegisterAdmin';
 
   function App() {
     return (
@@ -22,6 +24,7 @@
         <Route path="/register-school" element={<RegisterSchool />} />
         <Route path="/register-ally" element={<RegisterAlly />} />
         <Route path="/registration-success" element={<AllyRegSuccess />} />
+        <Route path="/register-admin" element={<RegisterAdmin />} />
 
         {/* ALIADO */}
         <Route path="/aliado/perfil" element={
@@ -50,6 +53,21 @@
           element={
             <PrivateRoute allowedRoles={['aliado']}>
               <EditPhysical />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Administrador todavia no esta */}
+        <Route path="/administrador/perfil" element={
+        <PrivateRoute allowedRoles={['administrador']}>
+          <AdminPage/>
+        </PrivateRoute>
+        } />
+        <Route
+          path="/administrador/page"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <AllyMap />
             </PrivateRoute>
           }
         />

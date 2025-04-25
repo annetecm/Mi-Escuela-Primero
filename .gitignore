@@ -1,39 +1,17 @@
-﻿#backend/.env
-#backend/*.log
-#backend/dist/
-#backend/dist-ssr
-#backend/*.local
-#backend/node_modules
-#backend/logs
-#backend/*.log
-#backend/npm-debug.log*
-#backend/yarn-debug.log*
-#backend/backend/yarn-error.log*
-#backend/pnpm-debug.log*
-#backend/lerna-debug.log*
+﻿# Node modules
+**/node_modules/
+/node_modules/
 
-#frontend/.env
-#frontend/*.log
-#frontend/dist/
-#frontend/dist-ssr
-#frontend/*.local
-#frontend/node_modules
-#frontend/logs
-#frontend/*.log
-#frontend/npm-debug.log*
-#frontend/yarn-debug.log*
-#frontend/yarn-error.log*
-#frontend/pnpm-debug.log*
-#frontend/lerna-debug.log*
-
+# Environment files
 /backend/.env
-.env
-*.log
-dist/
-dist-ssr
 *.local
-node_modules/
-logs
+
+# Build output
+dist/
+dist-ssr/
+
+# Logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -44,8 +22,10 @@ lerna-debug.log*
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+
+# Visual Studio
 *.suo
 *.ntvs*
 *.njsproj

@@ -37,10 +37,12 @@ function LoginPage() {
         navigate('/aliado/perfil');
       } else if (data.tipo === 'escuela') {
         navigate('/perfil/escuela');
+      }else if(data.tipo === 'administrador'){
+        navigate('/administrador/perfil');
       } else {
         navigate('/');
-      }      
-
+      } 
+      
     } catch (err) {
       setError(err.message);
     }
