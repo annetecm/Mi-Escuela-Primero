@@ -64,10 +64,18 @@
         </PrivateRoute>
         } />
         <Route
-          path="/administrador/page"
+          path="/administrador/escuelas"
           element={
             <PrivateRoute allowedRoles={['administrador']}>
-              <AllyMap />
+              <ListedSchools />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/aliados"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAllies />
             </PrivateRoute>
           }
         />

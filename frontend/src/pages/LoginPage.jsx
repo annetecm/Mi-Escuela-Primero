@@ -33,6 +33,8 @@ function LoginPage() {
 
       login(data.token, data.tipo);
 
+      console.log(data.tipo);
+
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');
       } else if (data.tipo === 'escuela') {

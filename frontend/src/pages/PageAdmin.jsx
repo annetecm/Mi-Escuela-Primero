@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/PageAdmin.css';
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
+import { useNavigate } from "react-router-dom"
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('aliados');
+  const navigate = useNavigate()
   const [showMonitoreoMenu, setShowMonitoreoMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [aliados, setAliados] = useState([]);
@@ -30,39 +31,70 @@ const AdminPage = () => {
     };
   }, [monitoreoMenuRef, createMenuRef]);
 
-  // Simulación de obtención de datos desde la base de datos
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // En un caso real, estas serían llamadas a una API o base de datos
-        // Simular una petición a la API
-        await new Promise(resolve => setTimeout(resolve, 800));
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      fetch("http://localhost:5000/api/admin/perfil/admin", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          setAdminData(prevState => ({
+            ...prevState,
+            nombre: data.nombre || 'Administrador'
+          }));
+        })
+        .catch(err => {
+          console.error("Error al cargar perfil:", err);
+          setAdminData(prevState => ({
+            ...prevState,
+            nombre: 'Administrador'
+          }));
+        });
+  }, []);
+    
+  // Perfiles no aprobados
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+      if (!token) return;
+
+      fetch("http://localhost:5000/api/admin/fetch/noAprobado", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         
-        // default
-        const datosAliados = [
-          { id: 1, nombre: 'Aliado1', telefono: '1234567', correo: 'aliado@example', rfc: 'ASDFG' },
-          { id: 2, nombre: 'Aliado2', telefono: '1234567', correo: 'aliado@example', rfc: 'ASDFG' },
-          { id: 3, nombre: 'Aliado3', telefono: '1234567', correo: 'aliado@example', rfc: 'ASDFG' },
-          { id: 4, nombre: 'Aliado4', telefono: '1234567', correo: 'aliado@example', rfc: 'ASDFG' },
-          { id: 5, nombre: 'Aliado5', telefono: '1234567', correo: 'aliado@example', rfc: 'ASDFG' },
-        ];
-        
-        const datosAdmin = {
-          nombre: 'Nombre administrador',
-          avatarUrl: profile // En un caso real sería la URL de la imagen del administrador
-        };
-        
-        setAliados(datosAliados);
-        setAdminData(datosAdmin);
+      .then(data => {
+        // Mapeamos los datos para que coincidan con la estructura esperada
+        const perfilesNoAprobados = data.map(perfil => ({
+          nombre: perfil.nombre_usuario,
+          correo: perfil.correo_usuario || 'No especificado',
+          identificador: perfil.identificador || 'No aplica',
+          tipoUsuario: perfil.tipo_usuario,
+          Estado:'Pendiente'
+        }));
+        setAliados(perfilesNoAprobados);
         setIsLoading(false);
-      } catch (error) {
+      })
+      .catch(error => {
         console.error('Error al obtener datos:', error);
         setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
+      });
+}, []);
 
   const handleMonitoreoMenuToggle = () => {
     setShowMonitoreoMenu(!showMonitoreoMenu);
@@ -97,7 +129,7 @@ const AdminPage = () => {
           <h1 className="admin-header-title">Panel de control</h1>
         </div>
         <div className="admin-info">
-          <img src={adminData.avatarUrl} alt="Admin" className="admin-avatar" />
+          <img src= {profile} alt="Admin" className="admin-avatar" />
           <span className="admin-name">{adminData.nombre}</span>
         </div>
       </header>
@@ -128,8 +160,8 @@ const AdminPage = () => {
             </div>
 
           <button 
-            className={`admin-menu-button ${activeTab === 'escuelas' ? 'active' : ''}`}
-            onClick={() => setActiveTab('escuelas')}
+            className={`admin-menu-button`}
+            onClick={() => navigate('/administrador/escuelas')}
           >
             <div className="admin-button-content">
               <span>Escuelas</span>
@@ -138,8 +170,8 @@ const AdminPage = () => {
           </button>
           
           <button 
-            className={`admin-menu-button ${activeTab === 'aliados' ? 'active' : ''}`}
-            onClick={() => setActiveTab('aliados')}
+            className={`admin-menu-button`}
+            onClick={() => navigate('/administrador/aliados')}
           >
             <div className="admin-button-content">
               <span>Aliados</span>
@@ -172,7 +204,8 @@ const AdminPage = () => {
         {/* Content Area */}
         <div className="admin-content-area">
           <div className="admin-table-container">
-            <h2 className="admin-table-title">Cuentas de aliado activas</h2>
+            <h2 className="admin-table-title">Cuentas sin aprobar</h2>
+            {/*Cambiar todo a que den los no aprobados*/}
             
             <table className="admin-data-table">
               <thead>
@@ -180,16 +213,18 @@ const AdminPage = () => {
                   <th>Nombre</th>
                   <th>Teléfono</th>
                   <th>Correo</th>
-                  <th>RFC</th>
+                  <th>Identificador</th>
+                  <th>Tipo de Usuario</th>
+                  <th>Estado de Usuario</th>
                 </tr>
               </thead>
               <tbody>
                 {aliados.map(aliado => (
-                  <tr key={aliado.id}>
-                    <td className='admin-aliado-name'>{aliado.nombre}</td>
-                    <td>{aliado.telefono}</td>
-                    <td>{aliado.correo}</td>
-                    <td className='admin-RFC'>{aliado.rfc}</td>
+                  <tr key={aliado.nombre}>
+                    <td className='admin-aliado-name'>{aliado.correo}</td>
+                    <td className='admin-RFC'>{aliado.identificador}</td>
+                    <td>{aliado.tipoUsuario}</td>
+                    <td>{aliado.Estado}</td>
                   </tr>
                 ))}
               </tbody>
