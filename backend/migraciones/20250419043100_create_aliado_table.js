@@ -6,7 +6,7 @@ exports.up = async function(knex) {
     table.text("aliadoId").primary();
     table.string("tipoDeApoyo").notNullable();
     table.uuid("usuarioId").notNullable().references("usuarioId").inTable("Usuario").onDelete("CASCADE");
-    table.string("tipoId").notNullable(); // CURP o RFC
+    
   });
 };
 
