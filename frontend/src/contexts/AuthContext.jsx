@@ -12,21 +12,24 @@ export const AuthProvider = ({ children }) => {
     if (token && tipo) {
       setIsLoggedIn(true);
       setUserType(tipo);
+    } else {
+      setIsLoggedIn(false);
+      setUserType(null);
     }
   }, []);
-  
+
   const login = (token, type) => {
     localStorage.setItem('token', token);
     localStorage.setItem('tipoUsuario', type);
-    setUserType(type);
     setIsLoggedIn(true);
+    setUserType(type);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('tipoUsuario');
-    setUserType(null);
     setIsLoggedIn(false);
+    setUserType(null);
   };
 
   return (
@@ -37,3 +40,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
+
