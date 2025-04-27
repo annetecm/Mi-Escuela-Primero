@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const verifyToken = require('../middlewares/authMiddleware');
+const verifyToken  = require('../middlewares/authMiddleware');
 
 // Crear conexiones entre aliado y escuela (match)
 router.post('/conexion', verifyToken, async (req, res) => {

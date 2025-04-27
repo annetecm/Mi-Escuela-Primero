@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // pg.Pool
 const bcrypt = require("bcrypt");
-const verifyToken = require('../middlewares/authMiddleware');
+const  verifyToken  = require("../middlewares/authMiddleware");
 
 router.use((req, res, next) => {
   console.log(` ${req.method} ${req.originalUrl}`);

@@ -14,7 +14,7 @@ const AdminPage = () => {
   const monitoreoMenuRef = useRef(null);
   const createMenuRef = useRef(null);
   
-  // Efecto para cerrar menús al hacer clic fuera de ellos
+  // Cerrar menús al hacer clic fuera de ellos
   useEffect(() => {
     function handleClickOutside(event) {
       if (monitoreoMenuRef.current && !monitoreoMenuRef.current.contains(event.target)) {
@@ -31,6 +31,7 @@ const AdminPage = () => {
     };
   }, [monitoreoMenuRef, createMenuRef]);
 
+  //get del nombre del administrador
   useEffect(() => {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -61,59 +62,91 @@ const AdminPage = () => {
         });
   }, []);
     
-  // Perfiles no aprobados
-  useEffect(() => {
+  // Función para obtener aliados no aprobados
+  const fetchAliados = async () => {
     const token = localStorage.getItem("token");
-      if (!token) return;
-
-      fetch("http://localhost:5000/api/admin/fetch/noAprobado", {
+    if (!token) return;
+    //ignorar error si no hay pendientes
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/fetch/noAprobado", {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        
-      .then(data => {
-        // Mapeamos los datos para que coincidan con la estructura esperada
-        const perfilesNoAprobados = data.map(perfil => ({
-          nombre: perfil.nombre_usuario,
-          correo: perfil.correo_usuario || 'No especificado',
-          identificador: perfil.identificador || 'No aplica',
-          tipoUsuario: perfil.tipo_usuario,
-          Estado:'Pendiente'
-        }));
-        setAliados(perfilesNoAprobados);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error al obtener datos:', error);
-        setIsLoading(false);
+          Authorization: `Bearer ${token}`,
+        },
       });
-}, []);
+
+      if (!res.ok) {
+        setAliados([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      const perfilesNoAprobados = data.map((perfil) => ({
+        nombre: perfil.nombre_usuario || "Sin nombre",
+        correo: perfil.correo_usuario || "Correo no especificado",
+        identificador: perfil.identificador || "Identificador no disponible",
+        tipoUsuario: perfil.tipo_usuario || "Tipo no definido",
+        Estado: perfil.estado || "Estado desconocido",
+      }));
+      setAliados(perfilesNoAprobados);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error al obtener datos:", error);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAliados();
+  }, []);
 
   const handleMonitoreoMenuToggle = () => {
     setShowMonitoreoMenu(!showMonitoreoMenu);
   };
 
-  const handleCreateMenuToggle = () => {
+  const handleCreateMenuToggle = (e) => {
+    e.stopPropagation();
     setShowCreateMenu(!showCreateMenu);
   };
 
-  const handleCreateAliadoClick = () => {
-    // Lógica para crear aliado
-    console.log('Crear aliado');
-    setShowCreateMenu(false);
-  };
+  // Llamar a fetchAliados después de aprobar un usuario
+  const handleAprobarClick = async (identificador, nombre) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("Token no encontrado");
+      return;
+    }
 
-  const handleCreateEscuelaClick = () => {
-    // Lógica para crear escuela
-    console.log('Crear escuela');
-    setShowCreateMenu(false);
+    let confirmacion = confirm("Seguro que quieres aprobar esta cuenta " + nombre);
+    if (confirmacion) {
+      try {
+        const response = await fetch("http://localhost:5000/api/admin/fetch/aprobar", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ identificador }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Error al aprobar usuario:", errorData);
+          alert(`Error: ${errorData.error}`);
+          return;
+        }
+
+        const data = await response.json();
+        alert(data.message);
+
+        // Actualizar la lista de aliados después de aprobar
+        await fetchAliados();
+      } catch (error) {
+        console.error("Error al realizar la solicitud:", error);
+        alert("Error al realizar la solicitud");
+      }
+    }
   };
 
   if (isLoading) {
@@ -190,11 +223,14 @@ const AdminPage = () => {
 
               {showCreateMenu && (
               <div className="admin-dropdown-menu">
-                <button className="admin-dropdown-item" onClick={handleCreateAliadoClick}>
+                <button className="admin-dropdown-item" onClick={() =>navigate("/register-ally")}>
                   Crear cuenta de aliado
                 </button>
-                <button className="admin-dropdown-item" onClick={handleCreateEscuelaClick}>
+                <button className="admin-dropdown-item" onClick={() =>navigate("/register-school")}>
                   Crear cuenta de escuela
+                </button>
+                <button className="admin-dropdown-item" onClick={() =>navigate("/register-admin")}>
+                  Crear cuenta de administrador
                 </button>
               </div>
             )}
@@ -211,7 +247,6 @@ const AdminPage = () => {
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Teléfono</th>
                   <th>Correo</th>
                   <th>Identificador</th>
                   <th>Tipo de Usuario</th>
@@ -221,10 +256,18 @@ const AdminPage = () => {
               <tbody>
                 {aliados.map(aliado => (
                   <tr key={aliado.nombre}>
-                    <td className='admin-aliado-name'>{aliado.correo}</td>
+                    <td
+                      className='admin-aliado-name'
+                      onClick={() => navigate(`/administrador/informacion/${aliado.identificador}/${aliado.tipoUsuario}`)}
+                    >
+                      {aliado.nombre}
+                    </td>
+                    <td>{aliado.correo}</td>
                     <td className='admin-RFC'>{aliado.identificador}</td>
                     <td>{aliado.tipoUsuario}</td>
-                    <td>{aliado.Estado}</td>
+                    <td onClick={() => handleAprobarClick(aliado.identificador, aliado.nombre)}>
+                        {aliado.Estado}
+                    </td>
                   </tr>
                 ))}
               </tbody>

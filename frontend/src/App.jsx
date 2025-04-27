@@ -16,6 +16,7 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import InformacionUser from './pages/InformacionUser';
 
   function App() {
     return (
@@ -76,6 +77,14 @@
           element={
             <PrivateRoute allowedRoles={['administrador']}>
               <ListedAllies />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/informacion/:identificador/:tipoUsuario"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <InformacionUser />
             </PrivateRoute>
           }
         />
