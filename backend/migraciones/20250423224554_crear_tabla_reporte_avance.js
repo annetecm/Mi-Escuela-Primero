@@ -1,9 +1,9 @@
-exports.up = function(knex) {
+exports.up = async function(knex) {
+    await knex.raw('CREATE EXTENSION IF NOT EXISTS "pgcrypto"')
     return knex.schema.createTable('ReporteAvance', function(table) {
-      // Primary key
-      table.increments('reporteAvanceId').primary();
-      
-      
+
+  
+      table.uuid('reporteAvanceId').primary().defaultTo(knex.raw("gen_random_uuid()")); 
       table.uuid('conexionId').notNullable().references('conexionId').inTable('Conexion').onDelete('CASCADE');
       table.string('tipo', 50).notNullable();
       table.date('fecha').notNullable();
