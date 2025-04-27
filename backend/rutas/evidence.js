@@ -33,14 +33,14 @@ router.post('/upload', verifyToken, upload.single('archivo'), async (req, res) =
         }
       ).end(req.file.buffer);
     });
-    
 
-    // Insertar en ReporteAvance
-    await db.query(`
+    // 🔥 Insertar en ReporteAvance y guardar el resultado
+    const insertResult = await db.query(`
       INSERT INTO "ReporteAvance" 
         ("reporteAvanceId", "tipo", "fecha", "descripcion", "ruta", "conexionId")
       VALUES 
         (gen_random_uuid(), $1, NOW(), $2, $3, $4)
+      RETURNING "reporteAvanceId"
     `, [
       uploadResult.format,
       descripcion || '',
@@ -48,9 +48,12 @@ router.post('/upload', verifyToken, upload.single('archivo'), async (req, res) =
       matchId
     ]);
 
+    const reporteAvanceId = insertResult.rows[0].reporteAvanceId;
+
     return res.status(201).json({ 
       message: "Evidencia subida correctamente", 
-      url: uploadResult.secure_url 
+      url: uploadResult.secure_url,
+      reporteAvanceId: reporteAvanceId
     });
   } catch (err) {
     console.error('❌ Error subiendo evidencia:', err);
@@ -74,6 +77,25 @@ router.get('/progreso/:conexionId', verifyToken, async (req, res) => {
   } catch (err) {
     console.error('❌ Error al cargar evidencias:', err);
     return res.status(500).json({ error: 'Error interno al cargar evidencias.' });
+  }
+});
+
+// Actualizar descripción de evidencia
+router.patch('/reporte/:reporteAvanceId', verifyToken, async (req, res) => {
+  const { reporteAvanceId } = req.params;
+  const { descripcion } = req.body;
+
+  try {
+    await db.query(`
+      UPDATE "ReporteAvance"
+      SET "descripcion" = $1
+      WHERE "reporteAvanceId" = $2
+    `, [descripcion, reporteAvanceId]);
+
+    return res.json({ message: "Descripción actualizada correctamente" });
+  } catch (err) {
+    console.error('❌ Error actualizando descripción:', err);
+    return res.status(500).json({ error: 'Error actualizando descripción.' });
   }
 });
 
