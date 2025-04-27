@@ -6,16 +6,10 @@ exports.up = function(knex) {
       
       table.uuid('conexionId').notNullable().references('conexionId').inTable('Conexion').onDelete('CASCADE');
       table.string('tipo', 50).notNullable();
-      
-
-      table.dateTime('fecha').defaultTo(knex.fn.now());
-      
-
+      table.date('fecha').notNullable();
       table.text('descripcion');
-      
+      table.text('ruta').notNullable();
      
-      table.timestamps(true, true);
-   
     });
   };
   
