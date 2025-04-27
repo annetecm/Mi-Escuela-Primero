@@ -3,8 +3,8 @@ exports.up = async function(knex){
     return knex.schema.createTable('Documento',(table)=>{
         table.uuid('documentoId').primary().defaultTo(knex.raw('gen_random_uuid()')); 
         table.string('tipo').notNullable();
-        table.string('ruta').notNullable();
-        table.string('fechaCarga').notNullable();
+        table.text('ruta').notNullable();
+        table.date('fechaCarga').notNullable();
         table.uuid('usuarioId').references('usuarioId').inTable('Usuario').onDelete('CASCADE');
         table.string('nombre', 100).notNullable();
     });
