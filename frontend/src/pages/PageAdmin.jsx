@@ -111,7 +111,7 @@ const AdminPage = () => {
   };
 
   // Llamar a fetchAliados después de aprobar un usuario
-  const handleAprobarClick = async (identificador, nombre) => {
+  const handleAprobarClick = async (identificador, nombre, correo, nombreAdmin) => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("Token no encontrado");
@@ -127,7 +127,7 @@ const AdminPage = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ identificador }),
+          body: JSON.stringify({ identificador, correo, nombreAdmin }),
         });
 
         if (!response.ok) {
@@ -265,7 +265,7 @@ const AdminPage = () => {
                     <td>{aliado.correo}</td>
                     <td className='admin-RFC'>{aliado.identificador}</td>
                     <td>{aliado.tipoUsuario}</td>
-                    <td onClick={() => handleAprobarClick(aliado.identificador, aliado.nombre)}>
+                    <td onClick={() => handleAprobarClick(aliado.identificador, aliado.nombre, aliado.correo, adminData.nombre)}>
                         {aliado.Estado}
                     </td>
                   </tr>

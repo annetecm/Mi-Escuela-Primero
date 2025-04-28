@@ -89,12 +89,12 @@ function InformacionUser() {
 
           const aliadoData = await aliadoResponse.json();
           setUserData(aliadoData);
-        }else{
-          const adminResponse = await fetch(`http://localhost:5000/api/admin/admin/perfil/${identificador}`, {
+        }else if (tipoUsuarioL === "administrador"){
+          const adminResponse = await fetch(`http://localhost:5000/api/admin/administrador/perfil/${identificador}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
-            }
+        }
           });
 
           if (!adminResponse.ok) {
@@ -103,6 +103,8 @@ function InformacionUser() {
 
           const adminData = await adminResponse.json();
           setUserData(adminData);
+        }else{
+          console.log("error aqui");
         }
       } catch (err) {
         console.error('Error fetching user data:', err);

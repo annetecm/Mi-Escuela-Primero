@@ -21,7 +21,7 @@ router.post("/test-route", (req, res) => {
 
 //obtener perfil de otros administradores
 //no se que tan efectivo sea este formato
-router.get("admin/perfil:adminId", verifyToken, async(req,res)=>{
+router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
   //se pasa el administradorId
   const adminId= req.params.adminId;
   console.log("🔍 Buscando administrador con id :", adminId);
@@ -36,13 +36,14 @@ router.get("admin/perfil:adminId", verifyToken, async(req,res)=>{
         u."estadoRegistro"
       FROM "Administrador" e
       JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
-      WHERE e."AdministradorId" = $1
+      WHERE e."administradorId" = $1
     )
     SELECT 
       ed.*
     FROM admin_data ed
     `;
     console.log("Ejecutando para ", adminId);
+    const result= await pool.query(query,[adminId]);
     if (result.rows.length === 0) {
       console.log("❌ No se encontró escuela con CCT:", CCT);
       return res.status(404).json({ 
@@ -341,7 +342,7 @@ router.post("/update", verifyToken, async(req,res)=>{
   }
 });
 
-//ni idea si esto deberia de estar aqui, no se cuando lo puse
+//no borrar
 //obtener informmacion a partir del identificador
 router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
@@ -367,7 +368,14 @@ router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
         JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
         WHERE a."aliadoId" = $1;
       `;
-    } else {
+    } else if (tipoUsuario==="administrador"){
+      query = `
+        SELECT a."administradorId" AS identificador, u."nombre", u."correoElectronico"
+        FROM "Administrador" a
+        JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
+        WHERE a."administradorId" = $1;
+      `;
+    }else {
       return res.status(400).json({ error: "Tipo de usuario no válido" });
     }
 
@@ -386,8 +394,9 @@ router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
 
 //cambiar de pendiente a aprobado 
 router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
+  const usuarioId = req.usuario.usuarioId;
   try{
-    const { identificador } = req.body;
+    const { identificador, correo, nombreAdmin } = req.body;
 
     if (!identificador) {
       return res.status(400).json({ error: "El identificador es requerido" });
@@ -414,8 +423,7 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
     //mandar correo
-    if (cambios.length > 0) {
-      const htmlCambios = `
+    const htmlCambios = `
       <html>
         <head>
           <style>
@@ -461,7 +469,7 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
         <body>
           <div class="container">
             <h2>Su usuario ha sido aceptado</h2>
-            <p><span class="highlight">Usuario que realizó el cambio:</span> ${usuarioId}</p>
+            <p><span class="highlight">Usuario que realizó el cambio por:</span> ${nombreAdmin}</p>
             <p>Su usario en la pagina mi escuela primero ha sido aceptado. ¡Felicidades!</p>
           </div>
         </body>
@@ -471,14 +479,14 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
       try {
         await transporter.sendMail({
           from: '"Sistema de Notificaciones Mi Escuela Primero" <equiporeto6@gmail.com>',
-          to: adminEmails,
+          to: correo,
           subject: "Actualización a aprobado.",
           html: htmlCambios
         });
       } catch (error) {
         console.error("❌ Error al enviar correo:", error);
       }
-    }
+    
     return res.json({ message: "Estado actualizado a aprobado" });
   } catch (err) {
     console.error("Error al actualizar estado en /fetch/aprobar:", err.message, err.stack);
