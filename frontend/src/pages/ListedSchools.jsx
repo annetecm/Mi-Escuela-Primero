@@ -1,30 +1,54 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import "../styles/ListedAllies.css"
-import logo from "../assets/logo1.png"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/ListedAllies.css";
+import logo from "../assets/logo1.png";
 
 export default function ListedSchools() {
-  const [menuVisible, setMenuVisible] = useState(false)
-  const toggleMenu = () => setMenuVisible(!menuVisible)
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [escuelasAgrupadas, setEscuelasAgrupadas] = useState({});
+  const navigate = useNavigate();
+
+  const toggleMenu = () => setMenuVisible(!menuVisible);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-  
+
     fetch("http://localhost:5000/api/mis-conexiones", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => {
-        setEscuelas(data);
-      })
+        const agrupadas = {};
+      
+        data.forEach(conexion => {
+          const key = conexion.CCT;
+          if (!agrupadas[key]) {
+            agrupadas[key] = {
+              nombreEscuela: conexion.nombreEscuela,
+              proyectos: new Set()
+            };
+          }
+          agrupadas[key].proyectos.add({
+            necesidad: conexion.necesidad,
+            conexionId: conexion.conexionId
+          });
+        });
+      
+        const finalAgrupadas = {};
+        for (const [key, value] of Object.entries(agrupadas)) {
+          finalAgrupadas[key] = {
+            nombreEscuela: value.nombreEscuela,
+            proyectos: Array.from(value.proyectos)
+          };
+        }
+      
+        setEscuelasAgrupadas(finalAgrupadas);
+      })      
       .catch(err => console.error("Error cargando conexiones:", err));
   }, []);
 
-  const navigate = useNavigate()
-
   return (
     <div className="listedallies-container">
-      {/* Barra superior */}
       <header className="listedallies-header">
         <button className="listedallies-menu-button" onClick={toggleMenu}>
           &#9776;
@@ -33,7 +57,6 @@ export default function ListedSchools() {
       </header>
 
       <div className={`listedallies-main-content ${menuVisible ? "menu-visible" : ""}`}>
-        {/* Menú lateral */}
         {menuVisible && (
           <nav className="listedallies-sidebar">
             <ul>
@@ -45,36 +68,38 @@ export default function ListedSchools() {
           </nav>
         )}
 
-        {/* Contenido principal */}
         <main className="listedallies-content">
           <h1 className="listedallies-title">Mis Escuelas</h1>
 
           <div className="listedallies-cards-container">
-          {escuelas.map((conexion) => (
-          <div
-            key={conexion.conexionId}
-            className="listedallies-card"
-            onClick={() => navigate(`/evidencia/${conexion.conexionId}`)}
-            style={{ cursor: "pointer" }}
-          >
-            <div className="listedallies-card-image">
-              <img
-                src="https://thumbs.dreamstime.com/b/dise%C3%B1o-de-icono-del-logotipo-libro-naranja-%C3%BAnico-con-color-moda-para-la-marca-empresa-175088599.jpg"
-                alt={conexion.nombreEscuela}
-              />
-            </div>
-            <div className="listedallies-card-info">
-              <h2 className="listedallies-card-title">{conexion.nombreEscuela}</h2>
-              <div className="listedallies-card-location">
-                <span className="listedallies-location-icon">📍</span>
-                <span>{conexion.necesidad}</span> {/* ← Aquí pones la necesidad */}
-              </div>
-            </div>
-          </div>
-          ))}
+            {Object.keys(escuelasAgrupadas).length === 0 ? (
+              <p className="listedallies-empty-text">No tienes escuelas asociadas aún.</p>
+            ) : (
+              Object.entries(escuelasAgrupadas).map(([CCT, datos], index) => (
+                <div
+                  key={index}
+                  className="listedallies-card"
+                  onClick={() => navigate(`/evidencia/${datos.proyectos[0].conexionId}`, {
+                    state: { CCT: CCT } // 🔥 Aquí pasamos también el CCT
+                  })}
+                >
+                  <div className="listedallies-card-info">
+                    <h2 className="listedallies-card-title">{datos.nombreEscuela}</h2>
+                    <h4 className="listedallies-projects-title">Proyectos asignados:</h4>
+                    <ul className="listedallies-projects-list">
+                      {datos.proyectos.map((proyecto, idx) => (
+                        <li key={idx} className="listedallies-project-item">
+                          {proyecto.necesidad}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </main>
       </div>
     </div>
-  )
+  );
 }

@@ -69,8 +69,7 @@ import aliadoImg from '../assets/aliado.jpg';
         nombre: tipoPersona === "moral" ? formData.nombreOrg : formData.nombre,
       },
       aliado: {
-        tipoDeApoyo: formData.tipoApoyo,
-        tipoId: tipoPersona === "fisica" ? formData.curp : formData.rfc
+        tipoDeApoyo: formData.tipoApoyo
       },
       personaFisica: tipoPersona === "fisica" ? {
         CURP: formData.curp,

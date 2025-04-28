@@ -242,6 +242,26 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.save-description-button {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #0baf4f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.save-description-button:hover {
+  background-color: #08823c;
+}
+.evidence-subtitle {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0 10px 0;
+}
+
 @media (max-width: 768px) {
   .evidence-sidebar {
     width: 240px;
