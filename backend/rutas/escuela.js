@@ -802,12 +802,10 @@ if (cambios.length > 0) {
   }
 });
 
-// Obtener aliados conectados con esta escuela
 router.get('/mis-conexiones', verifyToken, async (req, res) => {
   const usuarioId = req.usuario.usuarioId;
 
   try {
-    // Primero obtenemos el CCT de la escuela
     const escuelaResult = await pool.query(`
       SELECT "CCT" 
       FROM "Escuela" 
@@ -820,19 +818,20 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
 
     const CCT = escuelaResult.rows[0].CCT;
 
-    // Ahora obtenemos las conexiones asociadas a esta escuela
     const conexionesResult = await pool.query(`
       SELECT 
         c."conexionId",
         a."aliadoId",
         u."nombre" AS "nombreAliado",
-        ap."caracteristicas" AS "apoyo"
+        ap."caracteristicas" AS "apoyo",
+        n."nombre" AS "nombreNecesidad"
       FROM "Conexion" c
       JOIN "Aliado" a ON c."aliadoId" = a."aliadoId"
       JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
       JOIN "Apoyo" ap ON c."apoyoId" = ap."apoyoId"
+      JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
       WHERE c."CCT" = $1
-      ORDER BY u."nombre" ASC
+      ORDER BY u."nombre" ASC;
     `, [CCT]);
 
     return res.json(conexionesResult.rows);
