@@ -19,6 +19,51 @@ router.post("/test-route", (req, res) => {
   res.json({ received: true });
 });
 
+//obtener todas las escuelas 
+router.get("/todasEscuelas", verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      WITH escuela_data AS (
+        SELECT json_agg(
+          json_build_object(
+            'direccion', e."direccion",
+            'zonaEscolar', e."zonaEscolar",
+            'sectorEscolar', e."sectorEscolar",
+            'modalidad', e."modalidad",
+            'nivelEducativo', e."nivelEducativo",
+            'CCT', e."CCT",
+            'tieneUSAER', e."tieneUSAER",
+            'numeroDocentes', e."numeroDocentes",
+            'estudiantesPorGrupo', e."estudiantesPorGrupo",
+            'controlAdministrativo', e."controlAdministrativo",
+            'nombre', u."nombre",
+            'correoElectronico', u."correoElectronico"
+          )
+        ) AS informacion
+        FROM "Escuela" e
+        JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+        WHERE u."estadoRegistro" = 'aprobado'
+      )
+      SELECT
+        COALESCE(ed.informacion, '[]'::json) as informacion
+      FROM escuela_data ed
+    `);
+    
+    console.log("Todas las escuelas");
+    
+    const escuelas = result.rows[0];
+    
+    const responseData = {
+      informacion: Array.isArray(escuelas.informacion) ? escuelas.informacion : []
+    };
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Error al obtener perfil de admin:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 //obtener perfil de otros administradores
 //no se que tan efectivo sea este formato
 router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{

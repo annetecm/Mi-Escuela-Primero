@@ -8,6 +8,7 @@
   import EditSchool from './pages/EditSchool';
   import AllyMap from './pages/AllyMap';
   import ListedSchools from './pages/ListedSchools';
+  import ListedSchoolsAdmin from './pages/ListedSchoolAdmin';
   import ListedAllies from './pages/ListedAllies';
   import EditPhysical from './pages/EditPhysical';
   import SignOut from './pages/SignOut';
@@ -68,7 +69,7 @@
           path="/administrador/escuelas"
           element={
             <PrivateRoute allowedRoles={['administrador']}>
-              <ListedSchools />
+              <ListedSchoolsAdmin />
             </PrivateRoute>
           }
         />
