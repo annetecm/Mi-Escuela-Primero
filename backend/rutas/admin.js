@@ -79,6 +79,381 @@ router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
 
 });
 
+//obtener datos aliado fisicos
+//rt
+router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
+  //se pasa el administradorId
+  const aliadoId= req.params.aliadoId;
+  console.log("🔍 Buscando aliado de persona fisica con id :", aliadoId);
+
+  try{
+    const query=`
+    WITH aliado_data AS (
+      SELECT 
+        u."usuarioId",
+        u."nombre",
+        u."correoElectronico",
+        u."estadoRegistro"
+      FROM "Aliado" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE e."aliadoId" = $1
+    ),
+    persona_fisica AS(
+      SELECT
+        "razon" AS razon_persona,
+        "correoElectronico" AS correo_persona,
+        "telefono" AS telefono_persona
+      FROM "PersonaFisica"
+      WHERE "CURP" = $1
+    ),
+    apoyo_data AS(
+      SELECT json_agg(
+        json_build_object(
+          'tipo', a."tipo",
+          'caracteristicas', a."caracteristicas"
+        )
+      ) AS apoyos
+      FROM "Apoyo" a
+      WHERE a."aliadoId" = $1
+    ),
+    documentos_data AS (
+      SELECT json_agg(
+        json_build_object(
+          'nombre', d."nombre",
+          'ruta', d."ruta",
+          'fechaCarga', d."fechaCarga"
+        )
+      ) AS documentos
+      FROM "Documento" d
+      JOIN "Usuario" u ON d."usuarioId" = u."usuarioId"
+      JOIN "Aliado" e ON u."usuarioId" = e."usuarioId"
+      WHERE e."aliadoId" = $1
+    ),
+    conexiones_data AS (
+      SELECT 
+        json_agg(
+          json_build_object(
+            'necesidadId', c."necesidadId",
+            'apoyoId', c."apoyoId",
+            'fechaInicio', c."fechaInicio",
+            'fechaFin', c."fechaFin",
+            'estado', c."estado",
+            'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
+            'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
+            'escuelaNombre', COALESCE(u."nombre", 'No disponible')
+          )
+        ) AS conexiones
+      FROM "Conexion" c
+      LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+      LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
+      LEFT JOIN "Escuela" al ON c."CCT" = al."CCT"
+      LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
+      WHERE a."aliadoId" = $1
+    )
+    SELECT 
+      ed.*,
+      COALESCE(pf.razon_persona, null) as razon_persona,
+      COALESCE(pf.correo_persona, null) as correo_persona,
+      COALESCE(pf.telefono_persona, null) as telefono_persona,
+      COALESCE(ap.apoyos, '[]'::json) as apoyos,
+      COALESCE(doc.documentos, '[]'::json) as documentos,
+      COALESCE(con.conexiones, '[]'::json) as conexiones
+    FROM aliado_data ed
+    LEFT JOIN persona_fisica pf ON true
+    LEFT JOIN apoyo_data ap ON true
+    LEFT JOIN documentos_data doc ON true
+    LEFT JOIN conexiones_data con ON true
+    `;
+    console.log("Ejecutando para ", aliadoId);
+    const result= await pool.query(query,[aliadoId]);
+
+    if (result.rows.length === 0) {
+      console.log("❌ No se encontró escuela con CCT:", aliadoId);
+      return res.status(404).json({ 
+        error: "Escuela no encontrada",
+        details: `No existe registro con CCT: ${aliadoId}`
+      });
+  }
+
+  // Process the data for a cleaner structure
+  const aliadoF = result.rows[0];
+    
+  // Format data to match frontend expectations
+  const responseData = {
+    // Basic school data
+    ...aliadoF,
+      
+    // Director information
+    persona_fisica: aliadoF.razon_persona ? {
+      razon: aliadoF.razon_persona,
+      correoElectronico: aliadoF.correo_persona,
+      telefono: aliadoF.telefono_persona
+    } : null,
+
+    apoyos: Array.isArray(aliadoF.apoyos) ? aliadoF.apoyos : [], 
+    documentos: Array.isArray(aliadoF.documentos) ? aliadoF.documentos : [],
+    conexiones: Array.isArray(aliadoF.conexiones) ? aliadoF.conexiones : []
+    
+  };
+
+    //remove temporary fields
+    delete responseData.razon_persona;
+    delete responseData.correo_persona;
+    delete responseData.telefono_persona;
+    //delete responseData.apoyos;
+    delete responseData.documentos;
+    delete responseData.conexiones;
+
+    console.log("✅ Datos encontrados:", responseData);
+    return res.json(responseData);
+
+  } catch (err) {
+    console.error("💥 Error en la consulta:", {
+      message: err.message,
+      stack: err.stack,
+      parameters: [aliadoId]
+    });
+    
+    return res.status(500).json({ 
+      error: "Error en la consulta",
+      details: err.message,
+      solution: "Verifique que el aliadoId exista y tenga formato correcto"
+    });
+  }
+
+});
+
+//obtener informacion de persona moral 
+router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
+  //se pasa el administradorId
+  const aliadoId= req.params.aliadoId;
+  console.log("🔍 Buscando aliado de persona moral con id :", aliadoId);
+
+  try{
+    const query=`
+    WITH aliado_data AS (
+      SELECT 
+        u."usuarioId",
+        u."nombre",
+        u."correoElectronico",
+        u."estadoRegistro"
+      FROM "Aliado" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE e."aliadoId" = $1
+    ),
+    persona_moral AS(
+      SELECT
+        "area" AS area_persona,
+        "correoElectronico" AS correo_persona,
+        "telefono" AS telefono_persona
+      FROM "PersonaMoral"
+      WHERE "RFC" = $1
+    ),
+    institucion AS(
+      SELECT
+        "giro" AS giro_institucion,
+        "domicilio" AS domicilio_institucion,
+        "telefono" AS telefono_institucion,
+        "paginaWeb" AS paginaWeb_institucion
+      FROM "Institucion"
+      WHERE "RFC" = $1
+    ),
+    escritura_publica AS(
+      SELECT
+        "numeroEscritura" AS numero_escritura,
+        "otorgadaNotario" AS notario_escritura,
+        "ciudad" AS ciudad_escritura
+      FROM "EscrituraPublica"
+      WHERE "RFC" = $1
+    ),
+    constancia_fisica AS(
+      SELECT
+        "regimen" AS regimen_constancia,
+        "domicilio" AS domicilio_constancia
+      FROM "ConstanciaFisica"
+      WHERE "RFC" = $1
+    ),
+    representante AS(
+      SELECT
+        "correoRep" AS correo_representante,
+        "telefonoRep" AS telefono_representante,
+        "areaRep" AS area_representante
+      FROM "Representante"
+      WHERE "RFC" = $1
+    ),
+    apoyo_data AS(
+      SELECT json_agg(
+        json_build_object(
+          'tipo', a."tipo",
+          'caracteristicas', a."caracteristicas"
+        )
+      ) AS apoyos
+      FROM "Apoyo" a
+      WHERE a."aliadoId" = $1
+    ),
+    documentos_data AS (
+      SELECT json_agg(
+        json_build_object(
+          'nombre', d."nombre",
+          'ruta', d."ruta",
+          'fechaCarga', d."fechaCarga"
+        )
+      ) AS documentos
+      FROM "Documento" d
+      JOIN "Usuario" u ON d."usuarioId" = u."usuarioId"
+      JOIN "Aliado" e ON u."usuarioId" = e."usuarioId"
+      WHERE e."aliadoId" = $1
+    ),
+    conexiones_data AS (
+      SELECT 
+        json_agg(
+          json_build_object(
+            'necesidadId', c."necesidadId",
+            'apoyoId', c."apoyoId",
+            'fechaInicio', c."fechaInicio",
+            'fechaFin', c."fechaFin",
+            'estado', c."estado",
+            'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
+            'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
+            'escuelaNombre', COALESCE(u."nombre", 'No disponible')
+          )
+        ) AS conexiones
+      FROM "Conexion" c
+      LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+      LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
+      LEFT JOIN "Escuela" al ON c."CCT" = al."CCT"
+      LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
+      WHERE a."aliadoId" = $1
+    )
+    SELECT 
+      ed.*,
+      COALESCE(pf.area_persona, null) as area_persona,
+      COALESCE(pf.correo_persona, null) as correo_persona,
+      COALESCE(pf.telefono_persona, null) as telefono_persona,
+      COALESCE(ins.giro_institucion, null) as giro_institucion,
+      COALESCE(ins.domicilio_institucion, null) as domicilio_institucion,
+      COALESCE(ins.telefono_institucion, null) as telefono_institucion,
+      COALESCE(ins.paginaWeb_institucion, null) as paginaWeb_institucion,
+      COALESCE(ep.numero_escritura, null) as numero_escritura,
+      COALESCE(ep.notario_escritura, null) as notario_escritura,
+      COALESCE(ep.ciudad_escritura, null) as ciudad_escritura,
+      COALESCE(cf.regimen_constancia, null) as regimen_constancia,
+      COALESCE(cf.domicilio_constancia, null) as domicilio_constancia,
+      COALESCE(r.correo_representante, null) as correo_representante,
+      COALESCE(r.telefono_representante, null) as telefono_representante,
+      COALESCE(r.area_representante, null) as area_representante,
+      COALESCE(ap.apoyos, '[]'::json) as apoyos,
+      COALESCE(doc.documentos, '[]'::json) as documentos,
+      COALESCE(con.conexiones, '[]'::json) as conexiones
+    FROM aliado_data ed
+    LEFT JOIN persona_moral pf ON true
+    LEFT JOIN institucion ins ON true
+    LEFT JOIN escritura_publica ep ON true
+    LEFT JOIN constancia_fisica cf ON true
+    LEFT JOIN representante r ON true
+    LEFT JOIN apoyo_data ap ON true
+    LEFT JOIN documentos_data doc ON true
+    LEFT JOIN conexiones_data con ON true
+    `;
+    console.log("Ejecutando para ", aliadoId);
+    const result= await pool.query(query,[aliadoId]);
+
+    if (result.rows.length === 0) {
+      console.log("❌ No se encontró escuela con CCT:", aliadoId);
+      return res.status(404).json({ 
+        error: "Escuela no encontrada",
+        details: `No existe registro con CCT: ${aliadoId}`
+      });
+  }
+
+  // Process the data for a cleaner structure
+  const aliadoF = result.rows[0];
+    
+  // Format data to match frontend expectations
+  const responseData = {
+    // Basic school data
+    ...aliadoF,
+      
+    // Persona Moral information
+    persona_moral: aliadoF.area_persona ? {
+      area: aliadoF.area_persona,
+      correoElectronico: aliadoF.correo_persona,
+      telefono: aliadoF.telefono_persona
+    } : null,
+
+    // Institucion
+    institucion: aliadoF.giro_institucion ? {
+      giro: aliadoF.giro_institucion,
+      domicilio: aliadoF.domicilio_institucion,
+      telefono: aliadoF.telefono_institucion,
+      paginaWeb: aliadoF.paginaWeb_institucion
+    } : null,
+
+    // Escritura
+    escritura_publica: aliadoF.numero_escritura ? {
+      numero: aliadoF.numero_escritura,
+      notario: aliadoF.notario_escritura,
+      ciudad: aliadoF.ciudad_escritura
+    } : null,
+
+    // Constancia
+    constancia_fisica: aliadoF.regimen_constancia ? {
+      regimen: aliadoF.regimen_constancia,
+      domicilio: aliadoF.domicilio_constancia
+    } : null,
+
+    // Representante
+    representante: aliadoF.correo_representante ? {
+      correo: aliadoF.correo_representante,
+      telefono: aliadoF.telefono_representante,
+      area: aliadoF.area_representante
+    } : null,
+
+    apoyos: Array.isArray(aliadoF.apoyos) ? aliadoF.apoyos : [], 
+    documentos: Array.isArray(aliadoF.documentos) ? aliadoF.documentos : [],
+    conexiones: Array.isArray(aliadoF.conexiones) ? aliadoF.conexiones : []
+    
+  };
+
+    //remove temporary fields
+    delete responseData.area_persona;
+    delete responseData.correo_persona;
+    delete responseData.telefono_persona;
+    delete responseData.giro_institucion;
+    delete responseData.domicilio_institucion;
+    delete responseData.telefono_institucion;
+    delete responseData.paginaWeb_insitucion;
+    delete responseData.numero_escritura;
+    delete responseData.notario_escritura;
+    delete responseData.ciudad_escritura;
+    delete responseData.regimen_constancia;
+    delete responseData.domicilio_constancia;
+    delete responseData.correo_representante;
+    delete responseData.telefono_representante;
+    delete responseData.area_representante;
+    //delete responseData.apoyos;
+    delete responseData.documentos;
+    delete responseData.conexiones;
+
+    console.log("✅ Datos encontrados:", responseData);
+    return res.json(responseData);
+
+  } catch (err) {
+    console.error("💥 Error en la consulta:", {
+      message: err.message,
+      stack: err.stack,
+      parameters: [aliadoId]
+    });
+    
+    return res.status(500).json({ 
+      error: "Error en la consulta",
+      details: err.message,
+      solution: "Verifique que el aliadoId exista y tenga formato correcto"
+    });
+  }
+
+});
+
 //obtener datos
 //nadie le mueva que los mato
 router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
@@ -190,22 +565,14 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
               'estado', c."estado",
               'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
               'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
-              'aliadoNombre', COALESCE(
-                CASE 
-                  WHEN pf."razon" IS NOT NULL THEN pf."razon"
-                  WHEN pm."area" IS NOT NULL THEN pm."area"
-                  ELSE 'Aliado desconocido'
-                END, 
-                'No disponible'
-              )
+              'aliadoNombre', COALESCE(u."nombre", 'No disponible')
             )
           ) AS conexiones
         FROM "Conexion" c
         LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
         LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
         LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
-        LEFT JOIN "PersonaFisica" pf ON al."aliadoId" = pf."CURP"
-        LEFT JOIN "PersonaMoral" pm ON al."aliadoId" = pm."RFC"
+        LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
         WHERE c."CCT" = $1
       )
     
@@ -347,6 +714,7 @@ router.post("/update", verifyToken, async(req,res)=>{
 router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { tipoUsuario } = req.query;
+  console.log(tipoUsuario);
 
   try {
     let query = "";

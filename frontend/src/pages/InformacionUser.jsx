@@ -58,7 +58,7 @@ function InformacionUser() {
         }
 
         const tipoUsuarioL = tipoUsuario.toLowerCase();
-        
+        console.log(tipoUsuarioL);
         // Obtener datos principales de la escuela
         if (tipoUsuarioL === 'escuela') {
           const escuelaResponse = await fetch(`http://localhost:5000/api/admin/escuela/perfil/${identificador}`, {
@@ -75,8 +75,8 @@ function InformacionUser() {
           const escuelaData = await escuelaResponse.json();
           setUserData(escuelaData);
 
-        } else if (tipoUsuarioL === 'aliado'){ //revisar si se pasa como aliado o ya con el tipo de aliado
-          const aliadoResponse = await fetch(`http://localhost:5000/api/admin/aliado/perfil/${identificador}`, {
+        } else if (tipoUsuarioL === 'aliado de persona fisica'){ 
+          const aliadoResponse = await fetch(`http://localhost:5000/api/admin/aliado/fisica/perfil/${identificador}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -84,7 +84,21 @@ function InformacionUser() {
           });
 
           if (!aliadoResponse.ok) {
-            throw new Error('Error al obtener datos del aliado');
+            throw new Error('Error al obtener datos del aliado Fisico');
+          }
+
+          const aliadoData = await aliadoResponse.json();
+          setUserData(aliadoData);
+        }else if (tipoUsuarioL === 'aliado de persona moral'){ //falta
+          const aliadoResponse = await fetch(`http://localhost:5000/api/admin/aliado/moral/perfil/${identificador}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!aliadoResponse.ok) {
+            throw new Error('Error al obtener datos del aliado Moral');
           }
 
           const aliadoData = await aliadoResponse.json();
@@ -236,7 +250,7 @@ function InformacionUser() {
           </header>
     <div className="user-profile-container">
       
-      {tipoUsuario.toLowerCase() === 'escuela' ? (
+      {tipoUsuario.toLowerCase() === 'escuela' ? ( 
         <>
         <h1>Información de la Escuela</h1>
           <div className="school-section">
@@ -351,6 +365,7 @@ function InformacionUser() {
                 {renderArrayItems(userData.documentos, (documento, index) => (
                   <div key={index} className="documento-item">
                     {renderNonEditableField('Nombre', documento.nombre)}
+                    {renderNonEditableField('Nombre', documento.ruta)}
                     {renderNonEditableField('Fecha de Carga', documento.fechaCarga)}
                     <a href={documento.ruta} target="_blank" rel="noopener noreferrer">Ver documento</a>
                   </div>
@@ -393,40 +408,231 @@ function InformacionUser() {
           )}
         </>
       ) : 
-        tipoUsuario.toLowerCase() ==='aliado'?(
-        <div className="user-info">
-          <h2>{userData.nombre || 'Usuario'}</h2>
-          <div className="info-field">
-            <strong>Correo Electrónico:</strong>
-            {editingField === 'correoElectronico' ? (
-              <>
-                <input
-                  type="text"
-                  value={newValue}
-                  onChange={(e) => setNewValue(e.target.value)}
-                />
-                <button onClick={handleSaveClick}>Guardar</button>
-                <button onClick={() => setEditingField(null)}>Cancelar</button>
-              </>
-            ) : (
-              <span onClick={() => handleEditClick('correoElectronico')}>
-                {userData.correoElectronico || 'No disponible'}
-              </span>
-            )}
-          </div>
-        </div>
-          ):(
-            <>
-              <h1>Información del Administrador</h1>
-                <div className="school-section">
-                  <h2>Información General</h2>
-                  <div className="school-info">
-                    <h3>{userData.nombre || 'Administrador'}</h3>
+        tipoUsuario.toLowerCase() ==='aliado de persona fisica'?(
+          <>
+            <h1>Información del Aliado de Persona Fisica</h1>
+            <div className="school-section">
+              <h2>Información General</h2>
+              <div className="school-info">
+                <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
                     {renderNonEditableField('Correo', userData.correoElectronico)}
                     {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+              </div>
+            </div>
+            {/* Información de Persona Fisica*/}
+              {userData.persona_fisica && (
+                <div className="director-section">
+                  <h2>Información de Persona Fisica</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Razón', userData.persona_fisica.razon)}
+                    {renderNonEditableField('Correo Electrónico', userData.persona_fisica.correoElectronico)}
+                    {renderNonEditableField('Teléfono', userData.persona_fisica.telefono)}
                   </div>
                 </div>
-            </> 
+              )}
+            {/*Apoyos */}
+            <div className="necesidades-section">
+              <h2>Apoyos</h2>
+              <div className="info-section">
+                {renderArrayItems(userData.apoyos, (apoyo, index) => (
+                  <div key={index} className="necesidad-item">
+                    {renderNonEditableField('Tipo', apoyo.tipo)}
+                    {renderNonEditableField('Caracteristicas', apoyo.caracteristicas)}
+                    </div>
+                ))}
+              </div>
+            </div>
+            {/* Documentos */}
+            {userData.documentos && userData.documentos.length > 0 && (
+              <div className="documentos-section">
+                <h2>Documentos</h2>
+                <div className="info-section">
+                  {renderArrayItems(userData.documentos, (documento, index) => (
+                    <div key={index} className="documento-item">
+                      {renderNonEditableField('Nombre', documento.nombre)}
+                      {renderNonEditableField('Nombre', documento.ruta)}
+                      {renderNonEditableField('Fecha de Carga', documento.fechaCarga)}
+                      <a href={documento.ruta} target="_blank" rel="noopener noreferrer">Ver documento</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Conexiones */}
+            {userData.conexiones && userData.conexiones.length > 0 && (
+              <div className="conexiones-section">
+                <h2>Conexiones</h2>
+                <div className="info-section">
+                  <table className="conexiones-table">
+                    <thead>
+                      <tr>
+                        <th>Nombre de Necesidad</th>
+                        <th>Nombre del Apoyo</th>
+                        <th>Nombre del Aliado</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userData.conexiones.map((conexion, index) => (
+                        <tr key={index}>
+                          <td>{conexion.necesidadNombre || 'No disponible'}</td>
+                          <td>{conexion.apoyoNombre || 'No disponible'}</td>
+                          <td>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
+                          <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
+                          <td>{conexion.estado}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+          ):(
+            tipoUsuario.toLowerCase() === 'aliado de persona moral'?(
+              <>
+              <h1>Información del Aliado de Persona Moral</h1>
+            <div className="school-section">
+              <h2>Información General</h2>
+              <div className="school-info">
+                <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
+                    {renderNonEditableField('Correo', userData.correoElectronico)}
+                    {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+              </div>
+            </div>
+            {/* Información de Persona Moral*/}
+              {userData.persona_moral && (
+                <div className="director-section">
+                  <h2>Información de Persona Fisica</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Area', userData.persona_moral.area)}
+                    {renderNonEditableField('Correo Electrónico', userData.persona_moral.correoElectronico)}
+                    {renderNonEditableField('Teléfono', userData.persona_moral.telefono)}
+                  </div>
+                </div>
+              )}
+            {/* Información de Institucion*/}
+            {userData.institucion && (
+                <div className="director-section">
+                  <h2>Información de Institución</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Giro', userData.institucion.giro)}
+                    {renderNonEditableField('Domicilio', userData.institucion.domicilio)}
+                    {renderNonEditableField('Teléfono', userData.institucion.telefono)}
+                    {renderNonEditableField('Pagina Web', userData.institucion.paginaWeb)}
+                  </div>
+                </div>
+              )}
+            {/* Información de Escritura*/}
+            {userData.escritura_publica && (
+                <div className="director-section">
+                  <h2>Información de Escritura Publica</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Número de Escritura', userData.escritura_publica.numero)}
+                    {renderNonEditableField('Notario', userData.escritura_publica.notario)}
+                    {renderNonEditableField('Ciudad', userData.escritura_publica.ciudad)}
+                  </div>
+                </div>
+              )}
+            {/* Información de Constancia*/}
+            {userData.constancia_fisica && (
+                <div className="director-section">
+                  <h2>Información de Constancia Física</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Régimen', userData.constancia_fisica.regimen)}
+                    {renderNonEditableField('Domicilio', userData.constancia_fisica.domicilio)}
+                  </div>
+                </div>
+              )}
+            {/* Información de Representante*/}
+            {userData.representante && (
+                <div className="director-section">
+                  <h2>Información del Representante</h2>
+                  <div className="info-section">
+                    {renderNonEditableField('Correo Electrónico', userData.representante.correo)}
+                    {renderNonEditableField('Teléfono', userData.representante.telefono)}
+                    {renderNonEditableField('Area', userData.representante.area)}
+                  </div>
+                </div>
+              )}
+            
+            {/*Apoyos */}
+            <div className="necesidades-section">
+              <h2>Apoyos</h2>
+              <div className="info-section">
+                {renderArrayItems(userData.apoyos, (apoyo, index) => (
+                  <div key={index} className="necesidad-item">
+                    {renderNonEditableField('Tipo', apoyo.tipo)}
+                    {renderNonEditableField('Caracteristicas', apoyo.caracteristicas)}
+                    </div>
+                ))}
+              </div>
+            </div>
+            {/* Documentos */}
+            {userData.documentos && userData.documentos.length > 0 && (
+              <div className="documentos-section">
+                <h2>Documentos</h2>
+                <div className="info-section">
+                  {renderArrayItems(userData.documentos, (documento, index) => (
+                    <div key={index} className="documento-item">
+                      {renderNonEditableField('Nombre', documento.nombre)}
+                      {renderNonEditableField('Nombre', documento.ruta)}
+                      {renderNonEditableField('Fecha de Carga', documento.fechaCarga)}
+                      <a href={documento.ruta} target="_blank" rel="noopener noreferrer">Ver documento</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Conexiones */}
+            {userData.conexiones && userData.conexiones.length > 0 && (
+              <div className="conexiones-section">
+                <h2>Conexiones</h2>
+                <div className="info-section">
+                  <table className="conexiones-table">
+                    <thead>
+                      <tr>
+                        <th>Nombre de Necesidad</th>
+                        <th>Nombre del Apoyo</th>
+                        <th>Nombre del Aliado</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {userData.conexiones.map((conexion, index) => (
+                        <tr key={index}>
+                          <td>{conexion.necesidadNombre || 'No disponible'}</td>
+                          <td>{conexion.apoyoNombre || 'No disponible'}</td>
+                          <td>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
+                          <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
+                          <td>{conexion.estado}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+              </>
+            ):(
+              <>
+                <h1>Información del Administrador</h1>
+                  <div className="school-section">
+                    <h2>Información General</h2>
+                    <div className="school-info">
+                      <h3>{userData.nombre || 'Administrador'}</h3>
+                      {renderNonEditableField('Correo', userData.correoElectronico)}
+                      {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+                    </div>
+                  </div>
+              </> 
+            )
           )}
       </div>
     </div>

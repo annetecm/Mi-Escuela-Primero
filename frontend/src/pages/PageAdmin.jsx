@@ -212,6 +212,16 @@ const AdminPage = () => {
             </div>
           </button>
 
+          <button 
+            className={`admin-menu-button`}
+            onClick={() => navigate('/administrador/aliados')}
+          >
+            <div className="admin-button-content">
+              <span>Administrador</span>
+              <span className="admin-icon">👤</span>
+            </div>
+          </button>
+
           <div className="admin-create-button-container" ref={createMenuRef}>
             <button 
                 className="admin-create-button"
@@ -260,13 +270,13 @@ const AdminPage = () => {
                       className='admin-aliado-name'
                       onClick={() => navigate(`/administrador/informacion/${aliado.identificador}/${aliado.tipoUsuario}`)}
                     >
-                      {aliado.nombre}
+                      {aliado.nombre +" 🔍"}
                     </td>
                     <td>{aliado.correo}</td>
                     <td className='admin-RFC'>{aliado.identificador}</td>
                     <td>{aliado.tipoUsuario}</td>
                     <td onClick={() => handleAprobarClick(aliado.identificador, aliado.nombre, aliado.correo, adminData.nombre)}>
-                        {aliado.Estado}
+                        {aliado.Estado + " 🖊️"}
                     </td>
                   </tr>
                 ))}
