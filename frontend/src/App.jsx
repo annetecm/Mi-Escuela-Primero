@@ -109,7 +109,7 @@
       <Route
         path="/evidencia/:id"
         element={
-          <PrivateRoute allowedRoles={['aliado']}>
+          <PrivateRoute allowedRoles={['aliado','escuela']}>
             <EvidenceTimeline />
           </PrivateRoute>
         }
