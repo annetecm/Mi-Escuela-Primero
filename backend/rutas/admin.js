@@ -64,6 +64,68 @@ router.get("/todasEscuelas", verifyToken, async (req, res) => {
   }
 });
 
+//obtener todos los aliados
+router.get("/todosAliados", verifyToken, async(req, res) => {
+  try {
+    const result = await pool.query(`
+      WITH aliado_data AS (
+        SELECT 
+          u."nombre",
+          u."correoElectronico",
+          CASE
+            WHEN a."aliadoId" IS NOT NULL AND pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
+            WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
+            ELSE 'Desconocido'
+          END AS "tipoUsuario",
+          CASE
+            WHEN a."aliadoId" IS NOT NULL AND pf."CURP" IS NOT NULL THEN pf."telefono"
+            WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN pm."telefono"
+            ELSE null
+          END AS "telefono",
+          a."aliadoId"
+        FROM "Aliado" a
+        LEFT JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
+        LEFT JOIN "PersonaFisica" pf ON a."aliadoId" = pf."CURP"
+        LEFT JOIN "PersonaMoral" pm ON a."aliadoId" = pm."RFC"
+        WHERE u."estadoRegistro" = 'aprobado'
+      )
+      SELECT json_agg(
+        json_build_object(
+          'nombre', ad."nombre",
+          'correoElectronico', ad."correoElectronico",
+          'tipoUsuario', ad."tipoUsuario",
+          'telefono', ad."telefono",
+          'aliadoId', ad."aliadoId",
+          'apoyos', (
+            SELECT COALESCE(json_agg(
+              json_build_object(
+                'tipo', ap."tipo",
+                'caracteristicas', ap."caracteristicas"
+              )
+            ), '[]'::json)
+            FROM "Apoyo" ap
+            WHERE ap."aliadoId" = ad."aliadoId"
+          )
+        )
+      ) AS informacion
+      FROM aliado_data ad
+    `);
+    
+    console.log("Todos los aliados obtenidos");
+    
+    const aliados = result.rows[0];
+    
+    const responseData = {
+      informacion: aliados.informacion || []
+    };
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Error al obtener aliados:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 //obtener perfil de otros administradores
 //no se que tan efectivo sea este formato
 router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
@@ -125,7 +187,6 @@ router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
 });
 
 //obtener datos aliado fisicos
-//rt
 router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
   //se pasa el administradorId
   const aliadoId= req.params.aliadoId;
@@ -499,8 +560,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
 
 });
 
-//obtener datos
-//nadie le mueva que los mato
+//obtener datos de la escuela
 router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
   const CCT = req.params.CCT;
   console.log("🔍 Buscando escuela con CCT:", CCT);
