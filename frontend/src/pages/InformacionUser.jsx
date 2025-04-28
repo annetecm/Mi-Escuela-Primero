@@ -16,7 +16,7 @@ function InformacionUser() {
   const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
   
   //get del nombre del administrador
-    useEffect(() => {
+  useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
   
@@ -46,6 +46,7 @@ function InformacionUser() {
           });
     }, []);
 
+  //get de los datos de usuario
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -74,25 +75,34 @@ function InformacionUser() {
           const escuelaData = await escuelaResponse.json();
           setUserData(escuelaData);
 
-        } else {
-          // Lógica para otros tipos de usuarios (aliado, administrador)
-          const endpoint = tipoUsuarioL === 'aliado' 
-            ? `http://localhost:5000/api/aliado/perfil/${identificador}`
-            : `http://localhost:5000/api/admin/perfil/admin`;
-
-          const response = await fetch(endpoint, {
+        } else if (tipoUsuarioL === 'aliado'){ //revisar si se pasa como aliado o ya con el tipo de aliado
+          const aliadoResponse = await fetch(`http://localhost:5000/api/admin/aliado/perfil/${identificador}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           });
 
-          if (!response.ok) {
-            throw new Error('Error al obtener datos del usuario');
+          if (!aliadoResponse.ok) {
+            throw new Error('Error al obtener datos del aliado');
           }
 
-          const data = await response.json();
-          setUserData(data);
+          const aliadoData = await aliadoResponse.json();
+          setUserData(aliadoData);
+        }else{
+          const adminResponse = await fetch(`http://localhost:5000/api/admin/admin/perfil/${identificador}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!adminResponse.ok) {
+            throw new Error('Error al obtener datos del admin');
+          }
+
+          const adminData = await adminResponse.json();
+          setUserData(adminData);
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -404,28 +414,17 @@ function InformacionUser() {
           </div>
         </div>
           ):(
-            <div className="user-info">
-            <h2>{userData.nombre || 'Usuario'}</h2>
-            
-            <div className="info-field">
-              <strong>Correo Electrónico:</strong>
-              {editingField === 'correoElectronico' ? (
-                <>
-                  <input
-                    type="text"
-                    value={newValue}
-                    onChange={(e) => setNewValue(e.target.value)}
-                  />
-                  <button onClick={handleSaveClick}>Guardar</button>
-                  <button onClick={() => setEditingField(null)}>Cancelar</button>
-                </>
-              ) : (
-                <span onClick={() => handleEditClick('correoElectronico')}>
-                  {userData.correoElectronico || 'No disponible'}
-                </span>
-              )}
-            </div>
-          </div> 
+            <>
+              <h1>Información del Administrador</h1>
+                <div className="school-section">
+                  <h2>Información General</h2>
+                  <div className="school-info">
+                    <h3>{userData.nombre || 'Administrador'}</h3>
+                    {renderNonEditableField('Correo', userData.correoElectronico)}
+                    {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+                  </div>
+                </div>
+            </> 
           )}
       </div>
     </div>

@@ -2,6 +2,16 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const verifyToken  = require("../middlewares/authMiddleware");
+const nodemailer = require("nodemailer");
+
+// Configure nodemailer 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "equiporeto6@gmail.com",
+    pass: "bjmnunsytysdwycq", 
+  },
+});
 
 // Test route for debugging
 router.post("/test-route", (req, res) => {
@@ -9,6 +19,64 @@ router.post("/test-route", (req, res) => {
   res.json({ received: true });
 });
 
+//obtener perfil de otros administradores
+//no se que tan efectivo sea este formato
+router.get("admin/perfil:adminId", verifyToken, async(req,res)=>{
+  //se pasa el administradorId
+  const adminId= req.params.adminId;
+  console.log("🔍 Buscando administrador con id :", adminId);
+
+  try{
+    const query=`
+    WITH admin_data AS (
+      SELECT 
+        u."usuarioId",
+        u."nombre",
+        u."correoElectronico",
+        u."estadoRegistro"
+      FROM "Administrador" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE e."AdministradorId" = $1
+    )
+    SELECT 
+      ed.*
+    FROM admin_data ed
+    `;
+    console.log("Ejecutando para ", adminId);
+    if (result.rows.length === 0) {
+      console.log("❌ No se encontró escuela con CCT:", CCT);
+      return res.status(404).json({ 
+        error: "Escuela no encontrada",
+        details: `No existe registro con CCT: ${CCT}`
+      });
+  }
+
+  // Process the data for a cleaner structure
+  const administrador = result.rows[0];
+    
+  // Format data to match frontend expectations
+  const responseData = {
+    // Basic school data
+    ...administrador};
+
+    console.log("✅ Datos encontrados:", responseData);
+    return res.json(responseData);
+
+  } catch (err) {
+    console.error("💥 Error en la consulta:", {
+      message: err.message,
+      stack: err.stack,
+      parameters: [adminId]
+    });
+    
+    return res.status(500).json({ 
+      error: "Error en la consulta",
+      details: err.message,
+      solution: "Verifique que el adminId exista y tenga formato correcto"
+    });
+  }
+
+});
 
 //obtener datos
 //nadie le mueva que los mato
@@ -17,7 +85,6 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
   console.log("🔍 Buscando escuela con CCT:", CCT);
 
   try {
-    // Using the query from paste.txt
     const query = `
     WITH escuela_data AS (
       SELECT 
@@ -255,7 +322,7 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
   }
 });
 
-
+//creo que no sirve
 //update user information
 router.post("/update", verifyToken, async(req,res)=>{
   const {id, field, value}= req.body;
@@ -274,6 +341,7 @@ router.post("/update", verifyToken, async(req,res)=>{
   }
 });
 
+//ni idea si esto deberia de estar aqui, no se cuando lo puse
 //obtener informmacion a partir del identificador
 router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
@@ -345,7 +413,72 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
+    //mandar correo
+    if (cambios.length > 0) {
+      const htmlCambios = `
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Montserrat', sans-serif;
+              background-color: #f5f5f5;
+              margin: 0;
+              padding: 30px;
+            }
+            .container {
+              background: #fff;
+              padding: 25px 30px;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+              max-width: 600px;
+              margin: auto;
+            }
+            h2 {
+              color: #019847;
+              margin-bottom: 20px;
+              font-size: 24px;
+            }
+            p {
+              font-size: 16px;
+              color: #555;
+              margin-bottom: 15px;
+            }
+            ul {
+              padding-left: 20px;
+              margin-top: 15px;
+            }
+            li {
+              margin-bottom: 10px;
+              font-size: 15px;
+              color: #333;
+            }
+            .highlight {
+              font-weight: bold;
+              color: #019847;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Su usuario ha sido aceptado</h2>
+            <p><span class="highlight">Usuario que realizó el cambio:</span> ${usuarioId}</p>
+            <p>Su usario en la pagina mi escuela primero ha sido aceptado. ¡Felicidades!</p>
+          </div>
+        </body>
+      </html>
+    `;
 
+      try {
+        await transporter.sendMail({
+          from: '"Sistema de Notificaciones Mi Escuela Primero" <equiporeto6@gmail.com>',
+          to: adminEmails,
+          subject: "Actualización a aprobado.",
+          html: htmlCambios
+        });
+      } catch (error) {
+        console.error("❌ Error al enviar correo:", error);
+      }
+    }
     return res.json({ message: "Estado actualizado a aprobado" });
   } catch (err) {
     console.error("Error al actualizar estado en /fetch/aprobar:", err.message, err.stack);
@@ -358,25 +491,25 @@ router.get("/fetch/noAprobado", verifyToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-    u."nombre" AS nombre_usuario,
-    u."correoElectronico" AS correo_usuario,
-    u."estadoRegistro" AS estado,
-    COALESCE(pf."CURP"::TEXT, pm."RFC"::TEXT, e."CCT"::TEXT, ad."administradorId"::TEXT) AS identificador,
-    CASE 
-        WHEN a."aliadoId" IS NOT NULL AND pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
-        WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
-        WHEN e."usuarioId" IS NOT NULL THEN 'Escuela'
-        WHEN ad."usuarioId" IS NOT NULL THEN 'Administrador'
-        ELSE 'Desconocido'
-    END AS tipo_usuario
-FROM "Usuario" u
-LEFT JOIN "Administrador" ad ON ad."usuarioId" = u."usuarioId"
-LEFT JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
-LEFT JOIN "PersonaFisica" pf ON a."aliadoId" = pf."CURP"
-LEFT JOIN "PersonaMoral" pm ON a."aliadoId" = pm."RFC"
-LEFT JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
-WHERE u."estadoRegistro" = 'pendiente'
-ORDER BY u."nombre";
+          u."nombre" AS nombre_usuario,
+          u."correoElectronico" AS correo_usuario,
+          u."estadoRegistro" AS estado,
+          COALESCE(pf."CURP"::TEXT, pm."RFC"::TEXT, e."CCT"::TEXT, ad."administradorId"::TEXT) AS identificador,
+          CASE 
+              WHEN a."aliadoId" IS NOT NULL AND pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
+              WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
+              WHEN e."usuarioId" IS NOT NULL THEN 'Escuela'
+              WHEN ad."usuarioId" IS NOT NULL THEN 'Administrador'
+              ELSE 'Desconocido'
+          END AS tipo_usuario
+      FROM "Usuario" u
+      LEFT JOIN "Administrador" ad ON ad."usuarioId" = u."usuarioId"
+      LEFT JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
+      LEFT JOIN "PersonaFisica" pf ON a."aliadoId" = pf."CURP"
+      LEFT JOIN "PersonaMoral" pm ON a."aliadoId" = pm."RFC"
+      LEFT JOIN "Escuela" e ON e."usuarioId" = u."usuarioId"
+      WHERE u."estadoRegistro" = 'pendiente'
+      ORDER BY u."nombre";
     `);
 
     if (result.rows.length === 0) {
