@@ -1,44 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ListedAllies.css";
 import logo from "../assets/logo1.png";
 
 export default function ListedAllies() {
-  const [menuVisible, setMenuVisible] = useState(false)
-  const toggleMenu = () => setMenuVisible(!menuVisible)
-  const navigate = useNavigate()
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [aliadosAgrupados, setAliadosAgrupados] = useState({});
+  const navigate = useNavigate();
 
-  // Datos de ejemplo para los aliados
-  const aliados = [
-    {
-      id: 1,
-      nombre: "Aliado 1",
-      ubicacion: "Ciudad de México",
-      imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqQ__tb8atsMkS3ofDqudycyF1UzS3hyDyFQ&s",
-    },
-    {
-      id: 2,
-      nombre: "Aliado 2",
-      ubicacion: "Guadalajara",
-      imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqQ__tb8atsMkS3ofDqudycyF1UzS3hyDyFQ&s",
-    },
-    {
-      id: 3,
-      nombre: "Aliado 3",
-      ubicacion: "Monterrey",
-      imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqQ__tb8atsMkS3ofDqudycyF1UzS3hyDyFQ&s",
-    },
-    {
-      id: 4,
-      nombre: "Aliado 4",
-      ubicacion: "Puebla",
-      imagen: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqQ__tb8atsMkS3ofDqudycyF1UzS3hyDyFQ&s",
-    },
-  ]
+  const toggleMenu = () => setMenuVisible(!menuVisible);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/escuela/mis-conexiones", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const agrupados = {};
+
+        data.forEach(conexion => {
+          const key = conexion.aliadoId;
+          if (!agrupados[key]) {
+            agrupados[key] = {
+              nombreAliado: conexion.nombreAliado,
+              proyectos: new Set()
+            };
+          }
+          agrupados[key].proyectos.add({
+            apoyo: conexion.apoyo,
+            conexionId: conexion.conexionId
+          });
+        });
+
+        const finalAgrupados = {};
+        for (const [key, value] of Object.entries(agrupados)) {
+          finalAgrupados[key] = {
+            nombreAliado: value.nombreAliado,
+            proyectos: Array.from(value.proyectos)
+          };
+        }
+
+        setAliadosAgrupados(finalAgrupados);
+      })
+      .catch(err => console.error("Error cargando conexiones:", err));
+  }, []);
 
   return (
-    <div className="listedallies-app-container">
-      {/* Barra superior */}
+    <div className="listedallies-container">
       <header className="listedallies-header">
         <button className="listedallies-menu-button" onClick={toggleMenu}>
           &#9776;
@@ -46,8 +56,7 @@ export default function ListedAllies() {
         <img src={logo || "/placeholder.svg"} alt="Logo" className="listedallies-logo" />
       </header>
 
-      <div className={`listedallies-main-content ${menuVisible ? "listedallies-menu-visible" : ""}`}>
-        {/* Menú lateral */}
+      <div className={`listedallies-main-content ${menuVisible ? "menu-visible" : ""}`}>
         {menuVisible && (
           <nav className="listedallies-sidebar">
             <ul>
@@ -58,34 +67,38 @@ export default function ListedAllies() {
           </nav>
         )}
 
-        {/* Contenido principal */}
         <main className="listedallies-content">
           <h1 className="listedallies-title">Mis Aliados</h1>
 
           <div className="listedallies-cards-container">
-            {aliados.map((aliado) => (
-              <div
-               key={aliado.id} 
-               className="listedallies-card">
-                <div className="listedallies-card-image">
-                <img src={aliado.imagen || "/placeholder.svg"} alt={aliado.nombre} />
-                </div>
-                <div className="listedallies-card-info">
-                  <h2 className="listedallies-card-title">{aliado.nombre}</h2>
-                  <div className="listedallies-card-location">
-                    <span className="listedallies-location-icon">📍</span>
-                    <span>{aliado.ubicacion}</span>
+            {Object.keys(aliadosAgrupados).length === 0 ? (
+              <p className="listedallies-empty-text">No tienes aliados asociados aún.</p>
+            ) : (
+              Object.entries(aliadosAgrupados).map(([aliadoId, datos], index) => (
+                <div
+                  key={index}
+                  className="listedallies-card"
+                  onClick={() => navigate(`/evidencia/${datos.proyectos[0].conexionId}`, {
+                    state: { aliadoId: aliadoId }
+                  })}
+                >
+                  <div className="listedallies-card-info">
+                    <h2 className="listedallies-card-title">{datos.nombreAliado}</h2>
+                    <h4 className="listedallies-projects-title">Proyectos asignados:</h4>
+                    <ul className="listedallies-projects-list">
+                      {datos.proyectos.map((proyecto, idx) => (
+                        <li key={idx} className="listedallies-project-item">
+                          {proyecto.apoyo}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <button className="listedallies-message-button">
-                    <span className="listedallies-message-icon">💬</span>
-                    <span>Enviar mensaje</span>
-                  </button>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </main>
       </div>
     </div>
-  )
+  );
 }
