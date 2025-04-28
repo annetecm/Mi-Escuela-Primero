@@ -223,10 +223,10 @@ function InformacionUser() {
             </div>
           </header>
     <div className="user-profile-container">
-      <h1>Información del {tipoUsuario === 'escuela' ? 'Escuela' : 'Usuario'}</h1>
       
       {tipoUsuario.toLowerCase() === 'escuela' ? (
         <>
+        <h1>Información de la Escuela</h1>
           <div className="school-section">
             <h2>Información General</h2>
             <div className="school-info">
@@ -380,10 +380,10 @@ function InformacionUser() {
             </div>
           )}
         </>
-      ) : (
+      ) : 
+        tipoUsuario.toLowerCase() ==='aliado'?(
         <div className="user-info">
           <h2>{userData.nombre || 'Usuario'}</h2>
-          
           <div className="info-field">
             <strong>Correo Electrónico:</strong>
             {editingField === 'correoElectronico' ? (
@@ -403,8 +403,31 @@ function InformacionUser() {
             )}
           </div>
         </div>
-      )}
-    </div>
+          ):(
+            <div className="user-info">
+            <h2>{userData.nombre || 'Usuario'}</h2>
+            
+            <div className="info-field">
+              <strong>Correo Electrónico:</strong>
+              {editingField === 'correoElectronico' ? (
+                <>
+                  <input
+                    type="text"
+                    value={newValue}
+                    onChange={(e) => setNewValue(e.target.value)}
+                  />
+                  <button onClick={handleSaveClick}>Guardar</button>
+                  <button onClick={() => setEditingField(null)}>Cancelar</button>
+                </>
+              ) : (
+                <span onClick={() => handleEditClick('correoElectronico')}>
+                  {userData.correoElectronico || 'No disponible'}
+                </span>
+              )}
+            </div>
+          </div> 
+          )}
+      </div>
     </div>
   );
 }
