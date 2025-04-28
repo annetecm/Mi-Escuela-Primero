@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import logo from "../assets/logo1.png";
-import "../styles/SchoolProfile.css";
+import "../styles/InformationUser.css";
 import { useNavigate } from "react-router-dom";
+import logo from '../assets/logo.png';
+import profile from '../assets/profile.png';
 
 function InformacionUser() {
   const { identificador, tipoUsuario } = useParams();
@@ -12,7 +13,39 @@ function InformacionUser() {
   const [newValue, setNewValue] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
   
+  //get del nombre del administrador
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+  
+        fetch("http://localhost:5000/api/admin/perfil/admin", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+          })
+          .then(data => {
+            setAdminData(prevState => ({
+              ...prevState,
+              nombre: data.nombre || 'Administrador'
+            }));
+          })
+          .catch(err => {
+            console.error("Error al cargar perfil:", err);
+            setAdminData(prevState => ({
+              ...prevState,
+              nombre: 'Administrador'
+            }));
+          });
+    }, []);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -177,6 +210,18 @@ function InformacionUser() {
   };
 
   return (
+    <div className="usuario-escuela-panel-container">
+          {/* Header */}
+          <header className="usuario-escuela-panel-header">
+            <div className="usuario-escuela-logo-container">
+              <img src={logo} alt="Logo" className="usuario-escuela-logo" />
+              <h1 className="usuario-escuela-header-title">Panel de control</h1>
+            </div>
+            <div className="admin-info">
+              <img src= {profile} alt="Admin" className="admin-avatar" />
+              <span className="admin-name">{adminData.nombre}</span>
+            </div>
+          </header>
     <div className="user-profile-container">
       <h1>Información del {tipoUsuario === 'escuela' ? 'Escuela' : 'Usuario'}</h1>
       
@@ -302,38 +347,6 @@ function InformacionUser() {
             </div>
           )}
 
-          {/* Reportes de Avance */}
-          {userData.reportesAvance && userData.reportesAvance.length > 0 && (
-            <div className="reportes-section">
-              <h2>Reportes de Avance</h2>
-              <div className="info-section">
-                {renderArrayItems(userData.reportesAvance, (reporte, index) => (
-                  <div key={index} className="reporte-item">
-                    {renderNonEditableField('Tipo', reporte.tipo)}
-                    {renderNonEditableField('Fecha', reporte.fecha)}
-                    {renderNonEditableField('Descripción', reporte.descripcion)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Encuestas de Evaluación */}
-          {userData.encuestasEvaluacion && userData.encuestasEvaluacion.length > 0 && (
-            <div className="encuestas-section">
-              <h2>Encuestas de Evaluación</h2>
-              <div className="info-section">
-                {renderArrayItems(userData.encuestasEvaluacion, (encuesta, index) => (
-                  <div key={index} className="encuesta-item">
-                    {renderNonEditableField('Tipo', encuesta.tipo)}
-                    {renderNonEditableField('Fecha', encuesta.fecha)}
-                    {renderNonEditableField('Respuestas', encuesta.respuestas)}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Conexiones */}
           {userData.conexiones && userData.conexiones.length > 0 && (
             <div className="conexiones-section">
@@ -342,8 +355,9 @@ function InformacionUser() {
                 <table className="conexiones-table">
                   <thead>
                     <tr>
-                      <th>Necesidad ID</th>
-                      <th>Apoyo ID</th>
+                      <th>Nombre de Necesidad</th>
+                      <th>Nombre del Apoyo</th>
+                      <th>Nombre del Aliado</th>
                       <th>Fecha Inicio</th>
                       <th>Fecha Fin</th>
                       <th>Estado</th>
@@ -352,10 +366,11 @@ function InformacionUser() {
                   <tbody>
                     {userData.conexiones.map((conexion, index) => (
                       <tr key={index}>
-                        <td>{conexion.necesidadId}</td>
-                        <td>{conexion.apoyoId}</td>
-                        <td>{conexion.fechaInicio}</td>
-                        <td>{conexion.fechaFin}</td>
+                        <td>{conexion.necesidadNombre || 'No disponible'}</td>
+                        <td>{conexion.apoyoNombre || 'No disponible'}</td>
+                        <td>{conexion.aliadoNombre || 'No disponible'}</td>
+                        <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
+                        <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                         <td>{conexion.estado}</td>
                       </tr>
                     ))}
@@ -389,6 +404,7 @@ function InformacionUser() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -111,19 +111,35 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
       JOIN "Escuela" e ON u."usuarioId" = e."usuarioId"
       WHERE e."CCT" = $1
     ),
-    conexiones_data AS (
-      SELECT json_agg(
-        json_build_object(
-          'necesidadId', c."necesidadId",
-          'apoyoId', c."apoyoId",
-          'fechaInicio', c."fechaInicio",
-          'fechaFin', c."fechaFin",
-          'estado', c."estado"
-        )
-      ) AS conexiones
-      FROM "Conexion" c
-      WHERE c."CCT" = $1
-    )
+   conexiones_data AS (
+        SELECT 
+          json_agg(
+            json_build_object(
+              'necesidadId', c."necesidadId",
+              'apoyoId', c."apoyoId",
+              'fechaInicio', c."fechaInicio",
+              'fechaFin', c."fechaFin",
+              'estado', c."estado",
+              'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
+              'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
+              'aliadoNombre', COALESCE(
+                CASE 
+                  WHEN pf."razon" IS NOT NULL THEN pf."razon"
+                  WHEN pm."area" IS NOT NULL THEN pm."area"
+                  ELSE 'Aliado desconocido'
+                END, 
+                'No disponible'
+              )
+            )
+          ) AS conexiones
+        FROM "Conexion" c
+        LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+        LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
+        LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
+        LEFT JOIN "PersonaFisica" pf ON al."aliadoId" = pf."CURP"
+        LEFT JOIN "PersonaMoral" pm ON al."aliadoId" = pm."RFC"
+        WHERE c."CCT" = $1
+      )
     
    SELECT 
       ed.*,
