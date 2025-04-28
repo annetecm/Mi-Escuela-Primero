@@ -8,7 +8,10 @@
   import EditSchool from './pages/EditSchool';
   import AllyMap from './pages/AllyMap';
   import ListedSchools from './pages/ListedSchools';
+  import ListedSchoolsAdmin from './pages/ListedSchoolAdmin';
   import ListedAllies from './pages/ListedAllies';
+  import ListedAdmin from './pages/ListedAdmin';
+  import ListedAlliesAdmin from './pages/ListedAlliesAdmin';
   import EditPhysical from './pages/EditPhysical';
   import SignOut from './pages/SignOut';
   import PrivateRoute from './rutas/PrivateRoute';
@@ -16,6 +19,7 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import InformacionUser from './pages/InformacionUser';
 
   function App() {
     return (
@@ -57,17 +61,41 @@
           }
         />
 
-        {/* Administrador todavia no esta */}
+        {/* Administrador*/}
         <Route path="/administrador/perfil" element={
         <PrivateRoute allowedRoles={['administrador']}>
           <AdminPage/>
         </PrivateRoute>
         } />
         <Route
-          path="/administrador/page"
+          path="/administrador/escuelas"
           element={
             <PrivateRoute allowedRoles={['administrador']}>
-              <AllyMap />
+              <ListedSchoolsAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/aliados"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAlliesAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/informacion/:identificador/:tipoUsuario"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <InformacionUser />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/administrador"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAdmin />
             </PrivateRoute>
           }
         />

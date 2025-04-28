@@ -33,5 +33,4 @@ app.use('/api/admin', adminRouter);
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log("hola");
 });

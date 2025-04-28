@@ -15,6 +15,7 @@ button:hover, button, button:focus {
   min-height: 100vh;
   width: 100vw;
   background-color: #f5f5f5;
+  overflow-x: hidden;
 }
 /* Loading State */
 .admin-loading {
@@ -54,19 +55,19 @@ button:hover, button, button:focus {
   margin: 0;
 }
 
-.admin-admin-info {
+.admin-info {
   display: flex;
   align-items: center;
 }
 
-.admin-admin-avatar {
+.admin-avatar {
   border-radius: 50%;
   margin-right: 10px;
-  height:80%;
-  width:65px;
+  height:90%;
+  width:70px;
 }
 
-.admin-admin-name {
+.admin-name {
   font-size: 1.2em;
   font-weight: 700;
 }
@@ -76,6 +77,7 @@ button:hover, button, button:focus {
   display: flex;
   flex: 1;
   padding: 20px;
+  overflow-y: auto;
 }
 
 /* Sidebar Styles */
@@ -87,6 +89,8 @@ button:hover, button, button:focus {
   margin-right: 2%;
   margin-left: 3%;
   box-shadow: 0 2px 5px black;
+  max-height: calc(100vh - 150px); /* Limit height and enable scrolling if needed */
+  overflow-y: auto;
 }
 
 .admin-sidebar-header {
@@ -123,13 +127,16 @@ button:hover, button, button:focus {
 /* Dropdown Menu Styles */
 .admin-dropdown-menu {
   position: absolute;
+  display: block;
   right: 0;
-  top: 100%;
+  top: 90%;
   background-color: white;
   border-radius: 6px;
   box-shadow: 0 3px 10px black;
   min-width: 180px;
   z-index: 10;
+  max-height: 300px; /* Limitamos la altura máxima para que el contenido sea desplazable */
+  overflow-y: auto;
 }
 
 .admin-dropdown-item {
@@ -140,7 +147,7 @@ button:hover, button, button:focus {
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: black;
 }
 
@@ -178,9 +185,16 @@ button:hover, button, button:focus {
   box-shadow: 0 4px 6px black;
 }
 
+
+.admin-create-button-container .admin-dropdown-menu {
+  top: 0;
+  right: auto;
+  left: 100px; /* Adjust position to appear beside the + button */
+  margin-top: 65px;
+}
 .admin-create-button-container {
   position: relative;
-  margin-top: 40px;
+  margin-bottom: 80px; /* Add space below to ensure dropdown fits */
 }
 
 .admin-button-content {
@@ -197,7 +211,7 @@ button:hover, button, button:focus {
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-top: 40px;
+  margin-top: 30px;
   color: black;
   font-size: 1.5em;
 }
@@ -222,7 +236,6 @@ button:hover, button, button:focus {
   
 }
 
-/* Content Area Styles */
 .admin-content-area {
   flex: 1;
   background-color: white;
@@ -230,18 +243,22 @@ button:hover, button, button:focus {
   padding: 20px;
   box-shadow: 0 2px 5px black;
   margin-right: 3%;
+  max-height: calc(100vh - 150px); /* Limit height based on viewport */
+  overflow-y: auto; /* Enable vertical scrolling for content */
 }
 
 .admin-table-container {
   /*border: 2px solid black;*/
+  display: flex;
+  flex-direction: column;
+  /**/
   border-radius: 8px;
-  padding: 10px;
+  padding: 0px, 10px, 10px;
 }
 
 .admin-table-title {
   font-size: 1.5em;
   color: #333;
-  margin-top: 0;
   margin-bottom: 20px;
 }
 
@@ -249,6 +266,24 @@ button:hover, button, button:focus {
   width: 100%;
   border-collapse: collapse;
   color:black;
+  margin-right: 5px;
+}
+
+/* Add styles for the scrollbar to make it more visible */
+.admin-sidebar::-webkit-scrollbar,
+.admin-content-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb,
+.admin-content-area::-webkit-scrollbar-thumb {
+  background-color: #439846;
+  border-radius: 4px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track,
+.admin-content-area::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
 }
 
 .admin-data-table th {
@@ -256,7 +291,7 @@ button:hover, button, button:focus {
   color: white;
   text-align: left;
   padding: 12px 15px;
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .admin-aliado-name{
@@ -268,6 +303,7 @@ button:hover, button, button:focus {
   padding: 12px 15px;
   border-bottom: 1px solid black;
   font-weight: 500;
+  font-size: 1em;
 }
 
 .admin-data-table tr:last-child td {
@@ -278,7 +314,6 @@ button:hover, button, button:focus {
   color: blue;
 }
 
-/* Pagination Styles */
 .admin-pagination {
   display: flex;
   justify-content: center;

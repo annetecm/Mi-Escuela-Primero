@@ -130,7 +130,6 @@ router.post("/register", async (req, res) => {
     }
   }
   
-  
     // 9. Insert TramiteGobierno (optional)
     if (req.body.tramiteGobierno) {
       const { instancia, estado, folioOficial, nivelGobierno, descripcion } = req.body.tramiteGobierno;
@@ -140,11 +139,6 @@ router.post("/register", async (req, res) => {
         [CCT, instancia, estado, folioOficial, nivelGobierno, descripcion]
       );
     }
-  
-  
-
-    
-    
 
     // 10. Insert Supervisor (not optional)
     const {
@@ -173,8 +167,6 @@ router.post("/register", async (req, res) => {
       ]
     );
     
-    
-
     // 11. Insert MesaDirectiva (optional)
     if (escuela.mesaDirectiva) {
       await client.query(
@@ -192,8 +184,6 @@ router.post("/register", async (req, res) => {
       correoElectronico: correoDir,
       telefono: telDir,
     } = escuela.director;
-    
-    
   
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
@@ -266,7 +256,6 @@ router.post("/register", async (req, res) => {
   } finally {
     client.release();
   }
-
 
 });
 
