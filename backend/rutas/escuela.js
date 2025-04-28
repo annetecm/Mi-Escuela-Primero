@@ -663,7 +663,7 @@ const tiposMap = {
 oldData.apoyos.forEach((apoyoAntiguo) => {
   let tipo = apoyoAntiguo.tipo;
 
-  // ✅ Si el tipo es una clave (como "osc"), tradúcelo a nombre bonito
+  // Si el tipo es una clave (como "osc"), tradúcelo a nombre bonito
   if (tiposMap[tipo]) {
     tipo = tiposMap[tipo];
   }
@@ -790,4 +790,45 @@ if (cambios.length > 0) {
     client.release();
   }
 });
+
+// Obtener aliados conectados con esta escuela
+router.get('/mis-conexiones', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    // Primero obtenemos el CCT de la escuela
+    const escuelaResult = await pool.query(`
+      SELECT "CCT" 
+      FROM "Escuela" 
+      WHERE "usuarioId" = $1
+    `, [usuarioId]);
+
+    if (escuelaResult.rows.length === 0) {
+      return res.status(404).json({ error: "Escuela no encontrada" });
+    }
+
+    const CCT = escuelaResult.rows[0].CCT;
+
+    // Ahora obtenemos las conexiones asociadas a esta escuela
+    const conexionesResult = await pool.query(`
+      SELECT 
+        c."conexionId",
+        a."aliadoId",
+        u."nombre" AS "nombreAliado",
+        ap."caracteristicas" AS "apoyo"
+      FROM "Conexion" c
+      JOIN "Aliado" a ON c."aliadoId" = a."aliadoId"
+      JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
+      JOIN "Apoyo" ap ON c."apoyoId" = ap."apoyoId"
+      WHERE c."CCT" = $1
+      ORDER BY u."nombre" ASC
+    `, [CCT]);
+
+    return res.json(conexionesResult.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener conexiones de aliados:', err);
+    return res.status(500).json({ error: 'Error interno al cargar aliados.' });
+  }
+});
+
 module.exports = router;
