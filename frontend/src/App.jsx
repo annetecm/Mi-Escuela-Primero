@@ -10,6 +10,7 @@
   import ListedSchools from './pages/ListedSchools';
   import ListedSchoolsAdmin from './pages/ListedSchoolAdmin';
   import ListedAllies from './pages/ListedAllies';
+  import ListedAdmin from './pages/ListedAdmin';
   import ListedAlliesAdmin from './pages/ListedAlliesAdmin';
   import EditPhysical from './pages/EditPhysical';
   import SignOut from './pages/SignOut';
@@ -60,7 +61,7 @@
           }
         />
 
-        {/* Administrador todavia no esta */}
+        {/* Administrador*/}
         <Route path="/administrador/perfil" element={
         <PrivateRoute allowedRoles={['administrador']}>
           <AdminPage/>
@@ -87,6 +88,14 @@
           element={
             <PrivateRoute allowedRoles={['administrador']}>
               <InformacionUser />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/administrador"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAdmin />
             </PrivateRoute>
           }
         />

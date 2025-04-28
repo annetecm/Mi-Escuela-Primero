@@ -214,7 +214,7 @@ const AdminPage = () => {
 
           <button 
             className={`admin-menu-button`}
-            onClick={() => navigate('/administrador/aliados')}
+            onClick={() => navigate('/administrador/administrador')}
           >
             <div className="admin-button-content">
               <span>Administrador</span>

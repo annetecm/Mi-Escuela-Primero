@@ -126,6 +126,41 @@ router.get("/todosAliados", verifyToken, async(req, res) => {
   }
 });
 
+//obtener todos los administradores
+router.get("/todosadmin", verifyToken, async(req,res)=>{
+  
+  try{
+    const result = await pool.query(`
+    WITH admin_data AS (
+      SELECT json_agg(
+        json_build_object(
+          'id', e."administradorId", 
+          'nombre', u."nombre",
+          'correoElectronico', u."correoElectronico"
+        )
+      ) AS informacion
+      FROM "Administrador" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE u."estadoRegistro" = 'aprobado'
+    )
+    SELECT 
+      COALESCE(ed.informacion, '[]'::json) as informacion
+    FROM admin_data ed
+    `);
+    
+    const administrador = result.rows[0];
+    
+    const responseData = {
+      informacion: Array.isArray(administrador.informacion) ? administrador.informacion : []
+    };
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Error al obtener perfil de admin:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 //obtener perfil de otros administradores
 //no se que tan efectivo sea este formato
 router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
