@@ -65,7 +65,7 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
     const conexiones = await db.query(`
       SELECT 
         c."conexionId",
-        c."CCT",
+        e."CCT",
         u."nombre" AS "nombreEscuela",
         n."nombre" AS "necesidad"
       FROM "Conexion" c
@@ -73,6 +73,7 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
       JOIN "Usuario" u ON u."usuarioId" = e."usuarioId"
       JOIN "Necesidad" n ON n."necesidadId" = c."necesidadId"
       WHERE c."aliadoId" = $1
+      ORDER BY u."nombre" ASC
     `, [aliadoId]);
 
     return res.json(conexiones.rows);
@@ -81,5 +82,6 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
+
 
 module.exports = router;
