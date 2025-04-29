@@ -215,7 +215,7 @@ router.post("/register", async (req, res) => {
     if (documento && documento.length > 0) {
       for (const doc of documento) {
         try{
-        console.log("📝 Documento a insertar:", doc);
+        console.log("Documento a insertar:", doc);
         await client.query(`
           INSERT INTO "Documento" ("tipo", "ruta", "fechaCarga", "usuarioId", "nombre")
           VALUES ($1, $2, NOW(), $3, $4);
@@ -225,9 +225,9 @@ router.post("/register", async (req, res) => {
           usuarioId,
           doc.nombre
         ]);
-        console.log("✅ Documento insertado:", doc.nombre);
+        console.log("Documento insertado:", doc.nombre);
       } catch (insertErr) {
-        console.error("❌ Error al insertar documento:", insertErr);
+        console.error("Error al insertar documento:", insertErr);
       }
       }
     } 
@@ -286,7 +286,7 @@ router.get("/perfil", verifyToken, async (req, res) => {
 
     return res.json(result.rows[0]);
   } catch (err) {
-    console.error("❌ Error al obtener perfil de escuela:", err);
+    console.error("Error al obtener perfil de escuela:", err);
     return res.status(500).json({ error: "Error interno del servidor" });
   }
 });
@@ -445,7 +445,7 @@ router.get("/editar-perfil", verifyToken, async (req, res) => {
   
     client.release();
   } catch (err) {
-    console.error("❌ Error en editar-perfil:", err);
+    console.error("Error en editar-perfil:", err);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
@@ -772,9 +772,9 @@ if (cambios.length > 0) {
       subject: "Actualización de datos en escuela.",
       html: htmlCambios
     });
-    console.log("✅ Correo de cambios enviado a admins.");
+    console.log("Correo de cambios enviado a admins.");
   } catch (error) {
-    console.error("❌ Error al enviar correo:", error);
+    console.error("Error al enviar correo:", error);
   }
   
 }
@@ -825,7 +825,7 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
 
     return res.json(conexionesResult.rows);
   } catch (err) {
-    console.error('❌ Error al obtener conexiones de aliados:', err);
+    console.error('Error al obtener conexiones de aliados:', err);
     return res.status(500).json({ error: 'Error interno al cargar aliados.' });
   }
 });

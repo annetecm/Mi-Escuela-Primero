@@ -78,7 +78,7 @@ router.get('/mis-conexiones', verifyToken, async (req, res) => {
 
     return res.json(conexiones.rows);
   } catch (err) {
-    console.error('❌ Error al obtener conexiones:', err);
+    console.error('Error al obtener conexiones:', err);
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

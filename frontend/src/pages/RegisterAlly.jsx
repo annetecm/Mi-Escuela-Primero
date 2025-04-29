@@ -143,12 +143,12 @@ import aliadoImg from '../assets/aliado.jpg';
           navigate('/registration-success');
         }, 100);
       } catch (err) {
-        console.error('❌ No es JSON válido:', err);
+        console.error('No es JSON válido:', err);
         alert('Respuesta no válida del servidor:\n' + text);
       }
   
     } catch (error) {
-      console.error('❌ Error de red:', error);
+      console.error('Error de red:', error);
       alert('Error de red:\n' + error.message);
     }
   };
@@ -452,13 +452,13 @@ const juridico=[
                             nombre: file.name,
                           };
                           setDocumentosSubidos((prev) => [...prev, nuevoDoc]);
-                          console.log("📄 Documento guardado:", nuevoDoc);
+                          console.log("Documento guardado:", nuevoDoc);
                         } else {
-                          console.error("❌ Error al subir documento:", data.reason);
+                          console.error("Error al subir documento:", data.reason);
                           alert("Hubo un error al subir el archivo.");
                         }
                       } catch (err) {
-                        console.error("❌ Error de red:", err);
+                        console.error("Error de red:", err);
                         alert("Error al subir el archivo. Intenta nuevamente.");
                       }
                     }

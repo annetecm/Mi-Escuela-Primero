@@ -30,17 +30,17 @@ router.post("/crear-chat", async (req, res) => {
 router.post("/enviar-mensaje", async (req, res) => {
   const { conexionId, emisor, mensaje } = req.body;
   
-  console.log("🔎 Datos recibidos en POST /enviar-mensaje:", req.body);
+  console.log("Datos recibidos en POST /enviar-mensaje:", req.body);
 
   if (!conexionId || !emisor || !mensaje) {
-    console.log("❌ Faltan datos: ", { conexionId, emisor, mensaje });
+    console.log("Faltan datos: ", { conexionId, emisor, mensaje });
     return res.status(400).json({ error: "Faltan datos para guardar el mensaje." });
   }
 
   try {
     const chat = await pool.query(`SELECT * FROM "Chat" WHERE "conexionId" = $1`, [conexionId]);
     if (chat.rows.length === 0) {
-      console.log("❌ Chat no encontrado para conexionId:", conexionId);
+      console.log("Chat no encontrado para conexionId:", conexionId);
       return res.status(404).json({ error: "Chat no encontrado para esta conexión." });
     }
 

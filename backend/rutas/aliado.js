@@ -366,7 +366,7 @@ router.get('/escuela/:cct', async (req, res) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("❌ Error al obtener datos de escuela:", err);
+    console.error("Error al obtener datos de escuela:", err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
