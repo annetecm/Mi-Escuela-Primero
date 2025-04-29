@@ -7,6 +7,7 @@ export default function ListedAllies() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [aliadosAgrupados, setAliadosAgrupados] = useState({});
   const navigate = useNavigate();
+  
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
@@ -88,12 +89,23 @@ export default function ListedAllies() {
                     <ul className="listedallies-projects-list">
                       {datos.proyectos.map((proyecto, idx) => (
                         <li key={idx} className="listedallies-project-item">
-                          {proyecto.apoyo}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                      {proyecto.apoyo}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="listedallies-card-footer">
+                <button
+                  className="listedallies-message-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/chat/${datos.proyectos[0].conexionId}`);
+                  }}
+                >
+                  💬 Enviar mensaje
+                </button>
+              </div>
+            </div>
               ))
             )}
           </div>

@@ -23,6 +23,7 @@
   import ConexionInfo from './pages/ConexionesAdmin';
   import ChangePassword from './pages/ChangePassword';
   import ResetPassword from './pages/ResetPassword';
+  import ChatPage from './pages/ChatPage';
 
 
   function App() {
@@ -55,7 +56,9 @@
               <ListedSchools />
             </PrivateRoute>
           }
+          
         />
+        
         <Route
           path="/editar/aliado"
           element={
@@ -137,6 +140,15 @@
             </PrivateRoute>
           }
         />
+          <Route
+            path="/chat/:conexionId"
+            element={
+              <PrivateRoute allowedRoles={['escuela', 'aliado']}>
+                <ChatPage />
+              </PrivateRoute>
+            }
+        />
+
          <Route
         path="/listado/aliados"
         element={
