@@ -93,7 +93,8 @@ function LoginPage() {
           <p>¿Aún no tienes una cuenta?</p>
           <p>
             Si te gustaría apoyar una escuela, <a href="#" onClick={handleRegistroAliado}>crea una cuenta de aliado</a><br />
-            Si tu escuela necesita apoyo, <a href="#" onClick={handleRegistroEscuela}>regístrala aquí</a>
+            Si tu escuela necesita apoyo, <a href="#" onClick={handleRegistroEscuela}>regístrala aquí</a><br />
+            ¿Olvidaste tu contraseña? <a href="#" onClick={() => navigate('/recuperar-password')}>Recupérala aquí</a>
           </p>
         </div>
       </div>
