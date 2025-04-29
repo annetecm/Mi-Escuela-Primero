@@ -165,6 +165,7 @@ export default function ListedSchools() {
                   {renderNonEditableField('Correo Electrónico ', aliado.correoElectronico)}
                   {renderNonEditableField('Tipo de Usuario ', aliado.tipoUsuario)}
                   {renderNonEditableField('Teléfono ', aliado.telefono)}
+                  {renderNonEditableField('Identificador ', aliado.identificador)}
                   
                   {/* Apoyos */}
                   <div className="necesidades-section">

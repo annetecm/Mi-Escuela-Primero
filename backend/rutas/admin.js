@@ -82,6 +82,11 @@ router.get("/todosAliados", verifyToken, async(req, res) => {
             WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN pm."telefono"
             ELSE null
           END AS "telefono",
+          CASE
+            WHEN a."aliadoId" IS NOT NULL AND pf."CURP" IS NOT NULL THEN pf."CURP"
+            WHEN a."aliadoId" IS NOT NULL AND pm."RFC" IS NOT NULL THEN pm."RFC"
+            ELSE null
+          END AS "identificador",
           a."aliadoId"
         FROM "Aliado" a
         LEFT JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
@@ -95,6 +100,7 @@ router.get("/todosAliados", verifyToken, async(req, res) => {
           'correoElectronico', ad."correoElectronico",
           'tipoUsuario', ad."tipoUsuario",
           'telefono', ad."telefono",
+          'identificador', ad."identificador",
           'aliadoId', ad."aliadoId",
           'apoyos', (
             SELECT COALESCE(json_agg(
@@ -241,6 +247,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
     ),
     persona_fisica AS(
       SELECT
+        "CURP" AS curp_persona,
         "razon" AS razon_persona,
         "correoElectronico" AS correo_persona,
         "telefono" AS telefono_persona
@@ -293,6 +300,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
     )
     SELECT 
       ed.*,
+      COALESCE(pf.curp_persona, null) as curp_persona,
       COALESCE(pf.razon_persona, null) as razon_persona,
       COALESCE(pf.correo_persona, null) as correo_persona,
       COALESCE(pf.telefono_persona, null) as telefono_persona,
@@ -324,8 +332,9 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
     // Basic school data
     ...aliadoF,
       
-    // Director information
+    // Persona Fisica information
     persona_fisica: aliadoF.razon_persona ? {
+      curp: aliadoF.curp_persona,
       razon: aliadoF.razon_persona,
       correoElectronico: aliadoF.correo_persona,
       telefono: aliadoF.telefono_persona
@@ -338,12 +347,10 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
   };
 
     //remove temporary fields
+    delete responseData.curp_persona;
     delete responseData.razon_persona;
     delete responseData.correo_persona;
     delete responseData.telefono_persona;
-    //delete responseData.apoyos;
-    delete responseData.documentos;
-    delete responseData.conexiones;
 
     console.log("✅ Datos encontrados:", responseData);
     return res.json(responseData);
@@ -384,6 +391,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     ),
     persona_moral AS(
       SELECT
+        "RFC" AS rfc_persona,
         "area" AS area_persona,
         "correoElectronico" AS correo_persona,
         "telefono" AS telefono_persona
@@ -468,6 +476,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     )
     SELECT 
       ed.*,
+      COALESCE(pf.rfc_persona, null) as rfc_persona,
       COALESCE(pf.area_persona, null) as area_persona,
       COALESCE(pf.correo_persona, null) as correo_persona,
       COALESCE(pf.telefono_persona, null) as telefono_persona,
@@ -500,10 +509,10 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     const result= await pool.query(query,[aliadoId]);
 
     if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", aliadoId);
+      console.log("❌ No se encontró escuela con RFC:", aliadoId);
       return res.status(404).json({ 
         error: "Escuela no encontrada",
-        details: `No existe registro con CCT: ${aliadoId}`
+        details: `No existe registro con RFC: ${aliadoId}`
       });
   }
 
@@ -517,6 +526,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
       
     // Persona Moral information
     persona_moral: aliadoF.area_persona ? {
+      rfc: aliadoF.rfc_persona,
       area: aliadoF.area_persona,
       correoElectronico: aliadoF.correo_persona,
       telefono: aliadoF.telefono_persona
@@ -557,6 +567,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
   };
 
     //remove temporary fields
+    delete responseData.rfc_persona;
     delete responseData.area_persona;
     delete responseData.correo_persona;
     delete responseData.telefono_persona;
@@ -572,9 +583,6 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     delete responseData.correo_representante;
     delete responseData.telefono_representante;
     delete responseData.area_representante;
-    //delete responseData.apoyos;
-    delete responseData.documentos;
-    delete responseData.conexiones;
 
     console.log("✅ Datos encontrados:", responseData);
     return res.json(responseData);
@@ -686,7 +694,8 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
         json_build_object(
           'nombre', d."nombre",
           'ruta', d."ruta",
-          'fechaCarga', d."fechaCarga"
+          'fechaCarga', d."fechaCarga",
+          'tipo', d."tipo"
         )
       ) AS documentos
       FROM "Documento" d
@@ -729,11 +738,11 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
       COALESCE(sd.supervisor_medioContacto, null) as supervisor_medioContacto,
       COALESCE(sd.supervisor_antiguedad, null) as supervisor_antiguedad,
       COALESCE(md.mesa_personas, null) as mesa_personas,
-      COALESCE(nd.necesidades, '{}')::json as necesidades,
-      COALESCE(ap.apoyos_previos, '{}')::json as apoyos_previos,
-      COALESCE(td.tramites_gobierno, '{}')::json as tramites_gobierno,
-      COALESCE(doc.documentos, '{}')::json as documentos,
-      COALESCE(con.conexiones, '{}')::json as conexiones
+      COALESCE(nd.necesidades, '[]'::json) as necesidades,
+      COALESCE(ap.apoyos_previos, '[]'::json) as apoyos_previos,
+      COALESCE(td.tramites_gobierno, '[]'::json) as tramites_gobierno,
+      COALESCE(doc.documentos, '[]'::json) as documentos,
+      COALESCE(con.conexiones, '[]'::json) as conexiones
     FROM escuela_data ed
     LEFT JOIN director_data dd ON true
     LEFT JOIN supervisor_data sd ON true
@@ -809,8 +818,6 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
     delete responseData.mesa_personas;
     delete responseData.apoyos_previos;
     delete responseData.tramites_gobierno;
-    delete responseData.documentos;
-    delete responseData.conexiones;
 
     console.log("✅ Datos encontrados:", responseData);
     return res.json(responseData);

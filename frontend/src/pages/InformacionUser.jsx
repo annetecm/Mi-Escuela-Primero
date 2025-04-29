@@ -365,8 +365,9 @@ function InformacionUser() {
                 {renderArrayItems(userData.documentos, (documento, index) => (
                   <div key={index} className="documento-item">
                     {renderNonEditableField('Nombre', documento.nombre)}
-                    {renderNonEditableField('Nombre', documento.ruta)}
+                    {renderNonEditableField('Ruta', documento.ruta)}
                     {renderNonEditableField('Fecha de Carga', documento.fechaCarga)}
+                    {renderNonEditableField('Tipo', documento.tipo)}
                     <a href={documento.ruta} target="_blank" rel="noopener noreferrer">Ver documento</a>
                   </div>
                 ))}
@@ -424,6 +425,7 @@ function InformacionUser() {
                 <div className="director-section">
                   <h2>Información de Persona Fisica</h2>
                   <div className="info-section">
+                    {renderNonEditableField('CURP', userData.persona_fisica.curp)}
                     {renderNonEditableField('Razón', userData.persona_fisica.razon)}
                     {renderNonEditableField('Correo Electrónico', userData.persona_fisica.correoElectronico)}
                     {renderNonEditableField('Teléfono', userData.persona_fisica.telefono)}
@@ -506,8 +508,9 @@ function InformacionUser() {
             {/* Información de Persona Moral*/}
               {userData.persona_moral && (
                 <div className="director-section">
-                  <h2>Información de Persona Fisica</h2>
+                  <h2>Información de Persona Moral</h2>
                   <div className="info-section">
+                    {renderNonEditableField('RFC', userData.persona_moral.rfc)}
                     {renderNonEditableField('Area', userData.persona_moral.area)}
                     {renderNonEditableField('Correo Electrónico', userData.persona_moral.correoElectronico)}
                     {renderNonEditableField('Teléfono', userData.persona_moral.telefono)}
