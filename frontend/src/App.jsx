@@ -16,6 +16,8 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import EditMoral from "./pages/EditMoral"; 
+  
 
   function App() {
     return (
@@ -48,14 +50,17 @@
             </PrivateRoute>
           }
         />
-        <Route
-          path="/editar/aliado"
-          element={
-            <PrivateRoute allowedRoles={['aliado']}>
-              <EditPhysical />
-            </PrivateRoute>
-          }
-        />
+       <Route path="/editar/aliado/fisico" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditPhysical />
+  </PrivateRoute>
+} />
+<Route path="/editar/aliado/moral" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditMoral />
+  </PrivateRoute>
+} />
+
 
         {/* Administrador todavia no esta */}
         <Route path="/administrador/perfil" element={
