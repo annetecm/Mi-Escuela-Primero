@@ -88,7 +88,6 @@ function RegisterSchool() {
       tieneUSAER: "",
       numeroDocentes: "",
       estudiantesPorGrupo: "",
-      numeroDocentesEspeciales: "",
       controlAdministrativo: "",
       director: {
         nombre: "",
@@ -96,7 +95,7 @@ function RegisterSchool() {
         telefono: "",
         fechaJubilacion: "",
         posibleCambioPlantel: "",
-        antiguedadPuesto: ""
+        antiguedadZona: ""
       },
       supervisor: {
         nombre: "",
@@ -612,7 +611,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
       className="form-input" 
       type="date" 
       name="escuela.director.fechaJubilacion"
-      value={formData.escuela.director.fechaJubilacion}
+      value={(formData.escuela.director.fechaJubilacion || "").split("T")[0]}
       onChange={handleInputChange}
     />
   </div>
@@ -694,7 +693,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
       className="form-input"
       type="date"
       name="escuela.supervisor.fechaJubilacion"
-      value={formData.escuela.supervisor.fechaJubilacion}
+      value={(formData.escuela.director.fechaJubilacion || "").split("T")[0]}
       onChange={handleInputChange}
     />
   </div>
@@ -761,7 +760,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
   </div>
   <div className="form-group">
     <label>
-      ¿Cuentan con mesa de padres de familia? Si sí, ¿por cuántas personas está conformada?
+      ¿Cuentan con mesa de padres de familia? Si sí, ¿por cuántas personas está conformada? Si no, escriba 0
     </label>
     <input
       className="form-input"

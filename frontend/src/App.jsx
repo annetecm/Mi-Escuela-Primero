@@ -8,7 +8,10 @@
   import EditSchool from './pages/EditSchool';
   import AllyMap from './pages/AllyMap';
   import ListedSchools from './pages/ListedSchools';
+  import ListedSchoolsAdmin from './pages/ListedSchoolAdmin';
   import ListedAllies from './pages/ListedAllies';
+  import ListedAdmin from './pages/ListedAdmin';
+  import ListedAlliesAdmin from './pages/ListedAlliesAdmin';
   import EditPhysical from './pages/EditPhysical';
   import SignOut from './pages/SignOut';
   import PrivateRoute from './rutas/PrivateRoute';
@@ -16,7 +19,11 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
-  import ChatPage from './pages/ChatPage';
+  import InformacionUser from './pages/InformacionUser';
+  import ConexionInfo from './pages/ConexionesAdmin';
+  import ChangePassword from './pages/ChangePassword';
+  import ResetPassword from './pages/ResetPassword';
+
 
   function App() {
     return (
@@ -60,17 +67,49 @@
           }
         />
 
-        {/* Administrador todavia no esta */}
+        {/* Administrador*/}
         <Route path="/administrador/perfil" element={
         <PrivateRoute allowedRoles={['administrador']}>
           <AdminPage/>
         </PrivateRoute>
         } />
         <Route
-          path="/administrador/page"
+          path="/administrador/escuelas"
           element={
             <PrivateRoute allowedRoles={['administrador']}>
-              <AllyMap />
+              <ListedSchoolsAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/aliados"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAlliesAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/informacion/:identificador/:tipoUsuario"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <InformacionUser />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/informacion/conexion/:conexion.id"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ConexionInfo />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/administrador"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedAdmin />
             </PrivateRoute>
           }
         />
@@ -121,7 +160,7 @@
       <Route
         path="/evidencia/:id"
         element={
-          <PrivateRoute allowedRoles={['aliado']}>
+          <PrivateRoute allowedRoles={['aliado','escuela']}>
             <EvidenceTimeline />
           </PrivateRoute>
         }
@@ -134,6 +173,8 @@
             </PrivateRoute>
           }
         />
+        <Route path="/recuperar-password" element={<ChangePassword />} />
+        <Route path="/resetear-password" element={<ResetPassword />} />
         <Route path="/logout" element={<SignOut />} />
         <Route path="/unauthorized" element={<h1>Acceso no autorizado</h1>} />
       </Routes>

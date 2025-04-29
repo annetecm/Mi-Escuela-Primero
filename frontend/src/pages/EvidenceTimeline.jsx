@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom"; // agregamos useLocation
 import "../styles/EvidenceTimeline.css";
 import logo from "../assets/logo1.png";
 
 export default function EvidenceTimeline() {
+  const { userType } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
   const [evidences, setEvidences] = useState([
     { file: null, date: null, description: "" },
@@ -30,7 +32,7 @@ export default function EvidenceTimeline() {
     formData.append("archivo", file);
     formData.append("tipo", "escuela");
     formData.append("matchId", id);
-    formData.append("descripcion", evidences[index].description || ''); // 🔥 usamos la descripción escrita
+    formData.append("descripcion", evidences[index].description || '');
   
     try {
       const res = await fetch("http://localhost:5000/api/evidence/upload", {
@@ -86,7 +88,6 @@ export default function EvidenceTimeline() {
   
       if (res.ok) {
         console.log("Descripción guardada correctamente:", data.message);
-        // Puedes poner un pequeño mensaje de éxito si quieres
       } else {
         console.error("Error al guardar descripción:", data.reason || data.error);
       }
@@ -94,77 +95,92 @@ export default function EvidenceTimeline() {
       console.error("Error al guardar descripción:", error);
     }
   };  
-
   useEffect(() => {
     const token = localStorage.getItem("token");
   
-    // Cargar evidencias del progreso
-    fetch(`http://localhost:5000/api/evidence/progreso/${id}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    })
-    .then(async res => {
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Error ${res.status}: ${errorText}`);
-      }
-      return res.json();
-    })
-    .then(evidenciasCargadas => {
-      let formatted = [];
-
-      if (Array.isArray(evidenciasCargadas) && evidenciasCargadas.length > 0) {
-        formatted = evidenciasCargadas.map(evi => ({
-          file: evi.ruta,
-          date: new Date(evi.fecha).toLocaleDateString(),
-          description: evi.descripcion
-        }));
-      }
-
-      while (formatted.length < 4) {
-        formatted.push({ file: null, date: null, description: "" });
-      }
-
-      setEvidences(formatted);
-    })
-    .catch(err => console.error("Error cargando evidencias:", err));  
-
-    fetch("http://localhost:5000/api/mis-conexiones", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!CCT) {
-          console.error("No se proporcionó el CCT al navegar.");
+    const cargarProyectos = async () => {
+      try {
+        let url = "";
+  
+        if (userType === "aliado") {
+          url = "http://localhost:5000/api/mis-conexiones";
+        } else if (userType === "escuela") {
+          url = "http://localhost:5000/api/escuela/mis-conexiones";
+        } else {
+          console.error("Tipo de usuario no reconocido:", userType);
           return;
         }
-
-        const filtrados = data.filter(conexion => conexion.CCT === CCT);
   
-        const necesidadesVistas = new Set();
-        const proyectosFinal = [];
-  
-        filtrados.forEach(conexion => {
-          if (!necesidadesVistas.has(conexion.necesidad)) {
-            proyectosFinal.push({
-              necesidad: conexion.necesidad,
-              conexionId: conexion.conexionId
-            });
-            necesidadesVistas.add(conexion.necesidad);
-          }
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
         });
   
-        setProyectos(proyectosFinal);
+        const data = await res.json();
   
-        const actual = proyectosFinal.find(p => p.conexionId === id) || null;
+        if (!Array.isArray(data)) {
+          console.error("Error cargando proyectos:", data);
+          return;
+        }
+  
+        //FILTRA conexionId ÚNICOS
+        const proyectosFiltrados = [];
+        const conexionIdsVistos = new Set();
+
+        data.forEach((conexion) => {
+          if (!conexionIdsVistos.has(conexion.conexionId)) {
+            proyectosFiltrados.push({
+              conexionId: conexion.conexionId,
+              necesidad: userType === 'escuela'
+                ? conexion.nombreNecesidad || "Proyecto"
+                : conexion.apoyo || conexion.necesidad || "Proyecto"
+            });
+            conexionIdsVistos.add(conexion.conexionId);
+          }
+        });
+
+        setProyectos(proyectosFiltrados);
+  
+        const actual = proyectosFiltrados.find(p => p.conexionId === id) || null;
         setProyectoActual(actual);
-      })
-      .catch(err => console.error("Error cargando proyectos:", err));
   
-  }, [id, CCT]);  
+      } catch (error) {
+        console.error("Error cargando proyectos:", error);
+      }
+    };
+  
+    const cargarEvidencias = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/evidence/progreso/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        const evidenciasCargadas = await res.json();
+  
+        let formatted = [];
+  
+        if (Array.isArray(evidenciasCargadas) && evidenciasCargadas.length > 0) {
+          formatted = evidenciasCargadas.map(evi => ({
+            file: evi.ruta,
+            date: new Date(evi.fecha).toLocaleDateString(),
+            description: evi.descripcion,
+            reporteAvanceId: evi.reporteAvanceId
+          }));
+        }
+  
+        while (formatted.length < 4) {
+          formatted.push({ file: null, date: null, description: "" });
+        }
+  
+        setEvidences(formatted);
+  
+      } catch (error) {
+        console.error("Error cargando evidencias:", error);
+      }
+    };
+  
+    cargarProyectos();
+    cargarEvidencias();
+  }, [id, userType]);  
 
   return (
     <div className="evidence-container">
@@ -177,21 +193,21 @@ export default function EvidenceTimeline() {
 
       <div className={`evidence-main-layout ${menuVisible ? 'menu-visible' : ''}`}>
         <nav className={`evidence-sidebar ${!menuVisible ? 'hidden' : ''}`}>
-          <ul className="evidence-menu-list">
-            <li className="evidence-menu-item" onClick={() => navigate("/aliado/perfil")}>
-              Perfil
-            </li>
-            <li className="evidence-menu-item" onClick={() => navigate("/aliado/mapa")}>
-              Buscar escuelas
-            </li>
-            <li className="evidence-menu-item" onClick={() => navigate("/listado/escuelas")}>
-              Mis escuelas
-            </li>
-            <li className="evidence-menu-item" onClick={() => navigate("/logout")}>
-              Cerrar sesión
-            </li>
-          </ul>
-
+        <ul className="evidence-menu-list">
+          {userType === "aliado" ? (
+            <>
+              <li className="evidence-menu-item" onClick={() => navigate("/aliado/perfil")}>Perfil</li>
+              <li className="evidence-menu-item" onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
+              <li className="evidence-menu-item" onClick={() => navigate("/listado/escuelas")}>Mis escuelas</li>
+            </>
+          ) : (
+            <>
+              <li className="evidence-menu-item" onClick={() => navigate("/escuela/perfil")}>Perfil</li>
+              <li className="evidence-menu-item" onClick={() => navigate("/listado/aliados")}>Mis aliados</li>
+            </>
+          )}
+          <li className="evidence-menu-item" onClick={() => navigate("/logout")}>Cerrar sesión</li>
+        </ul>
           <h4 className="evidence-subtitle">Proyectos</h4>
           <ul className="evidence-menu-list">
             {proyectos.map((proyecto, idx) => (
@@ -199,7 +215,7 @@ export default function EvidenceTimeline() {
                 key={idx}
                 className="evidence-menu-item"
                 onClick={() => navigate(`/evidencia/${proyecto.conexionId}`, {
-                  state: { CCT: CCT } // 🔥 pasar CCT de nuevo
+                  state: { CCT: CCT }
                 })}
               >
                 {proyecto.necesidad}

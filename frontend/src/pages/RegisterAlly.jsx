@@ -291,7 +291,7 @@ const juridico=[
     <div className="content-wrapper">
       <form className="form-grid">
         <div className="form-group">
-          <label>Correo</label>
+          <label>Correo (para la creación de la cuenta)</label>
           <input className="form-input" type="text" name="correo" onChange={handleInput} />
         </div>
         <div className="form-group">
@@ -307,7 +307,7 @@ const juridico=[
           <input className="form-input" type="text" name="telefono" onChange={handleInput} />
         </div>
         <div className="form-group">
-          <label>Correo electrónico</label>
+          <label>Correo (personal)</label>
           <input className="form-input" type="email" name="correo" onChange={handleInput} />
         </div>
         <div className="form-group">

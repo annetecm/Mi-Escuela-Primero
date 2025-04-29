@@ -1,76 +1,68 @@
 import React, { useState } from 'react';
-import '../styles/ChangePassword.css';
-import logo from '../assets/logo1.png'; 
+import '../styles/RecoverPassword.css';
+import logo from '../assets/logo1.png';
 
 const ChangePassword = () => {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [correo, setCorreo] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setError('');
 
-    if (!newPassword || !confirmPassword) {
-      setMessage('Por favor completa todos los campos.');
+    if (!correo) {
+      setError('Por favor ingresa tu correo.');
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setMessage('Las nuevas contraseñas no coinciden.');
-      return;
-    }
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/recuperar-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correoElectronico: correo }),
+      });
 
-    setMessage('¡Contraseña cambiada con éxito!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage('Te hemos enviado un correo para recuperar tu contraseña.');
+        setCorreo('');
+      } else {
+        setError(data.error || 'Error al solicitar recuperación.');
+      }
+    } catch (err) {
+      console.error('Error enviando solicitud:', err);
+      setError('Error de conexión.');
+    }
   };
 
   return (
-    <div className="registro-container">
-      {/* Header con logo */}
-      <div className="header">
-        <img src={logo || "/placeholder.svg"} alt="Logo" className="logo" />
+    <div className="recover-container">
+      <div className="recover-header">
+        <img src={logo || "/placeholder.svg"} alt="Logo" className="recover-logo" />
       </div>
 
-      <div className="change-password-container">
-        <h2>Cambiar contraseña</h2>
-        <form onSubmit={handleSubmit}>
+      <div className="recover-form">
+        <h2>Recuperar contraseña</h2>
+        <form onSubmit={handleSubmit} className="recover-form-inner">
           <label>
-            Contraseña actual:
+            Correo electrónico:
             <input
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              type="email"
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
               required
+              className="recover-input"
             />
           </label>
 
-          <label>
-            Nueva contraseña:
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-          </label>
-
-          <label>
-            Confirmar nueva contraseña:
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </label>
-
-          <button type="submit">Guardar cambios</button>
+          <button type="submit" className="recover-button">Enviar enlace de recuperación</button>
         </form>
 
-        {message && <p className="message">{message}</p>}
+        {message && <p className="recover-message success">{message}</p>}
+        {error && <p className="recover-message error">{error}</p>}
       </div>
     </div>
   );

@@ -50,7 +50,6 @@ router.post("/login", async (req, res) => {
     if (escuela.rows.length > 0) {
       console.log("🔍 Escuela encontrada:", escuela.rows);
       tipoUsuario = 'escuela';
-      cct = escuela.rows[0].CCT;  // Aquí sacas el CCT
     } else {
       // Si no es escuela, revisa si es aliado
       const aliado = await pool.query(
@@ -61,7 +60,6 @@ router.post("/login", async (req, res) => {
       if (aliado.rows.length > 0) {
         console.log("🧾 Aliado encontrado:", aliado.rows);
         tipoUsuario = 'aliado';
-        aliadoId = aliado.rows[0].aliadoId; // Aquí sacas el aliadoId
       }
     }
 
@@ -101,6 +99,7 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Error en el login." });
   }
 });
+
 router.post('/recuperar-password', async (req, res) => {
   const { correoElectronico } = req.body;
 
