@@ -57,10 +57,23 @@ export default function Profile() {
               <div className="allyprofile-profile-header">
                 <div className="allyprofile-profile-info">
                   <h2 className="allyprofile-profile-name">{perfil.nombre}</h2>
-                  <button className="allyprofile-edit-button" onClick={() => navigate('/editar/aliado')}>
-                    <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
-                    <span className="allyprofile-edit-icon">✏️</span>
-                  </button>
+                  <button
+  className="allyprofile-edit-button"
+  onClick={() => {
+    if (perfil.tipo === "fisico") {
+      navigate('/editar/aliado/fisico');
+    } else if (perfil.tipo === "moral") {
+      navigate('/editar/aliado/moral');
+    } else {
+      console.error("Tipo de persona desconocido:", perfil.tipo);
+      alert("No se puede editar porque el tipo de persona es desconocido.");
+    }
+  }}
+>
+  <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
+  <span className="allyprofile-edit-icon">✏️</span>
+</button>
+          
                 </div>
 
                 <div className="allyprofile-profile-image-container">
@@ -86,7 +99,7 @@ export default function Profile() {
                     <span className="allyprofile-detail-icon">✉️</span>
                     <span className="allyprofile-detail-text">CORREO</span>
                   </div>
-                  <div className="allyprofile-detail-value">{perfil.correoElectronico}</div>
+                  <div className="allyprofile-detail-value">{perfil.correoElectronico || perfil.correo}</div>
                 </div>
 
                 {perfil.apoyos && perfil.apoyos.length > 0 && (

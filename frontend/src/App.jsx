@@ -19,6 +19,7 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import EditMoral from "./pages/EditMoral"; 
   import InformacionUser from './pages/InformacionUser';
   import ConexionInfo from './pages/ConexionesAdmin';
   import ChangePassword from './pages/ChangePassword';
@@ -58,15 +59,18 @@
           }
           
         />
-        
-        <Route
-          path="/editar/aliado"
-          element={
-            <PrivateRoute allowedRoles={['aliado']}>
-              <EditPhysical />
-            </PrivateRoute>
-          }
-        />
+
+       <Route path="/editar/aliado/fisico" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditPhysical />
+  </PrivateRoute>
+} />
+<Route path="/editar/aliado/moral" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditMoral />
+  </PrivateRoute>
+} />
+
 
         {/* Administrador*/}
         <Route path="/administrador/perfil" element={
