@@ -1,19 +1,19 @@
-import React,{ useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/InformationUser.css";
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
-import { useParams } from 'react-router-dom';
 
-export default function ListedSchools() {
-    const { identificador, tipoUsuario } = useParams();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
-  const [editingField, setEditingField] = useState(null);
-  const [newValue, setNewValue] = useState('');
+export default function ConexionesAdmin() {
+    const { conexionId } = useParams();
+    const location = useLocation();
+    const [conexionData, setConexionData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+    const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
+    const [editingField, setEditingField] = useState(null);
+    const [newValue, setNewValue] = useState('');
 
   // Handle edit click
   const handleEditClick = (field) => {
@@ -28,67 +28,86 @@ export default function ListedSchools() {
     setEditingField(null);
   };
 
-  //get del nombre del administrador
-  useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-  
-        fetch("http://localhost:5000/api/admin/perfil/admin", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            setAdminData(prevState => ({
-              ...prevState,
-              nombre: data.nombre || 'Administrador'
-            }));
-          })
-          .catch(err => {
-            console.error("Error al cargar perfil:", err);
-            setAdminData(prevState => ({
-              ...prevState,
-              nombre: 'Administrador'
-            }));
-          });
-    }, []);
-
+  // Get admin profile info
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return;
-    const fetchUserData= async ()=>{
-    try {
+    if (!token) {
+      setError("No se encontró token de autenticación");
+      setLoading(false);
+      return;
+    }
+  
+    fetch("http://localhost:5000/api/admin/perfil/admin", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        setAdminData(prevState => ({
+          ...prevState,
+          nombre: data.nombre || 'Administrador'
+        }));
+      })
+      .catch(err => {
+        console.error("Error al cargar perfil:", err);
+        setAdminData(prevState => ({
+          ...prevState,
+          nombre: 'Administrador'
+        }));
+      });
+  }, []);
+
+  // Fetch connection data
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("No se encontró token de autenticación");
+      setLoading(false);
+      return;
+    }
+    
+    const fetchConexionData = async () => {
+      try {
         setLoading(true);
         setError(null);
-        const conexionResponse= await fetch(`http://localhost:5000/api/admin/info/conexion/${identificador}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        
+        console.log(`Fetching connection data for ID: ${conexionId}`);
+        const conexionResponse = await fetch(`http://localhost:5000/api/admin/info/conexion/${conexionId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
         if (!conexionResponse.ok) {
-            throw new Error('Error al obtener datos de la conexion');
+          const errorData = await conexionResponse.json();
+          throw new Error(errorData.details || 'Error al obtener datos de la conexión');
         }
 
-        const conexionData = await conexionResponse.json();
-        setUserData(conexionData);
-        } catch (err) {
-            console.error('Error fetching user data:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-        };
+        const data = await conexionResponse.json();
+        console.log("Connection data received:", data);
+        setConexionData(data);
+      } catch (err) {
+        console.error('Error fetching connection data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    fetchUserData();
-  }, [identificador]);
-
+    if (conexionId) {
+      fetchConexionData();
+    } else {
+      setError("ID de conexión no proporcionado");
+      setLoading(false);
+    }
+  }, [conexionId]);
 
   if (loading) {
     return <div className="loading">Cargando datos...</div>;
@@ -98,32 +117,9 @@ export default function ListedSchools() {
     return <div className="error">Error: {error}</div>;
   }
 
-  if (!userData) {
-    return <div>No se encontraron datos del usuario</div>;
+  if (!conexionData || !conexionData.conexiones || conexionData.conexiones.length === 0) {
+    return <div className="no-data">No se encontraron datos para esta conexión</div>;
   }
-
-  const renderEditableField = (field, label, value) => {
-    return (
-      <div className="info-field">
-        <strong>{label}:</strong>
-        {editingField === field ? (
-          <>
-            <input
-              type="text"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-            />
-            <button onClick={handleSaveClick}>Guardar</button>
-            <button onClick={() => setEditingField(null)}>Cancelar</button>
-          </>
-        ) : (
-          <span onClick={() => handleEditClick(field)}>
-            {value !== undefined && value !== null ? value.toString() : 'No disponible'}
-          </span>
-        )}
-      </div>
-    );
-  };
 
   const renderNonEditableField = (label, value) => {
     return (
@@ -145,7 +141,6 @@ export default function ListedSchools() {
       </div>
     );
   };
-
       
   return (
     <div className="usuario-escuela-panel-container">
@@ -160,44 +155,42 @@ export default function ListedSchools() {
           <span className="admin-name">{adminData.nombre}</span>
         </div>
       </header>
+      
       <div className="user-profile-container">
-        <h1>Información de las Escuelas</h1>
+        <h1>Información de la Conexión</h1>
         
-        {/* Loading state */}
-        {loading && <p>Cargando datos...</p>}
-        
-        {/* Error state */}
-        {error && <p className="error-message">Error: {error}</p>}
-        
-        {/* Información general - Check if userData and userData.informacion exist */}
-        {userData && userData.informacion && userData.informacion.length > 0 ? (
-            <div className="documentos-section">
-            <h2>Informacion General de las Escuelas</h2>
-            <div className="info-section">
-                {renderArrayItems(userData.informacion, (documento, index) => (
-                <div key={index} className="documento-item" onClick={() => navigate(`/administrador/informacion/${documento.CCT}/Escuela`)}>
-                    {renderNonEditableField('Nombre ', documento.nombre +" 🔍")}
-                    {renderNonEditableField('CCT ', documento.CCT)}
-                    {renderNonEditableField('Correo Electronico ', documento.correoElectronico)}
-                    {renderEditableField('direccion', 'Dirección ', documento.direccion)}
-                    {renderEditableField('zonaEscolar', 'Zona Escolar ', documento.zonaEscolar)}
-                    {renderEditableField('sectorEscolar', 'Sector Escolar ', documento.sectorEscolar)}
-                    {renderEditableField('modalidad', 'Modalidad ', documento.modalidad)}
-                    {renderEditableField('nivelEducativo', 'Nivel Educativo ', documento.nivelEducativo)}
-                    {renderEditableField('tieneUSAER', 'Tiene USAER', documento.tieneUSAER ? 'Sí' : 'No')}
-                    {renderEditableField('numeroDocentes', 'Número de Docentes', documento.numeroDocentes)}
-                    {renderEditableField('estudiantesPorGrupo', 'Estudiantes por Grupo', documento.estudiantesPorGrupo)}
-                    {renderEditableField('controlAdministrativo', 'Control Administrativo', documento.controlAdministrativo)}
+        {/* Detalles de la conexión */}
+        <div className="documentos-section">
+          <h2>Detalles de la Conexión</h2>
+          <div className="info-section">
+            {renderArrayItems(conexionData.conexiones, (conexion, index) => {
+              const handleItemClick = () => {
+                if (conexion.CCT) {
+                  navigate(`/administrador/informacion/${conexion.CCT}/escuela`);
+                } else {
+                  console.warn("No se encontró CCT para esta conexión", conexion);
+                  // You might want to show an alert or handle this case
+                }
+              };
+              
+              return (
+                <div key={index} className="documento-item">
+                  {renderNonEditableField('ID de Conexión', conexion.conexionId)}
+                  {renderNonEditableField('Nombre de la escuela', conexion.escuelaNombre)}
+                  {renderNonEditableField('Necesidad', conexion.necesidadNombre)}
+                  {renderNonEditableField('Nombre del aliado', conexion.aliadoNombre)}
+                  {renderNonEditableField('Tipo de aliado', conexion.tipoUsuario)}
+                  {renderNonEditableField('Apoyo', conexion.apoyoNombre)}
+                  {renderNonEditableField('Fecha de Inicio', conexion.fechaInicio)}
+                  {renderNonEditableField('Fecha de Fin', conexion.fechaFin)}
+                  {renderNonEditableField('Estado', conexion.estado)}
+                  
                 </div>
-                ))}
-            </div>
-            </div>
-        ) : !loading && (
-            <p>No hay información de escuelas disponible</p>
-        )}
-            
-        <div className="user-profile-container"></div>
+              );
+            })}
+          </div>
         </div>
-        </div>
+      </div>
+    </div>
   );
 }

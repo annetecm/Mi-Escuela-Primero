@@ -20,72 +20,121 @@ router.post("/test-route", (req, res) => {
 });
 
 //obtener informacion de la conexion
-router.get("/info/conexion:conexionId", verifyToken, async(req,res)=>{
-  //se pasa el administradorId
-  const conexionId= req.params.conexionId;
-  console.log("🔍 Buscando conexion");
+// Route for fetching specific connection data by conexionId
+router.get("/info/conexion/:conexionId", verifyToken, async(req, res) => {
+  // Get the conexionId from URL parameters
+  const conexionId = req.params.conexionId;
+  console.log("🔍 Buscando conexion con ID:", conexionId);
 
-  try{
-    const query=`
+  try {
+    const query = `
+    WITH conexion_data AS(
       SELECT 
         json_agg(
           json_build_object(
-            'id', c."conexionId",
+            'conexionId', c."conexionId",
+            'necesidadId', c."necesidadId",
+            'apoyoId', c."apoyoId",
+            'aliadoId', c."aliadoId",
+            'CCT', c."CCT",
             'fechaInicio', c."fechaInicio",
             'fechaFin', c."fechaFin",
             'estado', c."estado",
+            'tipoUsuario', CASE
+              WHEN pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
+              WHEN pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
+              ELSE 'Desconocido'
+            END,
             'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
             'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
             'aliadoNombre', COALESCE(u."nombre", 'No disponible'),
-            'escuelaNombre', COALESCE(u."nombre", 'No disponible')
+            'escuelaNombre', COALESCE(usa."nombre", 'No disponible')
           )
         ) AS conexiones
       FROM "Conexion" c
       LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
       LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
-      LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
+      LEFT JOIN "Aliado" al ON c."aliadoId" = al."aliadoId"
+      LEFT JOIN "PersonaFisica" pf ON al."aliadoId" = pf."CURP"
+      LEFT JOIN "PersonaMoral" pm ON al."aliadoId" = pm."RFC"
       LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
-      WHERE c."CCT" = $1
+      LEFT JOIN "Escuela" es ON c."CCT" = es."CCT"
+      LEFT JOIN "Usuario" usa ON es."usuarioId" = usa."usuarioId"
+      WHERE c."conexionId" = $1
     )
     SELECT 
-      ed.*
-    FROM admin_data ed
+      con.*
+    FROM conexion_data con
     `;
-    console.log("Ejecutando para ", adminId);
-    const result= await pool.query(query,[adminId]);
-    if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", CCT);
-      return res.status(404).json({ 
-        error: "Escuela no encontrada",
-        details: `No existe registro con CCT: ${CCT}`
-      });
-  }
-
-  // Process the data for a cleaner structure
-  const administrador = result.rows[0];
     
-  // Format data to match frontend expectations
-  const responseData = {
-    // Basic school data
-    ...administrador};
+    console.log("Ejecutando consulta para conexionId:", conexionId);
+    const result = await pool.query(query, [conexionId]);
+    
+    if (result.rows.length === 0 || !result.rows[0].conexiones || result.rows[0].conexiones.length === 0) {
+      console.log("❌ No se encontró conexión con ID:", conexionId);
+      return res.status(404).json({ 
+        error: "Conexión no encontrada",
+        details: `No existe registro con conexionId: ${conexionId}`
+      });
+    }
 
-    console.log("✅ Datos encontrados:", responseData);
+    // Format data to match frontend expectations
+    const responseData = {
+      // Return the data directly
+      ...result.rows[0]
+    };
+
+    console.log("✅ Datos encontrados para conexionId:", conexionId);
     return res.json(responseData);
 
   } catch (err) {
     console.error("💥 Error en la consulta:", {
       message: err.message,
       stack: err.stack,
-      parameters: [adminId]
+      parameters: [conexionId]
     });
     
     return res.status(500).json({ 
       error: "Error en la consulta",
       details: err.message,
-      solution: "Verifique que el adminId exista y tenga formato correcto"
+      solution: "Verifique que el conexionId exista y tenga formato correcto"
     });
   }
+});
 
+//todas las conexiones
+router.get("/todasConexiones", verifyToken, async(req,res)=>{
+  
+  try{
+    const result = await pool.query(`
+    WITH admin_data AS (
+      SELECT json_agg(
+        json_build_object(
+          'id', e."administradorId", 
+          'nombre', u."nombre",
+          'correoElectronico', u."correoElectronico"
+        )
+      ) AS informacion
+      FROM "Administrador" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE u."estadoRegistro" = 'aprobado'
+    )
+    SELECT 
+      COALESCE(ed.informacion, '[]'::json) as informacion
+    FROM admin_data ed
+    `);
+    
+    const administrador = result.rows[0];
+    
+    const responseData = {
+      informacion: Array.isArray(administrador.informacion) ? administrador.informacion : []
+    };
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Error al obtener perfil de admin:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 //obtener todas las escuelas 
@@ -350,6 +399,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
       SELECT 
         json_agg(
           json_build_object(
+            'id', c."conexionId",
             'necesidadId', c."necesidadId",
             'CCT', c."CCT",
             'apoyoId', c."apoyoId",
@@ -527,6 +577,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
       SELECT 
         json_agg(
           json_build_object(
+            'id', c."conexionId",
             'CCT', c."CCT",
             'necesidadId', c."necesidadId",
             'apoyoId', c."apoyoId",
@@ -917,7 +968,7 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
 });
 
 //creo que no sirve
-//update user information
+//update user information para la edicion
 router.post("/update", verifyToken, async(req,res)=>{
   const {id, field, value}= req.body;
   if(!id||!field||value===undefined){
@@ -932,6 +983,90 @@ router.post("/update", verifyToken, async(req,res)=>{
   }catch(error){
     console.error("Error al actualizar datos: ", err);
     res.status(500).json({error: 'Error interno del servidor'});
+  }
+});
+
+//update multiple school fields at once
+router.post("/update-multiple", verifyToken, async(req, res) => {
+  const { cct, data } = req.body;
+  
+  if (!cct || !data || Object.keys(data).length === 0) {
+    return res.status(400).json({ error: "Faltan datos requeridos" });
+  }
+  
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    // Identify the usuarioId from the CCT
+    const userIdQuery = `SELECT "usuarioId" FROM "Escuela" WHERE "CCT" = $1`;
+    const userIdResult = await client.query(userIdQuery, [cct]);
+    
+    if (userIdResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Escuela no encontrada' });
+    }
+    
+    const usuarioId = userIdResult.rows[0].usuarioId;
+    
+    // Create an array to store all update operations
+    const updateOperations = [];
+    const fieldsToUpdate = Object.keys(data);
+    
+    // Process each field to update
+    for (const field of fieldsToUpdate) {
+      // Skip null or undefined values
+      if (data[field] === null || data[field] === undefined) {
+        continue;
+      }
+      
+      // Handle boolean conversions if needed
+      let value = data[field];
+      if (field === 'tieneUSAER' && typeof value === 'string') {
+        value = value.toLowerCase() === 'sí' || value.toLowerCase() === 'si' || value === true;
+      }
+      
+      // Handle numeric conversions
+      if (['numeroDocentes', 'estudiantesPorGrupo'].includes(field) && typeof value === 'string') {
+        value = parseInt(value, 10);
+        if (isNaN(value)) {
+          continue; // Skip invalid number conversions
+        }
+      }
+      
+      const query = `UPDATE "Escuela" SET "${field}" = $1 WHERE "usuarioId" = $2 RETURNING *`;
+      updateOperations.push(client.query(query, [value, usuarioId]));
+    }
+    
+    // Execute all updates
+    const results = await Promise.all(updateOperations);
+    
+    // Check if any updates were successful
+    const updatedFields = results.filter(result => result.rows.length > 0);
+    
+    if (updatedFields.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'No se pudo actualizar ningún campo' });
+    }
+    
+    await client.query('COMMIT');
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Datos actualizados correctamente',
+      updatedCount: updatedFields.length
+    });
+    
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Error al actualizar múltiples campos:", err);
+    return res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: err.message
+    });
+  } finally {
+    client.release();
   }
 });
 
