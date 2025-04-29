@@ -19,11 +19,13 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import EditMoral from "./pages/EditMoral"; 
   import InformacionUser from './pages/InformacionUser';
   import ConexionInfo from './pages/ConexionesAdmin';
   import ChangePassword from './pages/ChangePassword';
   import ResetPassword from './pages/ResetPassword';
   import ListedConexiones from './pages/ListedConexiones';
+  import ChatPage from './pages/ChatPage';
 
 
   function App() {
@@ -56,15 +58,20 @@
               <ListedSchools />
             </PrivateRoute>
           }
+          
         />
-        <Route
-          path="/editar/aliado"
-          element={
-            <PrivateRoute allowedRoles={['aliado']}>
-              <EditPhysical />
-            </PrivateRoute>
-          }
-        />
+
+       <Route path="/editar/aliado/fisico" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditPhysical />
+  </PrivateRoute>
+} />
+<Route path="/editar/aliado/moral" element={
+  <PrivateRoute allowedRoles={['aliado']}>
+    <EditMoral />
+  </PrivateRoute>
+} />
+
 
         {/* Administrador*/}
         <Route path="/administrador/perfil" element={
@@ -146,6 +153,15 @@
             </PrivateRoute>
           }
         />
+          <Route
+            path="/chat/:conexionId"
+            element={
+              <PrivateRoute allowedRoles={['escuela', 'aliado']}>
+                <ChatPage />
+              </PrivateRoute>
+            }
+        />
+
          <Route
         path="/listado/aliados"
         element={

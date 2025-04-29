@@ -37,7 +37,9 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Correo o contraseña incorrectos." });
     }
     let tipoUsuario = null;
-
+    let aliadoId = null;
+    let cct = null;
+    
     // Primero revisa si es ESCUELA
     console.log("🔑 ID leído:", usuarioId);
     const escuela = await pool.query(
@@ -48,6 +50,7 @@ router.post("/login", async (req, res) => {
     if (escuela.rows.length > 0) {
       console.log("🔍 Escuela encontrada:", escuela.rows);
       tipoUsuario = 'escuela';
+      cct = escuela.rows[0].CCT; // aquí se guarda el CCT ⚡
     } else {
       // Si no es escuela, revisa si es aliado
       const aliado = await pool.query(
@@ -58,6 +61,7 @@ router.post("/login", async (req, res) => {
       if (aliado.rows.length > 0) {
         console.log("🧾 Aliado encontrado:", aliado.rows);
         tipoUsuario = 'aliado';
+        aliadoId = aliado.rows[0].aliadoId; // aquí se guarda el aliadoId ⚡
       }
     }
 
@@ -78,12 +82,28 @@ router.post("/login", async (req, res) => {
       {
         usuarioId: usuarioId,
         correo: usuario.correoelectronico,
-        tipo: tipoUsuario 
+        tipo: tipoUsuario,
+        aliadoId: aliadoId,
+        cct: cct
       },
       process.env.JWT_SECRET || "top",
       { expiresIn: "1d" }
     );
-    res.json({ mensaje: "Login exitoso", token, tipo: tipoUsuario }); 
+
+      console.log("🚀 Devolviendo datos en login:", {
+      tipoUsuario,
+      aliadoId,
+      cct,
+      token: "token generado" // Opcional si quieres confirmar que token sí se generó
+    });
+
+    res.json({ 
+      mensaje: "Login exitoso",
+      token,
+      tipo: tipoUsuario,
+      aliadoId,
+      cct
+    });
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).json({ error: "Error en el login." });
@@ -163,5 +183,6 @@ router.post('/resetear-password', async (req, res) => {
     return res.status(400).json({ error: 'Token inválido o expirado.' });
   }
 });
+
 
 module.exports = router;

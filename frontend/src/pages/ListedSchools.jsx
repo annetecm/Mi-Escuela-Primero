@@ -94,6 +94,18 @@ export default function ListedSchools() {
                       ))}
                     </ul>
                   </div>
+                  <div className="listedallies-card-footer">
+                    <button
+                    className="listedallies-message-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("Navegando a chat con conexionId:", datos.proyectos[0].conexionId);
+                      navigate(`/chat/${datos.proyectos[0].conexionId}`);
+                    }}
+                  >
+                    💬 Enviar mensaje
+                  </button>
+                </div>
                 </div>
               ))
             )}

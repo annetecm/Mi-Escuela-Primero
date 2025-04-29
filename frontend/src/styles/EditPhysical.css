@@ -1,0 +1,144 @@
+/* EditPhysicalAlly.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+  }
+  
+  .editphysical-content-wrapper {
+    flex: 1;
+    width: 100%;
+  }
+  
+  .editphysical-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+  
+  .editphysical-image-section {
+    flex: 1;
+  }
+  
+  .editphysical-image-section img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .editphysical-form-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 60px;
+    background-color: white;
+    overflow-y: auto;
+    height: 100vh;
+  }
+  
+  .editphysical-title {
+    font-size: 30px;
+    font-family:'Montserrat', sans-serif;
+    margin-bottom: 30px;
+    margin-top: 40px;
+    text-align: center;
+    color: #333;
+  }
+  
+  .editphysical-question {
+    text-align: center;
+    font-family:'Montserrat', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-top: 50px;
+    margin-bottom: 70px;
+    color: #333;
+  }
+  
+  .editphysical-selector {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border: none;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    color: #666;
+  }
+  
+  .editphysical-continue-button {
+    grid-column: span 2;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #009933;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-family:'Montserrat', sans-serif;
+    margin-top: 40px;
+  }
+  
+  .editphysical-continue-button:hover {
+    background-color: #007a29;
+  }
+  
+  .editphysical-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px 40px;
+    width: 100%;
+    max-width: none;
+    margin-top: 30px;
+    font-family:'Montserrat', sans-serif;
+  }
+  
+  .editphysical-form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .editphysical-form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .editphysical-form-input {
+    background-color: #fff;
+    border: 1px solid #000;
+    padding: 10px;
+    border-radius: 5px;
+    color: #000;
+    font-size: 14px;
+  }
+  
+  .editphysical-label {
+    font-family: 'Montserrat', sans-serif;
+    color:  #000;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  
+  .editphysical-heading {
+    background-color: #F59D15;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 20px 0 10px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  
