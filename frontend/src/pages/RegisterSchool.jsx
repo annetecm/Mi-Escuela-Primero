@@ -213,7 +213,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
   };
 
   const obtenerCoordenadas = async (direccion) => {
-    const apiKey = "AIzaSyBzfgtswYTfG1vOW-JsKuBb-KrIH1SIcHU"; // ⛔ Sustituye con tu API Key real
+    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${apiKey}`;
   
     const response = await fetch(url);
