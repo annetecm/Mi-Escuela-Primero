@@ -3,6 +3,8 @@ import '../styles/PageAdmin.css';
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext";
+
 
 const AdminPage = () => {
   const navigate = useNavigate()
@@ -149,6 +151,12 @@ const AdminPage = () => {
     }
   };
 
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    navigate("/logout");
+  };
+
   if (isLoading) {
     return <div className="admin-loading">Cargando...</div>;
   }
@@ -185,6 +193,7 @@ const AdminPage = () => {
                       <div className="admin-dropdown-menu">
                         <button className="admin-dropdown-item">Chats</button>
                         <button className="admin-dropdown-item">Editar mi perfil</button>
+                        <button className="admin-dropdown-item" onClick={handleLogout}>Cerrar sesión</button> 
                       </div>
                   )}
               </div>
