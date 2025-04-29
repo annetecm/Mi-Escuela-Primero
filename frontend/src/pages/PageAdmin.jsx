@@ -183,10 +183,8 @@ const AdminPage = () => {
                     </button>
                     {showMonitoreoMenu && (
                       <div className="admin-dropdown-menu">
-                        <button className="admin-dropdown-item">Ver todos</button>
-                        <button className="admin-dropdown-item">Ordenar por</button>
-                        <button className="admin-dropdown-item">Filtrar</button>
-                        <button className="admin-dropdown-item">Configuración</button>
+                        <button className="admin-dropdown-item">Chats</button>
+                        <button className="admin-dropdown-item">Editar mi perfil</button>
                       </div>
                   )}
               </div>

@@ -20,6 +20,7 @@
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
   import InformacionUser from './pages/InformacionUser';
+  import ConexionInfo from './pages/ConexionesAdmin';
 
   function App() {
     return (
@@ -88,6 +89,14 @@
           element={
             <PrivateRoute allowedRoles={['administrador']}>
               <InformacionUser />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/informacion/conexion/:conexion.id"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ConexionInfo />
             </PrivateRoute>
           }
         />

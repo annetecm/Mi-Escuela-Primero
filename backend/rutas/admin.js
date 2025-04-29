@@ -19,6 +19,75 @@ router.post("/test-route", (req, res) => {
   res.json({ received: true });
 });
 
+//obtener informacion de la conexion
+router.get("/info/conexion:conexionId", verifyToken, async(req,res)=>{
+  //se pasa el administradorId
+  const conexionId= req.params.conexionId;
+  console.log("🔍 Buscando conexion");
+
+  try{
+    const query=`
+      SELECT 
+        json_agg(
+          json_build_object(
+            'id', c."conexionId",
+            'fechaInicio', c."fechaInicio",
+            'fechaFin', c."fechaFin",
+            'estado', c."estado",
+            'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
+            'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
+            'aliadoNombre', COALESCE(u."nombre", 'No disponible'),
+            'escuelaNombre', COALESCE(u."nombre", 'No disponible')
+          )
+        ) AS conexiones
+      FROM "Conexion" c
+      LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+      LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
+      LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
+      LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
+      WHERE c."CCT" = $1
+    )
+    SELECT 
+      ed.*
+    FROM admin_data ed
+    `;
+    console.log("Ejecutando para ", adminId);
+    const result= await pool.query(query,[adminId]);
+    if (result.rows.length === 0) {
+      console.log("❌ No se encontró escuela con CCT:", CCT);
+      return res.status(404).json({ 
+        error: "Escuela no encontrada",
+        details: `No existe registro con CCT: ${CCT}`
+      });
+  }
+
+  // Process the data for a cleaner structure
+  const administrador = result.rows[0];
+    
+  // Format data to match frontend expectations
+  const responseData = {
+    // Basic school data
+    ...administrador};
+
+    console.log("✅ Datos encontrados:", responseData);
+    return res.json(responseData);
+
+  } catch (err) {
+    console.error("💥 Error en la consulta:", {
+      message: err.message,
+      stack: err.stack,
+      parameters: [adminId]
+    });
+    
+    return res.status(500).json({ 
+      error: "Error en la consulta",
+      details: err.message,
+      solution: "Verifique que el adminId exista y tenga formato correcto"
+    });
+  }
+
+});
+
 //obtener todas las escuelas 
 router.get("/todasEscuelas", verifyToken, async (req, res) => {
   try {
@@ -282,6 +351,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
         json_agg(
           json_build_object(
             'necesidadId', c."necesidadId",
+            'CCT', c."CCT",
             'apoyoId', c."apoyoId",
             'fechaInicio', c."fechaInicio",
             'fechaFin', c."fechaFin",
@@ -457,6 +527,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
       SELECT 
         json_agg(
           json_build_object(
+            'CCT', c."CCT",
             'necesidadId', c."necesidadId",
             'apoyoId', c."apoyoId",
             'fechaInicio', c."fechaInicio",
@@ -704,27 +775,35 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
       WHERE e."CCT" = $1
     ),
    conexiones_data AS (
-        SELECT 
-          json_agg(
-            json_build_object(
-              'necesidadId', c."necesidadId",
-              'apoyoId', c."apoyoId",
-              'fechaInicio', c."fechaInicio",
-              'fechaFin', c."fechaFin",
-              'estado', c."estado",
-              'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
-              'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
-              'aliadoNombre', COALESCE(u."nombre", 'No disponible')
-            )
-          ) AS conexiones
-        FROM "Conexion" c
-        LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
-        LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
-        LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
-        LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
-        WHERE c."CCT" = $1
-      )
-    
+      SELECT
+        json_agg(
+          json_build_object(
+            'id', c."conexionId",
+            'necesidadId', c."necesidadId",
+            'apoyoId', c."apoyoId",
+            'aliadoId', c."aliadoId",
+            'fechaInicio', c."fechaInicio",
+            'fechaFin', c."fechaFin",
+            'estado', c."estado",
+            'tipoUsuario', CASE
+              WHEN pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
+              WHEN pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
+              ELSE 'Desconocido'
+            END,
+            'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
+            'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
+            'aliadoNombre', COALESCE(u."nombre", 'No disponible')
+          )
+        ) AS conexiones
+      FROM "Conexion" c
+      LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+      LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
+      LEFT JOIN "Aliado" al ON c."aliadoId" = al."aliadoId"
+      LEFT JOIN "PersonaFisica" pf ON al."aliadoId" = pf."CURP"
+      LEFT JOIN "PersonaMoral" pm ON al."aliadoId" = pm."RFC"
+      LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
+      WHERE c."CCT" = $1
+    )
    SELECT 
       ed.*,
       COALESCE(dd.director_nombre, null) as director_nombre,
