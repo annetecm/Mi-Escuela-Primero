@@ -6,6 +6,7 @@ import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
 
 function InformacionUser() {
+  const navigate = useNavigate();
   const { identificador, tipoUsuario } = useParams();
   const token = localStorage.getItem('token');
   const [userData, setUserData] = useState(null);
@@ -383,6 +384,7 @@ function InformacionUser() {
                 <table className="conexiones-table">
                   <thead>
                     <tr>
+                      <th>Index</th>
                       <th>Nombre de Necesidad</th>
                       <th>Nombre del Apoyo</th>
                       <th>Nombre del Aliado</th>
@@ -394,9 +396,10 @@ function InformacionUser() {
                   <tbody>
                     {userData.conexiones.map((conexion, index) => (
                       <tr key={index}>
+                        <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
                         <td>{conexion.necesidadNombre || 'No disponible'}</td>
                         <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                        <td>{conexion.aliadoNombre || 'No disponible'}</td>
+                        <td onClick={() => navigate(`/administrador/informacion/${conexion.aliadoId}/${conexion.tipoUsuario}`)}>{conexion.aliadoNombre || 'No disponible'}</td>
                         <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                         <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                         <td>{conexion.estado}</td>
@@ -468,9 +471,10 @@ function InformacionUser() {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
+                        <th>Index</th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
-                        <th>Nombre del Aliado</th>
+                        <th>Nombre de la Escuela</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Fin</th>
                         <th>Estado</th>
@@ -479,9 +483,10 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
+                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                          <td>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
                           <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                           <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                           <td>{conexion.estado}</td>
@@ -598,9 +603,10 @@ function InformacionUser() {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
+                        <th>Index</th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
-                        <th>Nombre del Aliado</th>
+                        <th>Nombre de la Escuela</th>
                         <th>Fecha Inicio</th>
                         <th>Fecha Fin</th>
                         <th>Estado</th>
@@ -609,9 +615,10 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
+                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                          <td>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
                           <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                           <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                           <td>{conexion.estado}</td>
