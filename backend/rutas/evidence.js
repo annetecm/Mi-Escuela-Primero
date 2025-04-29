@@ -34,7 +34,6 @@ router.post('/upload', verifyToken, upload.single('archivo'), async (req, res) =
       ).end(req.file.buffer);
     });
 
-    // 🔥 Insertar en ReporteAvance y guardar el resultado
     const insertResult = await db.query(`
       INSERT INTO "ReporteAvance" 
         ("reporteAvanceId", "tipo", "fecha", "descripcion", "ruta", "conexionId")
@@ -56,7 +55,7 @@ router.post('/upload', verifyToken, upload.single('archivo'), async (req, res) =
       reporteAvanceId: reporteAvanceId
     });
   } catch (err) {
-    console.error('❌ Error subiendo evidencia:', err);
+    console.error('Error subiendo evidencia:', err);
     return res.status(500).json({ status: 500, reason: err.message });
   }
 });
@@ -75,7 +74,7 @@ router.get('/progreso/:conexionId', verifyToken, async (req, res) => {
 
     return res.json(result.rows);
   } catch (err) {
-    console.error('❌ Error al cargar evidencias:', err);
+    console.error('Error al cargar evidencias:', err);
     return res.status(500).json({ error: 'Error interno al cargar evidencias.' });
   }
 });
@@ -94,7 +93,7 @@ router.patch('/reporte/:reporteAvanceId', verifyToken, async (req, res) => {
 
     return res.json({ message: "Descripción actualizada correctamente" });
   } catch (err) {
-    console.error('❌ Error actualizando descripción:', err);
+    console.error('Error actualizando descripción:', err);
     return res.status(500).json({ error: 'Error actualizando descripción.' });
   }
 });

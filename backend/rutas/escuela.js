@@ -130,7 +130,6 @@ router.post("/register", async (req, res) => {
     }
   }
   
-  
     // 9. Insert TramiteGobierno (optional)
     if (req.body.tramiteGobierno) {
       const { instancia, estado, folioOficial, nivelGobierno, descripcion } = req.body.tramiteGobierno;
@@ -140,11 +139,6 @@ router.post("/register", async (req, res) => {
         [CCT, instancia, estado, folioOficial, nivelGobierno, descripcion]
       );
     }
-  
-  
-
-    
-    
 
     // 10. Insert Supervisor (not optional)
     const {
@@ -173,8 +167,6 @@ router.post("/register", async (req, res) => {
       ]
     );
     
-    
-
     // 11. Insert MesaDirectiva (optional)
     if (escuela.mesaDirectiva) {
       await client.query(
@@ -192,8 +184,6 @@ router.post("/register", async (req, res) => {
       correoElectronico: correoDir,
       telefono: telDir,
     } = escuela.director;
-    
-    
   
     await client.query(
       `INSERT INTO "Director" ("CCT", "fechaJubilacion", "posibleCambioPlantel", "nombre", "correoElectronico", "telefono")
@@ -266,7 +256,6 @@ router.post("/register", async (req, res) => {
   } finally {
     client.release();
   }
-
 
 });
 
@@ -674,7 +663,7 @@ const tiposMap = {
 oldData.apoyos.forEach((apoyoAntiguo) => {
   let tipo = apoyoAntiguo.tipo;
 
-  // ✅ Si el tipo es una clave (como "osc"), tradúcelo a nombre bonito
+  // Si el tipo es una clave (como "osc"), tradúcelo a nombre bonito
   if (tiposMap[tipo]) {
     tipo = tiposMap[tipo];
   }
@@ -801,4 +790,44 @@ if (cambios.length > 0) {
     client.release();
   }
 });
+
+router.get('/mis-conexiones', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
+    const escuelaResult = await pool.query(`
+      SELECT "CCT" 
+      FROM "Escuela" 
+      WHERE "usuarioId" = $1
+    `, [usuarioId]);
+
+    if (escuelaResult.rows.length === 0) {
+      return res.status(404).json({ error: "Escuela no encontrada" });
+    }
+
+    const CCT = escuelaResult.rows[0].CCT;
+
+    const conexionesResult = await pool.query(`
+      SELECT 
+        c."conexionId",
+        a."aliadoId",
+        u."nombre" AS "nombreAliado",
+        ap."caracteristicas" AS "apoyo",
+        n."nombre" AS "nombreNecesidad"
+      FROM "Conexion" c
+      JOIN "Aliado" a ON c."aliadoId" = a."aliadoId"
+      JOIN "Usuario" u ON a."usuarioId" = u."usuarioId"
+      JOIN "Apoyo" ap ON c."apoyoId" = ap."apoyoId"
+      JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
+      WHERE c."CCT" = $1
+      ORDER BY u."nombre" ASC;
+    `, [CCT]);
+
+    return res.json(conexionesResult.rows);
+  } catch (err) {
+    console.error('❌ Error al obtener conexiones de aliados:', err);
+    return res.status(500).json({ error: 'Error interno al cargar aliados.' });
+  }
+});
+
 module.exports = router;

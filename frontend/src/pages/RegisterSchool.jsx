@@ -760,7 +760,7 @@ isSubmitting: Tracks whether the form is currently being submitted.
   </div>
   <div className="form-group">
     <label>
-      ¿Cuentan con mesa de padres de familia? Si sí, ¿por cuántas personas está conformada?
+      ¿Cuentan con mesa de padres de familia? Si sí, ¿por cuántas personas está conformada? Si no, escriba 0
     </label>
     <input
       className="form-input"

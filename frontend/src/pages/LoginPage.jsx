@@ -26,12 +26,32 @@ function LoginPage() {
       });
 
       const data = await response.json();
+      console.log("🚀 Data recibida en login:", data);
+
+
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
+      localStorage.removeItem('tipo');
+      localStorage.removeItem('aliadoId');
+      localStorage.removeItem('cct');
 
+
+
+      if (data.tipo === 'aliado') {
+        localStorage.setItem('tipo', 'aliado');
+        localStorage.setItem('aliadoId', data.aliadoId);
+      } else if (data.tipo === 'escuela') {
+        localStorage.setItem('tipo', 'escuela');
+        localStorage.setItem('cct', data.cct);
+      } else if (data.tipo === 'administrador') {
+        localStorage.setItem('tipo', 'administrador');
+      }
       login(data.token, data.tipo);
+
+      console.log(data.tipo);
+
 
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');
@@ -91,7 +111,8 @@ function LoginPage() {
           <p>¿Aún no tienes una cuenta?</p>
           <p>
             Si te gustaría apoyar una escuela, <a href="#" onClick={handleRegistroAliado}>crea una cuenta de aliado</a><br />
-            Si tu escuela necesita apoyo, <a href="#" onClick={handleRegistroEscuela}>regístrala aquí</a>
+            Si tu escuela necesita apoyo, <a href="#" onClick={handleRegistroEscuela}>regístrala aquí</a><br />
+            ¿Olvidaste tu contraseña? <a href="#" onClick={() => navigate('/recuperar-password')}>Recupérala aquí</a>
           </p>
         </div>
       </div>

@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
 });
 
 
-
 router.use((req, res, next) => {
   console.log(` ${req.method} ${req.originalUrl}`);
   next();
