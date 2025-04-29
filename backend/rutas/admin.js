@@ -968,7 +968,7 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
 });
 
 //creo que no sirve
-//update user information
+//update user information para la edicion
 router.post("/update", verifyToken, async(req,res)=>{
   const {id, field, value}= req.body;
   if(!id||!field||value===undefined){
@@ -983,6 +983,90 @@ router.post("/update", verifyToken, async(req,res)=>{
   }catch(error){
     console.error("Error al actualizar datos: ", err);
     res.status(500).json({error: 'Error interno del servidor'});
+  }
+});
+
+//update multiple school fields at once
+router.post("/update-multiple", verifyToken, async(req, res) => {
+  const { cct, data } = req.body;
+  
+  if (!cct || !data || Object.keys(data).length === 0) {
+    return res.status(400).json({ error: "Faltan datos requeridos" });
+  }
+  
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    // Identify the usuarioId from the CCT
+    const userIdQuery = `SELECT "usuarioId" FROM "Escuela" WHERE "CCT" = $1`;
+    const userIdResult = await client.query(userIdQuery, [cct]);
+    
+    if (userIdResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Escuela no encontrada' });
+    }
+    
+    const usuarioId = userIdResult.rows[0].usuarioId;
+    
+    // Create an array to store all update operations
+    const updateOperations = [];
+    const fieldsToUpdate = Object.keys(data);
+    
+    // Process each field to update
+    for (const field of fieldsToUpdate) {
+      // Skip null or undefined values
+      if (data[field] === null || data[field] === undefined) {
+        continue;
+      }
+      
+      // Handle boolean conversions if needed
+      let value = data[field];
+      if (field === 'tieneUSAER' && typeof value === 'string') {
+        value = value.toLowerCase() === 'sí' || value.toLowerCase() === 'si' || value === true;
+      }
+      
+      // Handle numeric conversions
+      if (['numeroDocentes', 'estudiantesPorGrupo'].includes(field) && typeof value === 'string') {
+        value = parseInt(value, 10);
+        if (isNaN(value)) {
+          continue; // Skip invalid number conversions
+        }
+      }
+      
+      const query = `UPDATE "Escuela" SET "${field}" = $1 WHERE "usuarioId" = $2 RETURNING *`;
+      updateOperations.push(client.query(query, [value, usuarioId]));
+    }
+    
+    // Execute all updates
+    const results = await Promise.all(updateOperations);
+    
+    // Check if any updates were successful
+    const updatedFields = results.filter(result => result.rows.length > 0);
+    
+    if (updatedFields.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'No se pudo actualizar ningún campo' });
+    }
+    
+    await client.query('COMMIT');
+    
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Datos actualizados correctamente',
+      updatedCount: updatedFields.length
+    });
+    
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Error al actualizar múltiples campos:", err);
+    return res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: err.message
+    });
+  } finally {
+    client.release();
   }
 });
 
