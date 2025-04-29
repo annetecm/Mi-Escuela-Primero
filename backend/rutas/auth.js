@@ -2,6 +2,7 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const transporter = require('../utils/nodemailer');
 
 // Login para cualquier tipo de usuario (esc/ali)
 router.post("/login", async (req, res) => {
@@ -86,6 +87,80 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).json({ error: "Error en el login." });
+  }
+});
+
+router.post('/recuperar-password', async (req, res) => {
+  const { correoElectronico } = req.body;
+
+  if (!correoElectronico) {
+    return res.status(400).json({ error: 'Correo requerido' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT "usuarioId" 
+      FROM "Usuario" 
+      WHERE "correoElectronico" = $1
+    `, [correoElectronico]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Correo no registrado' });
+    }
+
+    const usuarioId = result.rows[0].usuarioId;
+
+    const token = jwt.sign(
+      { usuarioId },
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
+    );
+
+    const resetLink = `http://localhost:5173/resetear-password?token=${token}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: correoElectronico,
+      subject: 'Recuperación de contraseña',
+      html: `
+        <h2>Solicitud de recuperación de contraseña</h2>
+        <p>Haz click en el siguiente enlace para recuperar tu contraseña:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>Este enlace expira en 1 hora.</p>
+      `
+    });
+
+    return res.json({ message: 'Correo enviado exitosamente' });
+  } catch (error) {
+    console.error('Error en recuperación de contraseña:', error);
+    return res.status(500).json({ error: 'Error interno' });
+  }
+});
+
+router.post('/resetear-password', async (req, res) => {
+  const { token, nuevaContraseña } = req.body;
+
+  if (!token || !nuevaContraseña) {
+    return res.status(400).json({ error: 'Token y nueva contraseña requeridos.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const usuarioId = decoded.usuarioId;
+
+    const hashedPassword = await bcrypt.hash(nuevaContraseña, 10);
+
+    await pool.query(`
+      UPDATE "Usuario"
+      SET "contraseña" = $1
+      WHERE "usuarioId" = $2
+    `, [hashedPassword, usuarioId]);
+
+    return res.json({ message: 'Contraseña actualizada exitosamente.' });
+
+  } catch (error) {
+    console.error('Error al resetear contraseña:', error);
+    return res.status(400).json({ error: 'Token inválido o expirado.' });
   }
 });
 

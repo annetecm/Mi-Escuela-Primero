@@ -20,6 +20,9 @@
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
   import InformacionUser from './pages/InformacionUser';
+  import ChangePassword from './pages/ChangePassword';
+  import ResetPassword from './pages/ResetPassword';
+
 
   function App() {
     return (
@@ -150,6 +153,8 @@
             </PrivateRoute>
           }
         />
+        <Route path="/recuperar-password" element={<ChangePassword />} />
+        <Route path="/resetear-password" element={<ResetPassword />} />
         <Route path="/logout" element={<SignOut />} />
         <Route path="/unauthorized" element={<h1>Acceso no autorizado</h1>} />
       </Routes>
