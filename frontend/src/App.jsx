@@ -16,6 +16,7 @@
   import SchoolCard from './pages/SchoolCard';
   import AdminPage from './pages/PageAdmin';
   import RegisterAdmin from './pages/RegisterAdmin';
+  import ChatPage from './pages/ChatPage';
 
   function App() {
     return (
@@ -47,7 +48,9 @@
               <ListedSchools />
             </PrivateRoute>
           }
+          
         />
+        
         <Route
           path="/editar/aliado"
           element={
@@ -97,6 +100,15 @@
             </PrivateRoute>
           }
         />
+          <Route
+            path="/chat/:conexionId"
+            element={
+              <PrivateRoute allowedRoles={['escuela', 'aliado']}>
+                <ChatPage />
+              </PrivateRoute>
+            }
+        />
+
          <Route
         path="/listado/aliados"
         element={

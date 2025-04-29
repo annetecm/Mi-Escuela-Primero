@@ -2,6 +2,7 @@ const router = require("express").Router();
 const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const transporter = require('../utils/nodemailer');
 
 // Login para cualquier tipo de usuario (esc/ali)
 router.post("/login", async (req, res) => {
@@ -21,7 +22,7 @@ router.post("/login", async (req, res) => {
     const usuario = result.rows[0];
     const usuarioId = usuario.usuarioId ?? usuario.usuarioid;
 
-    console.log("📥 Usuario completo desde DB:", usuario);
+    //console.log("📥 Usuario completo desde DB:", usuario);
 
 
     // 2. Verificar estado de aprobación
@@ -36,87 +37,143 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Correo o contraseña incorrectos." });
     }
     let tipoUsuario = null;
-
+    let aliadoId = null;
+    let cct = null;
+    
     // Primero revisa si es ESCUELA
-// Primero revisa si es ESCUELA
-console.log("📥 Usuario completo desde DB:", usuario);
-console.log("🔑 ID leído:", usuarioId);
-const escuela = await pool.query(
-  `SELECT * FROM "Escuela" WHERE "usuarioId"::text = $1::text`,
-        [usuarioId]
-);
-console.log("🔍 Escuela encontrada:", escuela.rows);
+    console.log("🔑 ID leído:", usuarioId);
+    const escuela = await pool.query(
+      `SELECT * FROM "Escuela" WHERE "usuarioId"::text = $1::text`,
+            [usuarioId]
+    );
 
-if (escuela.rows.length > 0) {
-  tipoUsuario = 'escuela';
-} else {
-  // Si no es escuela, revisa si es aliado
-  const aliado = await pool.query(
-    `SELECT * FROM "Aliado" WHERE "usuarioId" = $1`,
-        [usuarioId]
-  );
-  console.log("🧾 Aliado encontrado:", aliado.rows);
+    if (escuela.rows.length > 0) {
+      console.log("🔍 Escuela encontrada:", escuela.rows);
+      tipoUsuario = 'escuela';
+      cct = escuela.rows[0].CCT;  // Aquí sacas el CCT
+    } else {
+      // Si no es escuela, revisa si es aliado
+      const aliado = await pool.query(
+        `SELECT * FROM "Aliado" WHERE "usuarioId" = $1`,
+            [usuarioId]
+      );
 
-  if (aliado.rows.length > 0) {
-    tipoUsuario = 'aliado';
-  }
-}
+      if (aliado.rows.length > 0) {
+        console.log("🧾 Aliado encontrado:", aliado.rows);
+        tipoUsuario = 'aliado';
+        aliadoId = aliado.rows[0].aliadoId; // Aquí sacas el aliadoId
+      }
+    }
+
+    //revisar si es Administrador
+    const administrador= await pool.query(
+      `SELECT * FROM "Administrador" WHERE "usuarioId"::text = $1::text`,
+            [usuarioId]
+    );
+    
+    if(administrador.rows.length>0){
+      console.log("🧾 Administrador encontrado:", administrador.rows);
+      tipoUsuario= 'administrador'
+    }
+
     
     // 4. Generar token JWT
     const token = jwt.sign(
       {
         usuarioId: usuarioId,
         correo: usuario.correoelectronico,
-        tipo: tipoUsuario 
+        tipo: tipoUsuario,
+        aliadoId: aliadoId,
+        cct: cct
       },
       process.env.JWT_SECRET || "top",
       { expiresIn: "1d" }
     );
-    res.json({ mensaje: "Login exitoso", token, tipo: tipoUsuario }); 
+    res.json({ 
+      mensaje: "Login exitoso",
+      token,
+      tipo: tipoUsuario,
+      aliadoId,
+      cct
+    });
   } catch (err) {
     console.error("Error en login:", err);
     res.status(500).json({ error: "Error en el login." });
   }
 });
+router.post('/recuperar-password', async (req, res) => {
+  const { correoElectronico } = req.body;
 
-// Registrar usuario básico
-router.post("/register", async (req, res) => {
-  const { correoElectronico, contraseña, nombreCompleto } = req.body;
+  if (!correoElectronico) {
+    return res.status(400).json({ error: 'Correo requerido' });
+  }
 
   try {
-    // 1. Validar datos de entrada
-    if (!correoElectronico || !contraseña || !nombreCompleto) {
-      return res.status(400).json({ error: "Todos los campos son obligatorios." });
+    const result = await pool.query(`
+      SELECT "usuarioId" 
+      FROM "Usuario" 
+      WHERE "correoElectronico" = $1
+    `, [correoElectronico]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Correo no registrado' });
     }
 
-    // 2. Verificar si el correo ya está registrado
-    const existingUser = await pool.query(
-      `SELECT * FROM "Usuario" WHERE "correoElectronico" = $1`,
-      [correoElectronico]
+    const usuarioId = result.rows[0].usuarioId;
+
+    const token = jwt.sign(
+      { usuarioId },
+      process.env.JWT_SECRET, 
+      { expiresIn: '1h' }
     );
 
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: "Este correo ya está registrado." });
-    }
+    const resetLink = `http://localhost:5173/resetear-password?token=${token}`;
 
-    // 3. Hashear la contraseña
-    const contraseñaHasheada = await bcrypt.hash(contraseña, 10);
-
-    // 4. Insertar usuario en la base de datos
-    const result = await pool.query(
-      `INSERT INTO "Usuario" ("correoElectronico", "contraseña", "nombre", "estadoRegistro") 
-      VALUES ($1, $2, $3, 'pendiente') RETURNING *`,
-      [correoElectronico, contraseñaHasheada, nombreCompleto]
-    );
-
-    res.status(201).json({ 
-      mensaje: "Registro exitoso, pendiente de aprobación.",
-      usuarioId: result.rows[0].usuarioId
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: correoElectronico,
+      subject: 'Recuperación de contraseña',
+      html: `
+        <h2>Solicitud de recuperación de contraseña</h2>
+        <p>Haz click en el siguiente enlace para recuperar tu contraseña:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>Este enlace expira en 1 hora.</p>
+      `
     });
-  } catch (err) {
-    console.error("Error en registro:", err);
-    res.status(500).json({ error: "Error al registrar el usuario." });
+
+    return res.json({ message: 'Correo enviado exitosamente' });
+  } catch (error) {
+    console.error('Error en recuperación de contraseña:', error);
+    return res.status(500).json({ error: 'Error interno' });
   }
 });
+
+router.post('/resetear-password', async (req, res) => {
+  const { token, nuevaContraseña } = req.body;
+
+  if (!token || !nuevaContraseña) {
+    return res.status(400).json({ error: 'Token y nueva contraseña requeridos.' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const usuarioId = decoded.usuarioId;
+
+    const hashedPassword = await bcrypt.hash(nuevaContraseña, 10);
+
+    await pool.query(`
+      UPDATE "Usuario"
+      SET "contraseña" = $1
+      WHERE "usuarioId" = $2
+    `, [hashedPassword, usuarioId]);
+
+    return res.json({ message: 'Contraseña actualizada exitosamente.' });
+
+  } catch (error) {
+    console.error('Error al resetear contraseña:', error);
+    return res.status(400).json({ error: 'Token inválido o expirado.' });
+  }
+});
+
 
 module.exports = router;

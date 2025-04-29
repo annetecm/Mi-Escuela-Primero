@@ -32,6 +32,14 @@ function LoginPage() {
       }
 
       login(data.token, data.tipo);
+      
+      if (data.tipo === 'aliado') {
+        localStorage.setItem('aliadoId', data.aliadoId);
+      } else if (data.tipo === 'escuela') {
+        localStorage.setItem('cct', data.cct);
+      }
+
+      console.log(data.tipo);
 
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');
