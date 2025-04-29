@@ -23,6 +23,7 @@
   import ConexionInfo from './pages/ConexionesAdmin';
   import ChangePassword from './pages/ChangePassword';
   import ResetPassword from './pages/ResetPassword';
+  import ChatPage from './pages/ChatPage';
 
 
   function App() {

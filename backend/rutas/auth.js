@@ -50,6 +50,7 @@ router.post("/login", async (req, res) => {
     if (escuela.rows.length > 0) {
       console.log("🔍 Escuela encontrada:", escuela.rows);
       tipoUsuario = 'escuela';
+      cct = escuela.rows[0].CCT; // aquí se guarda el CCT ⚡
     } else {
       // Si no es escuela, revisa si es aliado
       const aliado = await pool.query(
@@ -60,6 +61,7 @@ router.post("/login", async (req, res) => {
       if (aliado.rows.length > 0) {
         console.log("🧾 Aliado encontrado:", aliado.rows);
         tipoUsuario = 'aliado';
+        aliadoId = aliado.rows[0].aliadoId; // aquí se guarda el aliadoId ⚡
       }
     }
 
@@ -87,6 +89,14 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET || "top",
       { expiresIn: "1d" }
     );
+
+      console.log("🚀 Devolviendo datos en login:", {
+      tipoUsuario,
+      aliadoId,
+      cct,
+      token: "token generado" // Opcional si quieres confirmar que token sí se generó
+    });
+
     res.json({ 
       mensaje: "Login exitoso",
       token,

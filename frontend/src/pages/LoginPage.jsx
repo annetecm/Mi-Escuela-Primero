@@ -26,22 +26,32 @@ function LoginPage() {
       });
 
       const data = await response.json();
+      console.log("🚀 Data recibida en login:", data);
+
+
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
       }
+      localStorage.removeItem('tipo');
+      localStorage.removeItem('aliadoId');
+      localStorage.removeItem('cct');
 
-      login(data.token, data.tipo);
-      
+
+
       if (data.tipo === 'aliado') {
+        localStorage.setItem('tipo', 'aliado');
         localStorage.setItem('aliadoId', data.aliadoId);
       } else if (data.tipo === 'escuela') {
+        localStorage.setItem('tipo', 'escuela');
         localStorage.setItem('cct', data.cct);
+      } else if (data.tipo === 'administrador') {
+        localStorage.setItem('tipo', 'administrador');
       }
+      login(data.token, data.tipo);
 
       console.log(data.tipo);
 
-      console.log(data.tipo);
 
       if (data.tipo === 'aliado') {
         navigate('/aliado/perfil');

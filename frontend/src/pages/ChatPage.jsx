@@ -12,19 +12,26 @@ export default function ChatPage() {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const { conexionId } = useParams();
+  const [tipoUsuario, setTipoUsuario] = useState('');
+
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
   useEffect(() => {
-    const tipoUsuario = localStorage.getItem("tipo");
+    const tipo = localStorage.getItem("tipo");
     const idAliado = localStorage.getItem("aliadoId");
     const cctEscuela = localStorage.getItem("cct");
 
-    if (tipoUsuario === "aliado") {
+    console.log("📦 LocalStorage recuperado:", { tipo, idAliado, cctEscuela });
+    
+    if (tipo === "aliado" && idAliado) {
+      setTipoUsuario("aliado");
       setRemitente(idAliado);
-    } else if (tipoUsuario === "escuela") {
+    } else if (tipo === "escuela" && cctEscuela) {
+      setTipoUsuario("escuela");
       setRemitente(cctEscuela);
     }
+
   }, []);
 
   const cargarMensajes = () => {
@@ -79,7 +86,6 @@ export default function ChatPage() {
       .catch((err) => console.error("Error al crear/verificar chat:", err));
   }, [conexionId]);
 
-  if (!remitente) return <div className="chat-main-content">Cargando chat...</div>;
 
   return (
     <div className="chat-container">
@@ -94,20 +100,34 @@ export default function ChatPage() {
 
       <div className="chat-main-layout">
         <aside className={`chat-sidebar ${menuVisible ? 'visible' : 'hidden'}`}>
-          <ul className="chat-menu-list">
-            <li className="chat-menu-item" onClick={() => navigate("/aliado/perfil")}>Perfil</li>
-            <li className="chat-menu-item" onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
-            <li className="chat-menu-item" onClick={() => navigate("/listado/escuelas")}>Mis escuelas</li>
-            <li className="chat-menu-item" onClick={() => navigate("/logout")}>Cerrar sesión</li>
+        <ul className="chat-menu-list">
+            {tipoUsuario === "aliado" ? (
+              <>
+                <li className="chat-menu-item" onClick={() => navigate('/aliado/perfil')}>Perfil</li>
+                <li className="chat-menu-item" onClick={() => navigate('/aliado/mapa')}>Buscar escuelas</li>
+                <li className="chat-menu-item" onClick={() => navigate('/listado/escuelas')}>Mis escuelas</li>
+                <li className="chat-menu-item" onClick={() => navigate('/logout')}>Cerrar sesión</li>
+              </>
+            ) : tipoUsuario === "escuela" ? (
+              <>
+                <li className="chat-menu-item" onClick={() => navigate('/escuela/perfil')}>Perfil</li>
+                <li className="chat-menu-item" onClick={() => navigate('/listado/aliados')}>Mis aliados</li>
+                <li className="chat-menu-item" onClick={() => navigate('/logout')}>Cerrar sesión</li>
+              </>
+            ) : null}
           </ul>
         </aside>
 
         <main className="chat-content">
           <div className="chat-header-actions">
             <h1 className="chat-title">Chat</h1>
-            <button onClick={cargarMensajes} className="chat-refresh-button">🔄 Refresh</button>
+            <button onClick={() => {
+              setCargando(true); 
+              cargarMensajes();
+            }} className="chat-refresh-button">
+              🔄 Refresh
+            </button>
           </div>
-
           <div className="chat-box">
             {cargando ? (
               <p>Cargando mensajes...</p>
@@ -138,6 +158,12 @@ export default function ChatPage() {
               placeholder="Escribe un mensaje..."
               value={mensaje}
               onChange={(e) => setMensaje(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  enviarMensaje();
+                }
+              }}
             />
             <button
               className="chat-send-button"
@@ -147,6 +173,7 @@ export default function ChatPage() {
               Enviar
             </button>
           </div>
+
         </main>
       </div>
     </div>
