@@ -90,7 +90,7 @@ export default function SchoolCard() {
             needs: data.necesidades || []
           });
         })
-        .catch(err => console.error("❌ Error al obtener escuela:", err));
+        .catch(err => console.error("Error al obtener escuela:", err));
     }
   }, [school]);  
 
