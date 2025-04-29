@@ -211,6 +211,22 @@ isSubmitting: Tracks whether the form is currently being submitted.
       return updatedData;
     });
   };
+
+  const obtenerCoordenadas = async (direccion) => {
+    const apiKey = "AIzaSyBzfgtswYTfG1vOW-JsKuBb-KrIH1SIcHU"; // ⛔ Sustituye con tu API Key real
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${apiKey}`;
+  
+    const response = await fetch(url);
+    const data = await response.json();
+  
+    if (data.status === "OK") {
+      const location = data.results[0].geometry.location;
+      return { latitud: location.lat, longitud: location.lng };
+    } else {
+      throw new Error("No se pudo obtener la ubicación geográfica.");
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -252,7 +268,13 @@ isSubmitting: Tracks whether the form is currently being submitted.
           //tieneUSAER: Boolean(formData.escuela.tieneUSAER)
         }
       }, null, 2));
+      
       console.log("Necesidades convertidas:", convertNecesidades());
+      
+      const direccionCompleta = `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`;
+      const coordenadas = await obtenerCoordenadas(direccionCompleta);
+
+      
       const response = await fetch("http://localhost:5000/api/escuela/register", {
         method: "POST",
         headers: {
@@ -263,8 +285,9 @@ isSubmitting: Tracks whether the form is currently being submitted.
           usuario: formData.usuario,
           escuela: {
             ...formData.escuela,
-            direccion: `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`,
-            numeroDocentes: Number(formData.escuela.numeroDocentes),
+            direccion: direccionCompleta,
+  latitud: coordenadas.latitud,
+  longitud: coordenadas.longitud,
             estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
             necesidades: convertNecesidades(), 
             apoyoPrevio: apoyoPrevioArray
