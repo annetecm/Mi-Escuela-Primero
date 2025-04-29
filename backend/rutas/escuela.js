@@ -91,9 +91,9 @@ router.post("/register", async (req, res) => {
       `INSERT INTO "Escuela" (
          "direccion", "sostenimiento", "zonaEscolar", "usuarioId",
          "sectorEscolar", "modalidad", "nivelEducativo", "CCT",
-         "tieneUSAER", "numeroDocentes", "estudiantesPorGrupo", "controlAdministrativo"
+         "tieneUSAER", "numeroDocentes", "estudiantesPorGrupo", "controlAdministrativo",  "latitud", "longitud"
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
        ) RETURNING *`,
       [
         escuela.direccion,
@@ -108,6 +108,8 @@ router.post("/register", async (req, res) => {
         escuela.numeroDocentes,
         escuela.estudiantesPorGrupo,
         escuela.controlAdministrativo,
+        escuela.latitud,
+        escuela.longitud,
       ]
     );
 
