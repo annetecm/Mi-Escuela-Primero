@@ -23,6 +23,7 @@
   import ConexionInfo from './pages/ConexionesAdmin';
   import ChangePassword from './pages/ChangePassword';
   import ResetPassword from './pages/ResetPassword';
+  import ListedConexiones from './pages/ListedConexiones';
 
 
   function App() {
@@ -96,7 +97,7 @@
           }
         />
         <Route
-          path="/administrador/informacion/conexion/:conexion.id"
+          path="/administrador/conexiones/:conexionId"
           element={
             <PrivateRoute allowedRoles={['administrador']}>
               <ConexionInfo />
@@ -108,6 +109,14 @@
           element={
             <PrivateRoute allowedRoles={['administrador']}>
               <ListedAdmin />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/administrador/conexiones/lista/:conexionId"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <ListedConexiones />
             </PrivateRoute>
           }
         />

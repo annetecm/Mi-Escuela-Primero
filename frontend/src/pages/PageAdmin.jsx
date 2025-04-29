@@ -184,6 +184,7 @@ const AdminPage = () => {
                     {showMonitoreoMenu && (
                       <div className="admin-dropdown-menu">
                         <button className="admin-dropdown-item">Chats</button>
+                        <button className="admin-dropdown-item" onClick={() => navigate('/administrador/conexiones')}>Conexiones</button>
                         <button className="admin-dropdown-item">Editar mi perfil</button>
                       </div>
                   )}

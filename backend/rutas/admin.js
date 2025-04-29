@@ -20,72 +20,121 @@ router.post("/test-route", (req, res) => {
 });
 
 //obtener informacion de la conexion
-router.get("/info/conexion:conexionId", verifyToken, async(req,res)=>{
-  //se pasa el administradorId
-  const conexionId= req.params.conexionId;
-  console.log("🔍 Buscando conexion");
+// Route for fetching specific connection data by conexionId
+router.get("/info/conexion/:conexionId", verifyToken, async(req, res) => {
+  // Get the conexionId from URL parameters
+  const conexionId = req.params.conexionId;
+  console.log("🔍 Buscando conexion con ID:", conexionId);
 
-  try{
-    const query=`
+  try {
+    const query = `
+    WITH conexion_data AS(
       SELECT 
         json_agg(
           json_build_object(
-            'id', c."conexionId",
+            'conexionId', c."conexionId",
+            'necesidadId', c."necesidadId",
+            'apoyoId', c."apoyoId",
+            'aliadoId', c."aliadoId",
+            'CCT', c."CCT",
             'fechaInicio', c."fechaInicio",
             'fechaFin', c."fechaFin",
             'estado', c."estado",
+            'tipoUsuario', CASE
+              WHEN pf."CURP" IS NOT NULL THEN 'Aliado de Persona Fisica'
+              WHEN pm."RFC" IS NOT NULL THEN 'Aliado de Persona Moral'
+              ELSE 'Desconocido'
+            END,
             'necesidadNombre', COALESCE(n."nombre", 'No disponible'),
             'apoyoNombre', COALESCE(a."tipo", 'No disponible'),
             'aliadoNombre', COALESCE(u."nombre", 'No disponible'),
-            'escuelaNombre', COALESCE(u."nombre", 'No disponible')
+            'escuelaNombre', COALESCE(usa."nombre", 'No disponible')
           )
         ) AS conexiones
       FROM "Conexion" c
       LEFT JOIN "Necesidad" n ON c."necesidadId" = n."necesidadId"
       LEFT JOIN "Apoyo" a ON c."apoyoId" = a."apoyoId"
-      LEFT JOIN "Aliado" al ON a."aliadoId" = al."aliadoId"
+      LEFT JOIN "Aliado" al ON c."aliadoId" = al."aliadoId"
+      LEFT JOIN "PersonaFisica" pf ON al."aliadoId" = pf."CURP"
+      LEFT JOIN "PersonaMoral" pm ON al."aliadoId" = pm."RFC"
       LEFT JOIN "Usuario" u ON al."usuarioId" = u."usuarioId"
-      WHERE c."CCT" = $1
+      LEFT JOIN "Escuela" es ON c."CCT" = es."CCT"
+      LEFT JOIN "Usuario" usa ON es."usuarioId" = usa."usuarioId"
+      WHERE c."conexionId" = $1
     )
     SELECT 
-      ed.*
-    FROM admin_data ed
+      con.*
+    FROM conexion_data con
     `;
-    console.log("Ejecutando para ", adminId);
-    const result= await pool.query(query,[adminId]);
-    if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", CCT);
-      return res.status(404).json({ 
-        error: "Escuela no encontrada",
-        details: `No existe registro con CCT: ${CCT}`
-      });
-  }
-
-  // Process the data for a cleaner structure
-  const administrador = result.rows[0];
     
-  // Format data to match frontend expectations
-  const responseData = {
-    // Basic school data
-    ...administrador};
+    console.log("Ejecutando consulta para conexionId:", conexionId);
+    const result = await pool.query(query, [conexionId]);
+    
+    if (result.rows.length === 0 || !result.rows[0].conexiones || result.rows[0].conexiones.length === 0) {
+      console.log("❌ No se encontró conexión con ID:", conexionId);
+      return res.status(404).json({ 
+        error: "Conexión no encontrada",
+        details: `No existe registro con conexionId: ${conexionId}`
+      });
+    }
 
-    console.log("✅ Datos encontrados:", responseData);
+    // Format data to match frontend expectations
+    const responseData = {
+      // Return the data directly
+      ...result.rows[0]
+    };
+
+    console.log("✅ Datos encontrados para conexionId:", conexionId);
     return res.json(responseData);
 
   } catch (err) {
     console.error("💥 Error en la consulta:", {
       message: err.message,
       stack: err.stack,
-      parameters: [adminId]
+      parameters: [conexionId]
     });
     
     return res.status(500).json({ 
       error: "Error en la consulta",
       details: err.message,
-      solution: "Verifique que el adminId exista y tenga formato correcto"
+      solution: "Verifique que el conexionId exista y tenga formato correcto"
     });
   }
+});
 
+//todas las conexiones
+router.get("/todasConexiones", verifyToken, async(req,res)=>{
+  
+  try{
+    const result = await pool.query(`
+    WITH admin_data AS (
+      SELECT json_agg(
+        json_build_object(
+          'id', e."administradorId", 
+          'nombre', u."nombre",
+          'correoElectronico', u."correoElectronico"
+        )
+      ) AS informacion
+      FROM "Administrador" e
+      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
+      WHERE u."estadoRegistro" = 'aprobado'
+    )
+    SELECT 
+      COALESCE(ed.informacion, '[]'::json) as informacion
+    FROM admin_data ed
+    `);
+    
+    const administrador = result.rows[0];
+    
+    const responseData = {
+      informacion: Array.isArray(administrador.informacion) ? administrador.informacion : []
+    };
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Error al obtener perfil de admin:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 //obtener todas las escuelas 
@@ -350,6 +399,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
       SELECT 
         json_agg(
           json_build_object(
+            'id', c."conexionId",
             'necesidadId', c."necesidadId",
             'CCT', c."CCT",
             'apoyoId', c."apoyoId",
@@ -527,6 +577,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
       SELECT 
         json_agg(
           json_build_object(
+            'id', c."conexionId",
             'CCT', c."CCT",
             'necesidadId', c."necesidadId",
             'apoyoId', c."apoyoId",
