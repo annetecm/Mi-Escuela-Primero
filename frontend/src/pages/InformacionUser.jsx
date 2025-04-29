@@ -471,6 +471,7 @@ function InformacionUser() {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
+                        <th>Index</th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
                         <th>Nombre de la Escuela</th>
@@ -482,6 +483,7 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
+                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
@@ -601,6 +603,7 @@ function InformacionUser() {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
+                        <th>Index</th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
                         <th>Nombre de la Escuela</th>
@@ -612,6 +615,7 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
+                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
