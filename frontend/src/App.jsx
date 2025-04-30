@@ -188,6 +188,15 @@
           </PrivateRoute>
         }
       />
+      <Route
+          path="/administrador/evidencia/:id"
+          element={
+            <PrivateRoute allowedRoles={['administrador']}>
+              <EvidenceTimeline modoSoloLectura={true} />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/tarjeta-escuela"
           element={
