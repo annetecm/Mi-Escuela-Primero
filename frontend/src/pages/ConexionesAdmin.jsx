@@ -6,27 +6,43 @@ import profile from '../assets/profile.png';
 
 export default function ConexionesAdmin() {
     const { conexionId } = useParams();
-    const location = useLocation();
+    const token = localStorage.getItem('token');
     const [conexionData, setConexionData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
-    const [editingField, setEditingField] = useState(null);
-    const [newValue, setNewValue] = useState('');
 
-  // Handle edit click
-  const handleEditClick = (field) => {
-    setEditingField(field);
-    // Set the current value to the field being edited
-    setNewValue(''); // You would set this to the current value
-  };
-
-  // Handle save click
-  const handleSaveClick = () => {
-    // Save logic here
-    setEditingField(null);
-  };
+    const EliminarConexion = async () => {
+      let confirmacion = confirm("Seguro que quieres eliminar esta conexion: " + conexionId);
+      if(confirmacion){
+        try {
+          const response = await fetch('http://localhost:5000/api/admin/eliminar-conexion', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ 
+              identificador: conexionId
+            }),
+          });
+    
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Error al eliminar la conexion');
+          }
+    
+          const result = await response.json();
+          alert('Conexion eliminada correctamente');
+          navigate('/administrador/perfil');
+    
+        } catch (error) {
+          console.error('Error eliminando conexion:', error);
+          alert(`Error al eliminar: ${error.message}`);
+        }
+      }
+    };
 
   // Get admin profile info
   useEffect(() => {
@@ -213,6 +229,7 @@ export default function ConexionesAdmin() {
                     >
                     Ver evidencias
                   </button>
+                  <button className="cancel-button" onClick={EliminarConexion}>Eliminar Conexion</button>
                 </div>
             ))}
           </div>

@@ -1344,7 +1344,6 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
           WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
         `, [identificador]);
 
-        
         await client.query(`
           DELETE FROM "Chat" 
           WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
@@ -1453,6 +1452,67 @@ async function eliminarUsuarioCascada(client, usuarioId) {
     DELETE FROM "Usuario" WHERE "usuarioId" = $1
   `, [usuarioId]);
 }
+
+//eliminar conexion 
+router.delete('/eliminar-conexion', verifyToken, async (req, res) => {
+  const { identificador: conexionId } = req.body;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+    console.log(`Iniciando eliminación en cascada de conexión con ID: ${conexionId}`);
+
+    // Verificar primero si existe la conexión
+    const conexionExistente = await client.query(
+      'SELECT * FROM "Conexion" WHERE "conexionId" = $1',
+      [conexionId]
+    );
+
+    if (conexionExistente.rows.length === 0) {
+      throw new Error('Conexión no encontrada');
+    }
+
+    // Eliminar todos los registros relacionados con la conexión
+    await client.query(`
+      DELETE FROM "Notificacion" WHERE "conexionId" = $1
+    `, [conexionId]);
+
+    await client.query(`
+      DELETE FROM "ReporteAvance" WHERE "conexionId" = $1
+    `, [conexionId]);
+
+    await client.query(`
+      DELETE FROM "Chat" WHERE "conexionId" = $1
+    `, [conexionId]);
+
+    // Finalmente eliminar la conexión principal
+    const result = await client.query(`
+      DELETE FROM "Conexion" WHERE "conexionId" = $1 RETURNING *
+    `, [conexionId]);
+
+    await client.query('COMMIT');
+    console.log('Eliminación en cascada de conexión completada con éxito');
+
+    res.status(200).json({
+      success: true,
+      message: 'Conexión eliminada en cascada correctamente',
+      deletedConexion: result.rows[0]
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error en la eliminación en cascada de conexión:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Error al eliminar la conexión en cascada',
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
 // Register admin
 router.post("/", async (req, res) => {
   
