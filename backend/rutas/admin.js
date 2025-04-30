@@ -1103,8 +1103,8 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
         <body>
           <div class="container">
             <h2>Su usuario ha sido aceptado</h2>
-            <p><span class="highlight">Usuario que realizó el cambio por:</span> ${nombreAdmin}</p>
-            <p>Su usario en la pagina mi escuela primero ha sido aceptado. ¡Felicidades!</p>
+            <p><span class="highlight">Usuario que realizó el cambio:</span> ${nombreAdmin}</p>
+            <p>Su usuario en la pagina mi escuela primero ha sido aceptado. ¡Felicidades!</p>
           </div>
         </body>
       </html>
@@ -1551,9 +1551,11 @@ async function updateAliadoFisico(client, curp, data) {
     estadoRegistro_aliado_fisico: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
     };
 
-  const validFields = {};
+    const validFields = {};
+    const usedFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
+      usedFields[frontendField]= data[frontendField]
       validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
     }
   }
@@ -1573,7 +1575,7 @@ async function updateAliadoFisico(client, curp, data) {
       [...Object.values(validFields), curp]
     );
   }
-  return { rowCount: 1 };
+  return usedFields;
 }
 async function updatePersonaFisica(client, curp, data) {
   const fieldMap = {
@@ -1767,5 +1769,7 @@ async function updateAdministrador(client, adminId, data) {
 
 return { rowCount: 1 };
 }
+
+
 
 module.exports = router;

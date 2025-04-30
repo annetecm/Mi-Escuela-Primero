@@ -129,9 +129,9 @@ function InformacionUser() {
         setLoading(false);
       }
     };
-
-    fetchUserData();
-  }, [identificador, tipoUsuario, token]);
+    if(!editMode){fetchUserData();}
+    
+  }, [identificador, tipoUsuario, token,editMode]);
 
   const handleEditClick = (field) => {
     if (window.confirm(`¿Quieres editar el campo ${field}?`)) {
@@ -148,7 +148,72 @@ const handleInputChange = (field, value) => {
   }));
 };
 
-// Save all edited fields
+const hacerCorreo= async(nombreAdmin, correo)=>{
+  //mandar correo
+  const htmlCambios = `
+  <html>
+    <head>
+      <style>
+        body {
+          font-family: 'Montserrat', sans-serif;
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 30px;
+        }
+        .container {
+          background: #fff;
+          padding: 25px 30px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          max-width: 600px;
+          margin: auto;
+        }
+        h2 {
+          color: #019847;
+          margin-bottom: 20px;
+          font-size: 24px;
+        }
+        p {
+          font-size: 16px;
+          color: #555;
+          margin-bottom: 15px;
+        }
+        ul {
+          padding-left: 20px;
+          margin-top: 15px;
+        }
+        li {
+          margin-bottom: 10px;
+          font-size: 15px;
+          color: #333;
+        }
+        .highlight {
+          font-weight: bold;
+          color: #019847;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>Su usuario ha sido modificado</h2>
+        <p><span class="highlight">Usuario que realizó el cambio:</span> ${nombreAdmin}</p>
+        <p>Su usuario en la pagina mi escuela primero ha sido modificado.</p>
+      </div>
+    </body>
+  </html>
+`;
+
+  try {
+    await transporter.sendMail({
+      from: '"Sistema de Notificaciones Mi Escuela Primero" <equiporeto6@gmail.com>',
+      to: correo,
+      subject: "Actualización de sus datos.",
+      html: htmlCambios
+    });
+  } catch (error) {
+    console.error("❌ Error al enviar correo:", error);
+  }
+}
 // Save all edited fields
 const handleSaveAllChanges = async () => {
   try {
@@ -174,13 +239,14 @@ const handleSaveAllChanges = async () => {
     const result = await response.json();
     
     // Update userData state with the edited data
-    setUserData(prev => ({
+    /*setUserData(prev => ({
       ...prev,
       ...editedData
-    }));
+    }));*/
     
     setEditMode(false);
     alert('Datos actualizados correctamente');
+    hacerCorreo(adminData.nombre, userData.correoElectronico);
 
   } catch (error) {
     console.error('Error updating data:', error);
