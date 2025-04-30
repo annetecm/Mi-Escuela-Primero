@@ -25,13 +25,13 @@ const chatRoutes = require("./rutas/Chat.");
 
 
 
-
 app.use('/api/auth', authRouter); 
 app.use('/api/escuela', escuelaRouter); 
 app.use('/api/evidence', evidenceRoutes);
 app.use('/api/aliado', aliadoRouter);
 app.use('/api', documentRouter);
-app.use('/api', conexionRouter);
+app.use('/api/', conexionRouter); // <- ahora sí, correcto
+app.use('/api/conexion', conexionRouter); // <- ahora sí, correcto
 app.use('/api/admin', adminRouter);
 app.use("/api/chat", chatRoutes);
 

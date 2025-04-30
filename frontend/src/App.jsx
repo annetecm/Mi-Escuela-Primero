@@ -161,6 +161,15 @@
               </PrivateRoute>
             }
         />
+        <Route 
+            path="/chat/conexion/:conexionId" 
+            element={
+              <PrivateRoute allowedRoles={["administrador"]}>
+                <ChatPage modoSoloLectura={true} />
+              </PrivateRoute>
+            }
+          />
+
 
          <Route
         path="/listado/aliados"

@@ -107,12 +107,14 @@ export default function Profile() {
                   <div className="allyprofile-detail-label">
                     <span className="allyprofile-detail-icon">📌</span>
                     <span className="allyprofile-detail-text">NECESIDADES QUE PUEDO APOYAR:</span>
+                  </div > 
+                  <div className="allyprofile-needs-scroll">
+                    <ul className="allyprofile-detail-value">
+                      {perfil.apoyos.map((apoyo, idx) => (
+                        <li key={idx}>{apoyo}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="allyprofile-detail-value">
-                    {perfil.apoyos.map((apoyo, idx) => (
-                      <li key={idx}>{apoyo}</li>
-                    ))}
-                  </ul>
                 </div>
                 )}
               </div>

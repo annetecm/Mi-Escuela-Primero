@@ -562,6 +562,7 @@ const handleSaveAllChanges = async () => {
                         <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                         <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                         <td>{conexion.estado}</td>
+                        
                       </tr>
                     ))}
                   </tbody>

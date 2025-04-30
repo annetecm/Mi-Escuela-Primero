@@ -95,15 +95,34 @@ export default function ListedAllies() {
                 </ul>
               </div>
               <div className="listedallies-card-footer">
-                <button
-                  className="listedallies-message-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/chat/${datos.proyectos[0].conexionId}`);
-                  }}
-                >
-                  💬 Enviar mensaje
-                </button>
+              <button
+                className="listedallies-message-button"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  const token = localStorage.getItem("token");
+
+                  try {
+                    const res = await fetch(`http://localhost:5000/api/conexion/conexion-id/${aliadoId}`, {
+                      headers: {
+                        Authorization: `Bearer ${token}`
+                      }
+                    });
+
+                    const data = await res.json();
+                    if (data.conexionId) {
+                      navigate(`/chat/${data.conexionId}`);
+                    } else {
+                      alert("No se encontró una conexión válida.");
+                    }
+                  } catch (err) {
+                    console.error("❌ Error al obtener conexión para chat:", err);
+                    alert("Error al intentar abrir el chat.");
+                  }
+                }}
+              >
+                💬 Enviar mensaje
+              </button>
+
               </div>
             </div>
               ))

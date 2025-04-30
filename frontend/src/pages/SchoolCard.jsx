@@ -42,8 +42,16 @@ export default function SchoolCard() {
       const apoyosDB = await apoyosRes.json(); //Array de { apoyoId, caracteristicas }
   
       const apoyosCompatibles = apoyosDB
-        .filter(a => schoolInfo.needs.includes(a.caracteristicas))
-        .map(a => a.apoyoId);
+      .filter(a => schoolInfo.needs.some(n => n.toLowerCase() === a.caracteristicas.toLowerCase()))
+      .map(a => a.apoyoId);
+      console.log("👀 Necesidades encontradas:", necesidades);
+      console.log("💡 Apoyos del perfil:", apoyos);
+      console.log("✅ Necesidades compatibles:", necesidadesCompatibles);
+
+      console.log("📚 Apoyos DB:", apoyosDB);
+      console.log("🏫 Needs escuela:", schoolInfo.needs);
+      console.log("🔗 Apoyos compatibles:", apoyosCompatibles);
+
   
       if (necesidadesCompatibles.length === 0 || apoyosCompatibles.length === 0) {
         alert("No hay coincidencias suficientes para generar una conexión.");

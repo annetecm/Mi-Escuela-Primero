@@ -160,8 +160,8 @@ export default function ListedSchools() {
             <h2>Informacion General de la conexion</h2>
             <div className="info-section">
                 {renderArrayItems(userData.conexiones, (documento, index) => (
-                <div key={index} className="documento-item" onClick={() => navigate(`/administrador/informacion/${documento.CCT}/Escuela`)}>
-                    {renderNonEditableField('Nombre de la escuela ', documento.apoyoNombre)}
+                  <div key={index} className="documento-item">
+                  {renderNonEditableField('Nombre de la escuela ', documento.apoyoNombre)}
                     {renderNonEditableField('Necesidad ', documento.necesidadNombre)}
                     {renderNonEditableField('Nombre del aliado ', documento.aliadoNombre)}
                     {renderNonEditableField('Tipo de aliado ', documento.tipoUsuario)}
@@ -169,6 +169,12 @@ export default function ListedSchools() {
                     {renderNonEditableField('Fecha de Inicio ', documento.fechaInicio)}
                     {renderNonEditableField('Fecha de Fin ', documento.fechaFin)}
                     {renderNonEditableField('Estado ', documento.estado)}
+                    <button 
+                      className="chat-button"
+                      onClick={() => navigate(`/chat/conexion/${documento.id}`)} // usa el ID correcto de la conexión
+                    >
+                      Abrir chat
+                    </button>
                 </div>
                 ))}
             </div>
