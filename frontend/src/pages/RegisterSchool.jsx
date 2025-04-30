@@ -4,6 +4,9 @@ import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+
 
 function RegisterSchool() {
 
@@ -213,12 +216,18 @@ isSubmitting: Tracks whether the form is currently being submitted.
   };
 
   const obtenerCoordenadas = async (direccion) => {
-    const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${apiKey}`;
+    console.log("Dirección:", direccion);
+    console.log("API Key:", GOOGLE_MAPS_API_KEY); // ← Esta debe imprimir tu clave real
+  
+   
+
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${GOOGLE_MAPS_API_KEY}`;
+
   
     const response = await fetch(url);
     const data = await response.json();
-  
+    console.log("Respuesta de la API:", data);
+
     if (data.status === "OK") {
       const location = data.results[0].geometry.location;
       return { latitud: location.lat, longitud: location.lng };
