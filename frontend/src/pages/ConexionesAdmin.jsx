@@ -158,22 +158,12 @@ export default function ConexionesAdmin() {
       
       <div className="user-profile-container">
         <h1>Información de la Conexión</h1>
-        
         {/* Detalles de la conexión */}
         <div className="documentos-section">
           <h2>Detalles de la Conexión</h2>
           <div className="info-section">
-            {renderArrayItems(conexionData.conexiones, (conexion, index) => {
-              const handleItemClick = () => {
-                if (conexion.CCT) {
-                  navigate(`/administrador/informacion/${conexion.CCT}/escuela`);
-                } else {
-                  console.warn("No se encontró CCT para esta conexión", conexion);
-                  // You might want to show an alert or handle this case
-                }
-              };
-              
-              return (
+            {renderArrayItems(conexionData.conexiones, (conexion, index) => (
+             
                 <div key={index} className="documento-item">
                   {renderNonEditableField('ID de Conexión', conexion.conexionId)}
                   {renderNonEditableField('Nombre de la escuela', conexion.escuelaNombre)}
@@ -183,7 +173,8 @@ export default function ConexionesAdmin() {
                   {renderNonEditableField('Apoyo', conexion.apoyoNombre)}
                   {renderNonEditableField('Fecha de Inicio', conexion.fechaInicio)}
                   {renderNonEditableField('Fecha de Fin', conexion.fechaFin)}
-                  {renderNonEditableField('Estado', conexion.estado)}
+                  {renderNonEditableField('Estado', conexion.estado + " 🖊️")}
+
                   <button
                     className="chat-button"
                     style={{
@@ -219,12 +210,11 @@ export default function ConexionesAdmin() {
                     onClick={() => navigate(`/administrador/evidencia/${conexion.conexionId}`, {
                       state: { CCT: conexion.CCT }
                     })}
-                                        >
+                    >
                     Ver evidencias
                   </button>
                 </div>
-              );
-            })}
+            ))}
           </div>
         </div>
       </div>
