@@ -15,15 +15,33 @@ export default function Profile() {
     const token = localStorage.getItem("token");
     if (!token) return;
   
-    fetch("http://localhost:5000/api/aliado/perfil", {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const fetchPerfil = async () => {
+      try {
+        const [editRes, fullRes] = await Promise.all([
+          fetch("http://localhost:5000/api/aliado/perfil-edit", {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch("http://localhost:5000/api/aliado/perfil", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+  
+        const editData = await editRes.json();
+        const fullData = await fullRes.json();
+  
+        // Fusionar ambos
+        setPerfil({
+          ...editData,
+          apoyos: fullData.apoyos || []
+        });
+      } catch (err) {
+        console.error("Error al cargar perfil del aliado:", err);
       }
-    })
-      .then(res => res.json())
-      .then(data => setPerfil(data))
-      .catch(err => console.error("Error al cargar perfil:", err));
+    };
+  
+    fetchPerfil();
   }, []);
+  
   
 
   if (!perfil) return <div className="allyprofile-main-content">Cargando perfil...</div>;
