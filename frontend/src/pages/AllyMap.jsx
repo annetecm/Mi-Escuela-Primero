@@ -3,6 +3,12 @@ import { useNavigate } from "react-router-dom"
 import "../styles/AllyMap.css"
 import logo from "../assets/logo1.png"
 import escuelaImg from "../assets/escuelaLogo.png"
+import GoogleMapComponent from '../components/GoogleMapComponent'; // Ajusta ruta si es diferente
+
+
+// Dentro del return:
+
+
 
 export default function AllyMap() {
   const navigate = useNavigate()
@@ -41,10 +47,8 @@ export default function AllyMap() {
       </nav>
 
       <div className="allymap-main-content allymap-container-row">
+
         <div className="allymap-school-sidebar">
-          <div className="allymap-search-bar">
-            <input type="text" placeholder="Ingresa una ubicación" />
-          </div>
           <h3>Escuelas compatibles con tus apoyos</h3>
           <div className="allymap-school-list">
             {schools.map((school, index) => (
@@ -66,12 +70,8 @@ export default function AllyMap() {
         </div>
 
         <div className="allymap-map">
-          <img
-            src="https://img.freepik.com/foto-gratis/resumen-superficie-texturas-muro-piedra-hormigon-blanco_74190-8189.jpg"
-            alt="Mapa"
-            className="allymap-map-image"
-          />
-        </div>
+        <GoogleMapComponent schools={schools.filter(s => s.latitud && s.longitud)} />
+      </div>
       </div>
     </div>
   );
