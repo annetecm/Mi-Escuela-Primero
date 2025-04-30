@@ -190,9 +190,42 @@ router.get('/perfil', verifyToken, async (req, res) => {
   const usuarioId = req.usuario.usuarioId;
 
   try {
+    const result = await db.query(`
+      SELECT 
+        u.nombre, 
+        u."correoElectronico", 
+        a."tipoDeApoyo",
+        ARRAY_AGG(ap."caracteristicas") AS apoyos
+      FROM "Usuario" u
+      JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
+      LEFT JOIN "Apoyo" ap ON ap."aliadoId" = a."aliadoId"
+      WHERE u."usuarioId" = $1
+      GROUP BY u.nombre, u."correoElectronico", a."tipoDeApoyo";
+    `, [usuarioId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Aliado no encontrado' });
+    }
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error al obtener perfil de aliado:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/perfil-edit', verifyToken, async (req, res) => {
+  const usuarioId = req.usuario.usuarioId;
+
+  try {
     // 1. Buscar datos principales
     const { rows: usuarioRows } = await db.query(`
-      SELECT u.nombre, u."correoElectronico", u."estadoRegistro", a."tipoDeApoyo", a."aliadoId"
+      SELECT 
+      u.nombre,
+       u."correoElectronico",
+        u."estadoRegistro", 
+        a."tipoDeApoyo", 
+        a."aliadoId"
       FROM "Usuario" u
       JOIN "Aliado" a ON a."usuarioId" = u."usuarioId"
       WHERE u."usuarioId" = $1

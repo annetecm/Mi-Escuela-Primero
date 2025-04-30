@@ -35,7 +35,7 @@ function EditMoral() {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("http://localhost:5000/api/aliado/perfil", {
+    fetch("http://localhost:5000/api/aliado/perfil-edit", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

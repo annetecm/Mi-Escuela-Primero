@@ -145,7 +145,7 @@ const [datosTramite, setDatosTramite] = useState({
   
       if (!response.ok) throw new Error("Error al actualizar información");
       alert("Información actualizada exitosamente.");
-      navigate("/escuela/perfil");
+      navigate("/escuela/perfil-edit");
     } catch (error) {
       console.error("Error:", error);
       alert("Hubo un problema al actualizar la información.");
