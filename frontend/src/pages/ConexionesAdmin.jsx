@@ -184,7 +184,44 @@ export default function ConexionesAdmin() {
                   {renderNonEditableField('Fecha de Inicio', conexion.fechaInicio)}
                   {renderNonEditableField('Fecha de Fin', conexion.fechaFin)}
                   {renderNonEditableField('Estado', conexion.estado)}
+                  <button
+                    className="chat-button"
+                    style={{
+                      marginTop: '1rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      localStorage.removeItem("tipo");
+                      localStorage.removeItem("aliadoId");
+                      localStorage.removeItem("cct");
+                      navigate(`/chat/conexion/${conexion.conexionId}`);
+                    }}                    
+                  >
+                    Abrir chat
+                  </button>
+                  <button
+                    className="chat-button"
+                    style={{
+                      marginTop: '1rem',
+                      padding: '0.5rem 1rem',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer'
+                    }}
                   
+                    onClick={() => navigate(`/administrador/evidencia/${conexion.conexionId}`, {
+                      state: { CCT: conexion.CCT }
+                    })}
+                                        >
+                    Ver evidencias
+                  </button>
                 </div>
               );
             })}

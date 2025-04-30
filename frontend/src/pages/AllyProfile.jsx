@@ -15,15 +15,33 @@ export default function Profile() {
     const token = localStorage.getItem("token");
     if (!token) return;
   
-    fetch("http://localhost:5000/api/aliado/perfil", {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const fetchPerfil = async () => {
+      try {
+        const [editRes, fullRes] = await Promise.all([
+          fetch("http://localhost:5000/api/aliado/perfil-edit", {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          fetch("http://localhost:5000/api/aliado/perfil", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+  
+        const editData = await editRes.json();
+        const fullData = await fullRes.json();
+  
+        // Fusionar ambos
+        setPerfil({
+          ...editData,
+          apoyos: fullData.apoyos || []
+        });
+      } catch (err) {
+        console.error("Error al cargar perfil del aliado:", err);
       }
-    })
-      .then(res => res.json())
-      .then(data => setPerfil(data))
-      .catch(err => console.error("Error al cargar perfil:", err));
+    };
+  
+    fetchPerfil();
   }, []);
+  
   
 
   if (!perfil) return <div className="allyprofile-main-content">Cargando perfil...</div>;
@@ -57,10 +75,23 @@ export default function Profile() {
               <div className="allyprofile-profile-header">
                 <div className="allyprofile-profile-info">
                   <h2 className="allyprofile-profile-name">{perfil.nombre}</h2>
-                  <button className="allyprofile-edit-button" onClick={() => navigate('/editar/aliado')}>
-                    <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
-                    <span className="allyprofile-edit-icon">✏️</span>
-                  </button>
+                  <button
+  className="allyprofile-edit-button"
+  onClick={() => {
+    if (perfil.tipo === "fisico") {
+      navigate('/editar/aliado/fisico');
+    } else if (perfil.tipo === "moral") {
+      navigate('/editar/aliado/moral');
+    } else {
+      console.error("Tipo de persona desconocido:", perfil.tipo);
+      alert("No se puede editar porque el tipo de persona es desconocido.");
+    }
+  }}
+>
+  <span className="allyprofile-edit-text">EDITAR INFORMACIÓN</span>
+  <span className="allyprofile-edit-icon">✏️</span>
+</button>
+          
                 </div>
 
                 <div className="allyprofile-profile-image-container">
@@ -86,7 +117,7 @@ export default function Profile() {
                     <span className="allyprofile-detail-icon">✉️</span>
                     <span className="allyprofile-detail-text">CORREO</span>
                   </div>
-                  <div className="allyprofile-detail-value">{perfil.correoElectronico}</div>
+                  <div className="allyprofile-detail-value">{perfil.correoElectronico || perfil.correo}</div>
                 </div>
 
                 {perfil.apoyos && perfil.apoyos.length > 0 && (
@@ -94,12 +125,14 @@ export default function Profile() {
                   <div className="allyprofile-detail-label">
                     <span className="allyprofile-detail-icon">📌</span>
                     <span className="allyprofile-detail-text">NECESIDADES QUE PUEDO APOYAR:</span>
+                  </div > 
+                  <div className="allyprofile-needs-scroll">
+                    <ul className="allyprofile-detail-value">
+                      {perfil.apoyos.map((apoyo, idx) => (
+                        <li key={idx}>{apoyo}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="allyprofile-detail-value">
-                    {perfil.apoyos.map((apoyo, idx) => (
-                      <li key={idx}>{apoyo}</li>
-                    ))}
-                  </ul>
                 </div>
                 )}
               </div>

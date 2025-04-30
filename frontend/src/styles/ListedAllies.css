@@ -10,6 +10,24 @@ body {
   color: #333;
   line-height: 1.6;
 }
+.listedallies-cards-container {
+  max-height: calc(100vh - 150px); /* Altura visible ajustable */
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.listedallies-cards-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.listedallies-cards-container::-webkit-scrollbar-thumb {
+  background-color: #a5d6a7;
+  border-radius: 4px;
+}
+
+.listedallies-cards-container::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 .listedallies-container {
   min-height: 100vh;

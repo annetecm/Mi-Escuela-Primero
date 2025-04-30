@@ -54,7 +54,7 @@ function RegisterAdmin() {
       navigate('/registration-success');
     }
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('Error:', error);
     alert(`Error: ${error.message}`);
   }
 };

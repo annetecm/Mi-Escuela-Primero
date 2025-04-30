@@ -71,7 +71,7 @@ router.get("/info/conexion/:conexionId", verifyToken, async(req, res) => {
     const result = await pool.query(query, [conexionId]);
     
     if (result.rows.length === 0 || !result.rows[0].conexiones || result.rows[0].conexiones.length === 0) {
-      console.log("❌ No se encontró conexión con ID:", conexionId);
+      console.log("No se encontró conexión con ID:", conexionId);
       return res.status(404).json({ 
         error: "Conexión no encontrada",
         details: `No existe registro con conexionId: ${conexionId}`
@@ -311,7 +311,7 @@ router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
     console.log("Ejecutando para ", adminId);
     const result= await pool.query(query,[adminId]);
     if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", CCT);
+      console.log("No se encontró escuela con CCT:", CCT);
       return res.status(404).json({ 
         error: "Escuela no encontrada",
         details: `No existe registro con CCT: ${CCT}`
@@ -437,7 +437,7 @@ router.get("/aliado/fisica/perfil/:aliadoId", verifyToken, async(req,res)=>{
     const result= await pool.query(query,[aliadoId]);
 
     if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", aliadoId);
+      console.log("No se encontró escuela con CCT:", aliadoId);
       return res.status(404).json({ 
         error: "Escuela no encontrada",
         details: `No existe registro con CCT: ${aliadoId}`
@@ -635,7 +635,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     const result= await pool.query(query,[aliadoId]);
 
     if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con RFC:", aliadoId);
+      console.log("No se encontró escuela con RFC:", aliadoId);
       return res.status(404).json({ 
         error: "Escuela no encontrada",
         details: `No existe registro con RFC: ${aliadoId}`
@@ -896,7 +896,7 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
     const result = await pool.query(query, [CCT]);
 
     if (result.rows.length === 0) {
-      console.log("❌ No se encontró escuela con CCT:", CCT);
+      console.log("No se encontró escuela con CCT:", CCT);
       return res.status(404).json({ 
         error: "Escuela no encontrada",
         details: `No existe registro con CCT: ${CCT}`
@@ -1118,7 +1118,7 @@ router.put("/fetch/aprobar", verifyToken, async (req,res)=>{
           html: htmlCambios
         });
       } catch (error) {
-        console.error("❌ Error al enviar correo:", error);
+        console.error("Error al enviar correo:", error);
       }
     
     return res.json({ message: "Estado actualizado a aprobado" });

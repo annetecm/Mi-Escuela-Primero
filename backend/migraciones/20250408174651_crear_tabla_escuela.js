@@ -14,6 +14,9 @@ exports.up = async function(knex) {
     table.integer("numeroDocentes").notNullable();
     table.integer("estudiantesPorGrupo").notNullable(); 
     table.string("controlAdministrativo").notNullable();
+    table.double("latitud");
+    table.double("longitud");
+  
   });
 };
 

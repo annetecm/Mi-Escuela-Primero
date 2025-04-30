@@ -1,285 +1,207 @@
-import React, { useState } from 'react';
-import '../styles/RegisterAlly.css';
-import TableSelect from '../components/TableSelect';
+import "../styles/EditMoral.css";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import aliadoImg from '../assets/aliado.jpg';
 
-export default function EditMoral() {
-  const [formData, setFormData] = useState({});
-  const [apoyosSeleccionados, setApoyosSeleccionados] = useState([]);
-  const [documentoPersonaMoral, setDocumentoPersonaMoral] = useState(null);
-  const [nombreArchivo, setNombreArchivo] = useState("");
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
-  const [needsData, setNeedsData] = useState({
-    formacionDocente: [],
-    formacionFamilias: [],
-    formacionNiños: [],
-    personalApoyo: [],
-    infraestructura: [],
-    materiales: [],
-    mobiliario: [],
-    alimentacion: [],
-    transporte: [],
-    juridico: []
+function EditMoral() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    correo: "",
+    contrasena: "",
+    rfcInstitucion: "",
+    nombreOrg: "",
+    giro: "",
+    proposito: "",
+    domicilioInstitucion: "",
+    telefono: "",
+    paginaWeb: "",
+    numeroEscritura: "",
+    fechaEscritura: "",
+    otorgadaPor: "",
+    ciudad: "",
+    rfcFiscal: "",
+    razonSocial: "",
+    regimen: "",
+    domicilioFiscal: "",
+    representanteNombre: "",
+    representanteCorreo: "",
+    representanteTelefono: "",
+    representanteArea: "",
+    
   });
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:5000/api/aliado/perfil-edit", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setFormData(data);
+      })
+      .catch((err) => console.error("Error al cargar perfil:", err));
+  }, []);
+
   const handleInput = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const agregarApoyo = (categoria, seleccionados) => {
-    const nuevos = seleccionados.map(desc => ({ tipo: categoria, caracteristicas: desc }));
-    setApoyosSeleccionados(prev => [
-      ...prev.filter(a => a.tipo !== categoria),
-      ...nuevos
-    ]);
-  };
-
-  const enviarFormulario = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Formulario enviado", formData, apoyosSeleccionados);
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/aliado/editar-datos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error("Error al actualizar información");
+      alert("Información actualizada exitosamente.");
+      navigate("/aliado/perfil");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Hubo un problema al actualizar la información.");
+    }
   };
-
-  const formacionDocente = [
-    "Convivencia escolar / Cultura de paz / Valores",
-    "Educación inclusiva",
-    "Enseñanza de lectura y matemáticas",
-    "Inteligencia emocional",
-    "Lectoescritura",
-    "Atención de estudiantes con BAP (Barreras para el aprendizaje y la participación)",
-    "Evaluación",
-    "Herramientas digitales para la educación / Innovación tecnológica",
-    "Proyecto de vida / Expectativas a futuro / Orientación vocacional",
-    "Liderazgo y habilidades directivas",
-    "Nueva Escuela Mexicana",
-    "Disciplina positiva",
-    "Metodologías activas (ejemplo: aprendizaje basado en proyectos, en problemas, en el juego, en servicio, gamificación, etc.)",
-    "Alimentación saludable",
-    "Participación infantil",
-    "Comunicación efectiva con comunidad escolar",
-    "Comunidades de aprendizaje",
-    "Neuroeducación",
-    "Sexualidad"
-];
-const formacionFamilias= [
-    "Crianza positiva",
-    "Derechos y obligaciones de los padres",
-    "Inteligencia emocional",
-    "Atención para hijos con BAP (Barreras para el aprendizaje y la participación)",
-    "Proyecto de vida /Expectativas a futuro/ Orientación vocacional",
-    "Cultura de paz / Valores en el hogar",
-    "Alimentación saludable",
-    "Sexualidad",
-    "Enseñanza de lectura y matemáticas",
-    "Comunicación efectiva con escuela",
-    "Nueva Escuela Mexicana"
-];
-
-const formacionNiños= [
-    "Lectoescritura",
-    "Convivencia escolar/ Cultura de paz / Valores",
-    "Enseñanza de matemáticas",
-    "Educación física",
-    "Inteligencia emocional",
-    "Proyecto de vida /Expectativas a futuro/ Orientación vocacional",
-    "Sexualidad",
-    "Alimentación saludable",
-    "Arte",
-    "Música",
-    "Computación",
-    "Visitas fuera de la escuela (a empresas o lugares recreativos)"
-];
-
-const personalApoyo= [
-    "Psicólogo",
-    "Psicopedagogo o especialista en BAP",
-    "Suplentes de docentes frente a grupo",
-    "Maestro para clases de educación física",
-    "Terapeuta de lenguaje o comunicación",
-    "Maestro para clases de arte",
-    "Persona para apoyo en limpieza",
-    "Maestro para clases de idiomas",
-    "Persona para apoyo administrativo"
-];
-
-const infraestructura= [
-    "Agua (falla de agua, filtros de agua, bomba de agua nueva,tinaco o cisterna nueva, bebederos, etc.)",
-    "Luz (fallo eléctrico, conexión de luz, focos y cableado nuevo, paneles solares, etc.)",
-    "Suplentes de docentes frente a grupo",
-    "Muros, techos o pisos (reconstrucción de muros cuarteados, tablaroca, plafón, cambio de pisos levantados,etc.)",
-    "Adecuaciones para personas con discapacidad (rampas, etc.)",
-    "Baños (arreglo de baños, cambio de sanitarios o lavamanos,construcción de baños, plomería, etc.)",
-    "Cocina (construcción, remodelación de cocina)",
-    "Conectividad (routers, instalación de internet, etc.)",
-    "Domos y patios (estructura para domo, lonaria y/o malla sombra, nivelación de patio, plancha de concreto, etc.)",
-    "Árboles (plantar nuevos, poda de árboles, arreglo de o nuevas jardineras)",
-    "Pintura",
-    "Seguridad (construcción o arreglo de barda perimetral, cámaras de seguridad, alambrado, cambio de barandales en mal estado, etc.)",
-    "Ventanas y puertas (ventanas y puertas nuevas, protección para ventanas, candados para puertas)"
-];
-
-const materiales=[
-    "Tecnológico (computadoras, impresoras, proyectores, pantallas, bocinas, extensiones, cables HDMI, etc.)",
-    "Didácticos (plastilina, cartulinas, hojas, marcadores, crayolas, lápices, colores, juegos para aprender fracciones, multiplicaciones, regletas, rompecabezas, geoplanos, bloques geométricos, billetes de juego, alimentos de juego, microscopio, etc.)",
-    "De educación física (sogas, pelotas, aros, tinas, balones, porterías, redes para canastas o para voleibol, etc.)",
-    "Literarios (libros infantiles, manuales, libros de texto, libros en braille, libros macrotipo, libros para estudiantes de lengua indígena, programas de estudio, etc.)"
-];
-
-const mobiliario=[
-    "Mesas para niños/ mesabancos",
-    "Sillas (para niños o para maestros)",
-    "Mesas para docentes",
-    "Pizarrones",
-    "Comedores",
-    "Estantes, libreros o cajoneras"
-];
-
-const alimentacion=[
-    "Desayunos",
-    "Fórmula"
-];
-
-const transporte=[
-    "Transporte (nuevas rutas de camiones, transporte escolar,entrega de bicis, etc.)",
-    "Arreglo de camino (puentes en arroyos, aplanadora de camino, luminaria, etc.)"
-];
-
-const juridico=[
-    "Apoyo en gestión de escrituras (cuando el inmueble no las tiene)"
-];
 
   return (
-    <div className="register-container">
-      <div className="image-section">
-        <img src={aliadoImg} alt="Aliado" />
+    <div className="editmoral-container">
+      <div className="editmoral-image-section">
+        <img src={aliadoImg || "/placeholder.svg"} alt="Aliados" />
       </div>
-      <div className="form-section">
-        <h1 className="title">Edita tu información</h1>
+      <div className="editmoral-form-section">
+        <h1 className="editmoral-title">Edita tu información</h1>
+        <p className="editmoral-label">Actualiza los datos de tu institución</p>
 
-        <form onSubmit={enviarFormulario}>
-          <div className="form-grid">
-            <div className="form-group">
+        <form onSubmit={handleSubmit} className="editmoral-scroll">
+          {/* Sección Credenciales */}
+          <div className="editmoral-form-grid">
+            <div className="editmoral-form-group">
               <label>Correo</label>
-              <input className="form-input" type="text" name="correo" onChange={handleInput} />
+              <input className="editmoral-form-input" type="text" name="correo" value={formData.correo} onChange={handleInput} />
             </div>
-            <div className="form-group">
+            <div className="editmoral-form-group">
               <label>Contraseña</label>
-              <input className="form-input" type="text" name="contraseña" onChange={handleInput} />
+              <input className="editmoral-form-input" type="password" name="contrasena" value={formData.contrasena} onChange={handleInput} />
             </div>
           </div>
 
-          <div className="heading">DATOS DE LA INSTITUCIÓN</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>RFC (se usará para todos los registros)</label>
-              <input className="form-input" type="text" name="rfc" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Nombre de la organización (empresa, OSC, etc)</label>
-              <input className="form-input" type="text" name="nombreOrg" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Giro</label>
-              <input className="form-input" type="text" name="giro" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Propósito de la organización</label>
-              <input className="form-input" type="text" name="proposito" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Domicilio</label>
-              <input className="form-input" type="text" name="domicilioInstitucion" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Teléfono</label>
-              <input className="form-input" type="text" name="telefono" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Página web oficial</label>
-              <input className="form-input" type="text" name="paginaWeb" onChange={handleInput} />
-            </div>
-          </div>
-
-          <div className="heading">ESCRITURA PÚBLICA</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Número de escritura pública</label>
-              <input className="form-input" type="text" name="numeroEscritura" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Fecha de escritura pública</label>
-              <input className="form-input" type="date" name="fechaEscritura" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>Otorgada por: (Nombre del notario)</label>
-              <input className="form-input" type="text" name="otorgadaPor" onChange={handleInput} />
-            </div>
-            <div className="form-group">
-              <label>En la ciudad de:</label>
-              <input className="form-input" type="text" name="ciudad" onChange={handleInput} />
-            </div>
-          </div>
-
-          <div className="heading">CONSTANCIA FISCAL</div>
-          <div className="form-grid">
-            <div className="form-group">
+          {/* Sección Datos de la Institución */}
+          <div className="editmoral-heading">DATOS DE LA INSTITUCIÓN</div>
+          <div className="editmoral-form-grid">
+            <div className="editmoral-form-group">
               <label>RFC</label>
-              <input className="form-input" type="text" name="rfc" onChange={handleInput} />
+              <input className="editmoral-form-input" type="text" name="rfcInstitucion" value={formData.rfcInstitucion} onChange={handleInput} />
             </div>
-            <div className="form-group">
-              <label>Razón Social</label>
-              <input className="form-input" type="text" name="razonSocial" onChange={handleInput} />
+            <div className="editmoral-form-group">
+              <label>Nombre de la organización</label>
+              <input className="editmoral-form-input" type="text" name="nombreOrg" value={formData.nombreOrg} onChange={handleInput} />
             </div>
-            <div className="form-group">
-              <label>Régimen</label>
-              <input className="form-input" type="text" name="regimen" onChange={handleInput} />
+            <div className="editmoral-form-group">
+              <label>Giro</label>
+              <input className="editmoral-form-input" type="text" name="giro" value={formData.giro} onChange={handleInput} />
             </div>
-            <div className="form-group">
+            <div className="editmoral-form-group">
+              <label>Propósito de la organización</label>
+              <input className="editmoral-form-input" type="text" name="proposito" value={formData.proposito} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
               <label>Domicilio</label>
-              <input className="form-input" type="text" name="domicilioFiscal" onChange={handleInput} />
+              <input className="editmoral-form-input" type="text" name="domicilioInstitucion" value={formData.domicilioInstitucion} onChange={handleInput} />
             </div>
-          </div>
-
-          <div className="heading">DATOS DEL REPRESENTANTE</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Nombre completo</label>
-              <input className="form-input" type="text" name="representanteNombre" onChange={handleInput} />
-            </div>
-            <div className="form-group">
+            <div className="editmoral-form-group">
               <label>Teléfono</label>
-              <input className="form-input" type="text" name="representanteTelefono" onChange={handleInput} />
+              <input className="editmoral-form-input" type="text" name="telefono" value={formData.telefono} onChange={handleInput} />
             </div>
-            <div className="form-group">
+            <div className="editmoral-form-group">
+              <label>Página web oficial</label>
+              <input className="editmoral-form-input" type="text" name="paginaWeb" value={formData.paginaWeb} onChange={handleInput} />
+            </div>
+          </div>
+
+          {/* Sección Escritura Pública */}
+          <div className="editmoral-heading">ESCRITURA PÚBLICA</div>
+          <div className="editmoral-form-grid">
+            <div className="editmoral-form-group">
+              <label>Número de escritura pública</label>
+              <input className="editmoral-form-input" type="text" name="numeroEscritura" value={formData.numeroEscritura} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Fecha de escritura pública</label>
+              <input className="editmoral-form-input" type="date" name="fechaEscritura" value={formData.fechaEscritura} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Otorgada por</label>
+              <input className="editmoral-form-input" type="text" name="otorgadaPor" value={formData.otorgadaPor} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>En la ciudad de</label>
+              <input className="editmoral-form-input" type="text" name="ciudad" value={formData.ciudad} onChange={handleInput} />
+            </div>
+          </div>
+
+          {/* Sección Constancia Fiscal */}
+          <div className="editmoral-heading">CONSTANCIA FISCAL</div>
+          <div className="editmoral-form-grid">
+            <div className="editmoral-form-group">
+              <label>RFC</label>
+              <input className="editmoral-form-input" type="text" name="rfcFiscal" value={formData.rfcFiscal} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Razón Social</label>
+              <input className="editmoral-form-input" type="text" name="razonSocial" value={formData.razonSocial} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Régimen</label>
+              <input className="editmoral-form-input" type="text" name="regimen" value={formData.regimen} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Domicilio Fiscal</label>
+              <input className="editmoral-form-input" type="text" name="domicilioFiscal" value={formData.domicilioFiscal} onChange={handleInput} />
+            </div>
+          </div>
+
+          {/* Sección Datos del Representante */}
+          <div className="editmoral-heading">DATOS DEL REPRESENTANTE</div>
+          <div className="editmoral-form-grid">
+            <div className="editmoral-form-group">
+              <label>Nombre completo</label>
+              <input className="editmoral-form-input" type="text" name="representanteNombre" value={formData.representanteNombre} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Correo</label>
+              <input className="editmoral-form-input" type="text" name="representanteCorreo" value={formData.representanteCorreo} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
+              <label>Teléfono</label>
+              <input className="editmoral-form-input" type="text" name="representanteTelefono" value={formData.representanteTelefono} onChange={handleInput} />
+            </div>
+            <div className="editmoral-form-group">
               <label>Área a la que pertenece en la organización</label>
-              <input className="form-input" type="text" name="representanteArea" onChange={handleInput} />
+              <input className="editmoral-form-input" type="text" name="representanteArea" value={formData.representanteArea} onChange={handleInput} />
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Tipo de apoyo a brindar</label>
-            <input className="form-input" type="text" name="tipoApoyo" onChange={handleInput} />
-          </div>
+       
 
-          <div className="heading-need">REGISTRA TU APOYO</div>
-          <p className="label">Selecciona en que necesidades podrías apoyar</p>
-
-          <TableSelect title="Formación Docente" needs={formacionDocente} selectedNeeds={needsData.formacionDocente} onChange={(s) => { setNeedsData(prev => ({ ...prev, formacionDocente: s })); agregarApoyo("Formación Docente", s); }} />
-          <TableSelect title="Formación a familias" needs={formacionFamilias} selectedNeeds={needsData.formacionFamilias} onChange={(s) => { setNeedsData(prev => ({ ...prev, formacionFamilias: s })); agregarApoyo("Formación a familias", s); }} />
-          <TableSelect title="Formación niñas y niños" needs={formacionNiños} selectedNeeds={needsData.formacionNiños} onChange={(s) => { setNeedsData(prev => ({ ...prev, formacionNiños: s })); agregarApoyo("Formación niñas y niños", s); }} />
-          <TableSelect title="Personal de apoyo" needs={personalApoyo} selectedNeeds={needsData.personalApoyo} onChange={(s) => { setNeedsData(prev => ({ ...prev, personalApoyo: s })); agregarApoyo("Personal de apoyo", s); }} />
-          <TableSelect title="Infraestructura" needs={infraestructura} selectedNeeds={needsData.infraestructura} onChange={(s) => { setNeedsData(prev => ({ ...prev, infraestructura: s })); agregarApoyo("Infraestructura", s); }} />
-          <TableSelect title="Materiales" needs={materiales} selectedNeeds={needsData.materiales} onChange={(s) => { setNeedsData(prev => ({ ...prev, materiales: s })); agregarApoyo("Materiales", s); }} />
-          <TableSelect title="Mobiliario" needs={mobiliario} selectedNeeds={needsData.mobiliario} onChange={(s) => { setNeedsData(prev => ({ ...prev, mobiliario: s })); agregarApoyo("Mobiliario", s); }} />
-          <TableSelect title="Alimentación" needs={alimentacion} selectedNeeds={needsData.alimentacion} onChange={(s) => { setNeedsData(prev => ({ ...prev, alimentacion: s })); agregarApoyo("Alimentación", s); }} />
-          <TableSelect title="Transporte" needs={transporte} selectedNeeds={needsData.transporte} onChange={(s) => { setNeedsData(prev => ({ ...prev, transporte: s })); agregarApoyo("Transporte", s); }} />
-          <TableSelect title="Jurídico" needs={juridico} selectedNeeds={needsData.juridico} onChange={(s) => { setNeedsData(prev => ({ ...prev, juridico: s })); agregarApoyo("Jurídico", s); }} />
-
-          <button className="continue-button" type="submit">
-            CONTINUAR
-          </button>
+          <button type="submit" className="editmoral-continue-button">GUARDAR CAMBIOS</button>
         </form>
       </div>
     </div>
   );
 }
+
+export default EditMoral;
+
 

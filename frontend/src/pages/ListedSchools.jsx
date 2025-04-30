@@ -94,6 +94,44 @@ export default function ListedSchools() {
                       ))}
                     </ul>
                   </div>
+                  <div className="listedallies-card-footer">
+                  <button
+                    className="listedallies-message-button"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const token = localStorage.getItem("token");
+
+                      try {
+                        const res = await fetch(`http://localhost:5000/api/conexion/conexion-id/${CCT}`, {
+                          headers: {
+                            Authorization: `Bearer ${token}`
+                          }
+                        });
+                        
+                        if (!res.ok) {
+                          const text = await res.text();
+                          console.error("❌ Respuesta no válida del backend:", text);
+                          alert("No se pudo obtener la conexión para el chat.");
+                          return;
+                        }
+                        
+                        const data = await res.json();
+                        if (data.conexionId) {
+                          navigate(`/chat/${data.conexionId}`);
+                        } else {
+                          alert("No se encontró una conexión válida.");
+                        }
+                        
+                      } catch (err) {
+                        console.error("❌ Error al obtener conexión para chat:", err);
+                        alert("Error al intentar abrir el chat.");
+                      }
+                    }}
+                  >
+                    💬 Enviar mensaje
+                  </button>
+
+                </div>
                 </div>
               ))
             )}

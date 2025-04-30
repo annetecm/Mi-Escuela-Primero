@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate, useParams, useLocation } from "react-router-dom"; // agregamos useLocation
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../styles/EvidenceTimeline.css";
 import logo from "../assets/logo1.png";
 
 export default function EvidenceTimeline() {
   const { userType } = useAuth();
+  const modoSoloLectura = userType === "administrador";
   const [menuVisible, setMenuVisible] = useState(false);
   const [evidences, setEvidences] = useState([
     { file: null, date: null, description: "" },
@@ -18,33 +19,32 @@ export default function EvidenceTimeline() {
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
   const navigate = useNavigate();
-  const { id } = useParams(); // conexionId actual
+  const { id } = useParams();
   const location = useLocation();
-  const { CCT } = location.state || {}; // obtenemos CCT
+  const { CCT } = location.state || {};
 
   const handleFileUpload = async (index, event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     const token = localStorage.getItem("token");
-  
     const formData = new FormData();
     formData.append("archivo", file);
     formData.append("tipo", "escuela");
     formData.append("matchId", id);
-    formData.append("descripcion", evidences[index].description || '');
-  
+    formData.append("descripcion", evidences[index].description || "");
+
     try {
       const res = await fetch("http://localhost:5000/api/evidence/upload", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
         const updated = [...evidences];
         updated[index].file = data.url;
@@ -57,35 +57,35 @@ export default function EvidenceTimeline() {
     } catch (error) {
       console.error("Error al subir evidencia:", error);
     }
-  };  
+  };
 
   const handleDescriptionChange = (index, value) => {
     const updated = [...evidences];
     updated[index].description = value;
     setEvidences(updated);
-  };  
+  };
 
   const handleSaveDescription = async (index) => {
     const token = localStorage.getItem("token");
     const evidencia = evidences[index];
-  
+
     if (!evidencia.reporteAvanceId) {
       console.error("No se puede guardar la descripción: falta reporteAvanceId");
       return;
     }
-  
+
     try {
       const res = await fetch(`http://localhost:5000/api/evidence/reporte/${evidencia.reporteAvanceId}`, {
         method: "PATCH",
         headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ descripcion: evidencia.description })
+        body: JSON.stringify({ descripcion: evidencia.description }),
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
         console.log("Descripción guardada correctamente:", data.message);
       } else {
@@ -94,35 +94,28 @@ export default function EvidenceTimeline() {
     } catch (error) {
       console.error("Error al guardar descripción:", error);
     }
-  };  
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-  
+
     const cargarProyectos = async () => {
       try {
         let url = "";
-  
+
         if (userType === "aliado") {
           url = "http://localhost:5000/api/mis-conexiones";
         } else if (userType === "escuela") {
           url = "http://localhost:5000/api/escuela/mis-conexiones";
         } else {
-          console.error("Tipo de usuario no reconocido:", userType);
           return;
         }
-  
+
         const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-  
+
         const data = await res.json();
-  
-        if (!Array.isArray(data)) {
-          console.error("Error cargando proyectos:", data);
-          return;
-        }
-  
-        //FILTRA conexionId ÚNICOS
         const proyectosFiltrados = [];
         const conexionIdsVistos = new Set();
 
@@ -130,57 +123,55 @@ export default function EvidenceTimeline() {
           if (!conexionIdsVistos.has(conexion.conexionId)) {
             proyectosFiltrados.push({
               conexionId: conexion.conexionId,
-              necesidad: userType === 'escuela'
-                ? conexion.nombreNecesidad || "Proyecto"
-                : conexion.apoyo || conexion.necesidad || "Proyecto"
+              necesidad:
+                userType === "escuela"
+                  ? conexion.nombreNecesidad || "Proyecto"
+                  : conexion.apoyo || conexion.necesidad || "Proyecto",
             });
             conexionIdsVistos.add(conexion.conexionId);
           }
         });
 
         setProyectos(proyectosFiltrados);
-  
-        const actual = proyectosFiltrados.find(p => p.conexionId === id) || null;
+
+        const actual = proyectosFiltrados.find((p) => p.conexionId === id) || null;
         setProyectoActual(actual);
-  
       } catch (error) {
         console.error("Error cargando proyectos:", error);
       }
     };
-  
+
     const cargarEvidencias = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/evidence/progreso/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-  
+
         const evidenciasCargadas = await res.json();
-  
         let formatted = [];
-  
+
         if (Array.isArray(evidenciasCargadas) && evidenciasCargadas.length > 0) {
-          formatted = evidenciasCargadas.map(evi => ({
+          formatted = evidenciasCargadas.map((evi) => ({
             file: evi.ruta,
             date: new Date(evi.fecha).toLocaleDateString(),
             description: evi.descripcion,
-            reporteAvanceId: evi.reporteAvanceId
+            reporteAvanceId: evi.reporteAvanceId,
           }));
         }
-  
+
         while (formatted.length < 4) {
           formatted.push({ file: null, date: null, description: "" });
         }
-  
+
         setEvidences(formatted);
-  
       } catch (error) {
         console.error("Error cargando evidencias:", error);
       }
     };
-  
+
     cargarProyectos();
     cargarEvidencias();
-  }, [id, userType]);  
+  }, [id, userType]);
 
   return (
     <div className="evidence-container">
@@ -191,38 +182,43 @@ export default function EvidenceTimeline() {
         <img src={logo || "/placeholder.svg"} alt="Logo" className="evidence-logo" />
       </header>
 
-      <div className={`evidence-main-layout ${menuVisible ? 'menu-visible' : ''}`}>
-        <nav className={`evidence-sidebar ${!menuVisible ? 'hidden' : ''}`}>
-        <ul className="evidence-menu-list">
-          {userType === "aliado" ? (
-            <>
-              <li className="evidence-menu-item" onClick={() => navigate("/aliado/perfil")}>Perfil</li>
-              <li className="evidence-menu-item" onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
-              <li className="evidence-menu-item" onClick={() => navigate("/listado/escuelas")}>Mis escuelas</li>
-            </>
-          ) : (
-            <>
-              <li className="evidence-menu-item" onClick={() => navigate("/escuela/perfil")}>Perfil</li>
-              <li className="evidence-menu-item" onClick={() => navigate("/listado/aliados")}>Mis aliados</li>
-            </>
-          )}
-          <li className="evidence-menu-item" onClick={() => navigate("/logout")}>Cerrar sesión</li>
-        </ul>
-          <h4 className="evidence-subtitle">Proyectos</h4>
-          <ul className="evidence-menu-list">
-            {proyectos.map((proyecto, idx) => (
-              <li 
-                key={idx}
-                className="evidence-menu-item"
-                onClick={() => navigate(`/evidencia/${proyecto.conexionId}`, {
-                  state: { CCT: CCT }
-                })}
-              >
-                {proyecto.necesidad}
-              </li>
-            ))}
-          </ul>
-        </nav>
+      <div className={`evidence-main-layout ${menuVisible ? "menu-visible" : ""}`}>
+        {/* Menú lateral solo si NO es administrador */}
+        {!modoSoloLectura && (
+          <nav className={`evidence-sidebar ${!menuVisible ? "hidden" : ""}`}>
+            <ul className="evidence-menu-list">
+              {userType === "aliado" ? (
+                <>
+                  <li className="evidence-menu-item" onClick={() => navigate("/aliado/perfil")}>Perfil</li>
+                  <li className="evidence-menu-item" onClick={() => navigate("/aliado/mapa")}>Buscar escuelas</li>
+                  <li className="evidence-menu-item" onClick={() => navigate("/listado/escuelas")}>Mis escuelas</li>
+                </>
+              ) : (
+                <>
+                  <li className="evidence-menu-item" onClick={() => navigate("/escuela/perfil")}>Perfil</li>
+                  <li className="evidence-menu-item" onClick={() => navigate("/listado/aliados")}>Mis aliados</li>
+                </>
+              )}
+              <li className="evidence-menu-item" onClick={() => navigate("/logout")}>Cerrar sesión</li>
+            </ul>
+            <h4 className="evidence-subtitle">Proyectos</h4>
+            <ul className="evidence-menu-list">
+              {proyectos.map((proyecto, idx) => (
+                <li
+                  key={idx}
+                  className="evidence-menu-item"
+                  onClick={() =>
+                    navigate(`/evidencia/${proyecto.conexionId}`, {
+                      state: { CCT: CCT },
+                    })
+                  }
+                >
+                  {proyecto.necesidad}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
 
         <main className="evidence-main-content">
           <div className="evidence-content-wrapper">
@@ -250,7 +246,7 @@ export default function EvidenceTimeline() {
                     >
                       <span className="evidence-upload-icon">✅</span>
                     </a>
-                  ) : (
+                  ) : !modoSoloLectura ? (
                     <>
                       <label
                         htmlFor={`upload-${i}`}
@@ -268,23 +264,40 @@ export default function EvidenceTimeline() {
                         onChange={(e) => handleFileUpload(i, e)}
                       />
                     </>
+                  ) : (
+                    <div
+                      className="evidence-upload-circle"
+                      style={{
+                        borderColor: ["#c62828", "#fbc02d", "#0288d1", "#1a237e"][i],
+                        opacity: 0.5,
+                        cursor: "not-allowed",
+                      }}
+                    >
+                      <span className="evidence-upload-icon">🔒</span>
+                    </div>
                   )}
-                  <div className="evidence-upload-date">{evidence.date ? evidence.date : "FECHA"}</div>
 
-                  {/* 🔥 Textarea siempre visible */}
+                  <div className="evidence-upload-date">
+                    {evidence.date ? evidence.date : "FECHA"}
+                  </div>
+
                   <textarea
                     className="evidence-description-box"
                     placeholder="Escribe tu descripción aquí..."
                     value={evidence.description}
                     onChange={(e) => handleDescriptionChange(i, e.target.value)}
                     rows={3}
+                    disabled={modoSoloLectura}
                   />
-                  <button 
-                    onClick={() => handleSaveDescription(i)}
-                    className="save-description-button"
-                  >
-                    Guardar
-                  </button>
+
+                  {!modoSoloLectura && (
+                    <button
+                      onClick={() => handleSaveDescription(i)}
+                      className="save-description-button"
+                    >
+                      Guardar
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

@@ -4,6 +4,9 @@ import TableSelect from "../components/TableSelect"
 import niñosImg from "../assets/niños.png"
 import { useState } from "react";
 
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+
 
 function RegisterSchool() {
 
@@ -211,6 +214,28 @@ isSubmitting: Tracks whether the form is currently being submitted.
       return updatedData;
     });
   };
+
+  const obtenerCoordenadas = async (direccion) => {
+    console.log("Dirección:", direccion);
+    console.log("API Key:", GOOGLE_MAPS_API_KEY); // ← Esta debe imprimir tu clave real
+  
+   
+
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${GOOGLE_MAPS_API_KEY}`;
+
+  
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log("Respuesta de la API:", data);
+
+    if (data.status === "OK") {
+      const location = data.results[0].geometry.location;
+      return { latitud: location.lat, longitud: location.lng };
+    } else {
+      throw new Error("No se pudo obtener la ubicación geográfica.");
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -252,7 +277,13 @@ isSubmitting: Tracks whether the form is currently being submitted.
           //tieneUSAER: Boolean(formData.escuela.tieneUSAER)
         }
       }, null, 2));
+      
       console.log("Necesidades convertidas:", convertNecesidades());
+      
+      const direccionCompleta = `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`;
+      const coordenadas = await obtenerCoordenadas(direccionCompleta);
+
+      
       const response = await fetch("http://localhost:5000/api/escuela/register", {
         method: "POST",
         headers: {
@@ -263,8 +294,9 @@ isSubmitting: Tracks whether the form is currently being submitted.
           usuario: formData.usuario,
           escuela: {
             ...formData.escuela,
-            direccion: `${formData.escuela.direccion.calleNumero}, ${formData.escuela.direccion.colonia}, ${formData.escuela.direccion.municipio}`,
-            numeroDocentes: Number(formData.escuela.numeroDocentes),
+            direccion: direccionCompleta,
+  latitud: coordenadas.latitud,
+  longitud: coordenadas.longitud,
             estudiantesPorGrupo: Number(formData.escuela.estudiantesPorGrupo),
             necesidades: convertNecesidades(), 
             apoyoPrevio: apoyoPrevioArray

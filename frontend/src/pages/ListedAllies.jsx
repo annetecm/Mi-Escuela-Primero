@@ -7,19 +7,20 @@ export default function ListedAllies() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [aliadosAgrupados, setAliadosAgrupados] = useState({});
   const navigate = useNavigate();
+  
 
   const toggleMenu = () => setMenuVisible(!menuVisible);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
+  
     fetch("http://localhost:5000/api/escuela/mis-conexiones", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => {
         const agrupados = {};
-
+  
         data.forEach(conexion => {
           const key = conexion.aliadoId;
           if (!agrupados[key]) {
@@ -28,24 +29,24 @@ export default function ListedAllies() {
               proyectos: new Set()
             };
           }
-          agrupados[key].proyectos.add({
-            apoyo: conexion.apoyo,
+          agrupados[key].proyectos.add(JSON.stringify({
+            necesidad: conexion.nombreNecesidad,
             conexionId: conexion.conexionId
-          });
+          }));
         });
-
+  
         const finalAgrupados = {};
         for (const [key, value] of Object.entries(agrupados)) {
           finalAgrupados[key] = {
             nombreAliado: value.nombreAliado,
-            proyectos: Array.from(value.proyectos)
+            proyectos: Array.from(value.proyectos).map(str => JSON.parse(str))
           };
         }
-
+  
         setAliadosAgrupados(finalAgrupados);
       })
       .catch(err => console.error("Error cargando conexiones:", err));
-  }, []);
+  }, []);  
 
   return (
     <div className="listedallies-container">
@@ -88,12 +89,42 @@ export default function ListedAllies() {
                     <ul className="listedallies-projects-list">
                       {datos.proyectos.map((proyecto, idx) => (
                         <li key={idx} className="listedallies-project-item">
-                          {proyecto.apoyo}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                      {proyecto.necesidad}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="listedallies-card-footer">
+              <button
+                className="listedallies-message-button"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  const token = localStorage.getItem("token");
+
+                  try {
+                    const res = await fetch(`http://localhost:5000/api/conexion/conexion-id/${aliadoId}`, {
+                      headers: {
+                        Authorization: `Bearer ${token}`
+                      }
+                    });
+
+                    const data = await res.json();
+                    if (data.conexionId) {
+                      navigate(`/chat/${data.conexionId}`);
+                    } else {
+                      alert("No se encontró una conexión válida.");
+                    }
+                  } catch (err) {
+                    console.error("❌ Error al obtener conexión para chat:", err);
+                    alert("Error al intentar abrir el chat.");
+                  }
+                }}
+              >
+                💬 Enviar mensaje
+              </button>
+
+              </div>
+            </div>
               ))
             )}
           </div>
