@@ -192,10 +192,6 @@ const AdminPage = () => {
 
                     {showMonitoreoMenu && (
                     <div className="admin-dropdown-menu">
-                      <button className="admin-dropdown-item" onClick={() => navigate('/administrador/conexiones')}>
-                        Conexiones y chats
-                      </button>
-                      <button className="admin-dropdown-item">Editar mi perfil</button>
                       <button className="admin-dropdown-item" onClick={handleLogout}>Cerrar sesión</button> 
                     </div>
                   )}

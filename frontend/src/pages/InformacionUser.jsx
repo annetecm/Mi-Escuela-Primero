@@ -214,6 +214,39 @@ const hacerCorreo= async(nombreAdmin, correo)=>{
     console.error("❌ Error al enviar correo:", error);
   }
 }
+
+const EliminarUsuario = async () => {
+  let confirmacion = confirm("Seguro que quieres eliminar este usuario");
+  if(confirmacion){
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/eliminar', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          identificador: identificador,  // ← Cambiado de 'cct' a 'identificador'
+          tipoUsuario: tipoUsuario
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar el usuario');
+      }
+
+      const result = await response.json();
+      alert('Usuario eliminado correctamente');
+      navigate('/administrador/perfil');
+
+    } catch (error) {
+      console.error('Error eliminando usuario:', error);
+      alert(`Error al eliminar: ${error.message}`);
+    }
+  }
+};
+
 // Save all edited fields
 const handleSaveAllChanges = async () => {
   try {
@@ -447,6 +480,7 @@ const handleSaveAllChanges = async () => {
               <div className="edit-buttons">
                 <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
                 <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+                <button className="cancel-button" onClick={EliminarUsuario}>Eliminar Usuario</button>
               </div>
             ) : (
               <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
@@ -661,6 +695,7 @@ const handleSaveAllChanges = async () => {
               <div className="edit-buttons">
                 <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
                 <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+                <button className="cancel-button" onClick={EliminarUsuario}>Eliminar Usuario</button>
               </div>
             ) : (
               <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
@@ -741,7 +776,7 @@ const handleSaveAllChanges = async () => {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
+                          <td onClick={() => navigate(`/administrador/conexiones/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍" )|| 'No disponible'}</td>
@@ -764,6 +799,7 @@ const handleSaveAllChanges = async () => {
               <div className="edit-buttons">
                 <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
                 <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+                <button className="cancel-button" onClick={EliminarUsuario}>Eliminar Usuario</button>
               </div>
             ) : (
               <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
@@ -915,7 +951,7 @@ const handleSaveAllChanges = async () => {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
+                          <td onClick={() => navigate(`/administrador/conexiones/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍") || 'No disponible'}</td>
@@ -937,6 +973,7 @@ const handleSaveAllChanges = async () => {
                     <div className="edit-buttons">
                       <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
                       <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+                      <button className="cancel-button" onClick={EliminarUsuario}>Eliminar Usuario</button>
                     </div>
                   ) : (
                     <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
