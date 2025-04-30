@@ -140,46 +140,6 @@ function InformacionUser() {
     }
   };
 
-  const handleSaveClick = async () => {
-    if (!editingField) return;
-    
-    try {
-      const tipoUsuarioL = tipoUsuario.toLowerCase();
-      const endpoint = tipoUsuarioL === 'escuela' 
-        ? 'http://localhost:5000/api/admin/update' 
-        : 'http://localhost:5000/api/aliado/update';
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ 
-          id: identificador, 
-          field: editingField, 
-          value: newValue 
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar el dato');
-      }
-
-      setUserData(prev => ({
-        ...prev,
-        [editingField]: newValue
-      }));
-      
-      setEditingField(null);
-      setNewValue('');
-      alert('Dato actualizado correctamente');
-
-    } catch (error) {
-      console.error('Error updating data:', error);
-      alert(`Error al actualizar: ${error.message}`);
-    }
-  };
 // Handle input change for edit mode
 const handleInputChange = (field, value) => {
   setEditedData(prev => ({
@@ -189,28 +149,31 @@ const handleInputChange = (field, value) => {
 };
 
 // Save all edited fields
+// Save all edited fields
 const handleSaveAllChanges = async () => {
   try {
-    const endpoint = 'http://localhost:5000/api/admin/update-multiple';
-    
-    const response = await fetch(endpoint, {
-      method: 'POST',
+    // Add the tipoUsuario to the request
+    const response = await fetch('http://localhost:5000/api/admin/update-multiple', {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ 
         cct: identificador,
-        data: editedData
+        data: editedData,
+        tipoUsuario: tipoUsuario // Include the user type in the request
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Error al actualizar los datos');
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Error al actualizar los datos');
     }
 
     const result = await response.json();
     
+    // Update userData state with the edited data
     setUserData(prev => ({
       ...prev,
       ...editedData
@@ -224,51 +187,107 @@ const handleSaveAllChanges = async () => {
     alert(`Error al actualizar: ${error.message}`);
   }
 };
-  // Toggle edit mode
+
+// Toggle edit mode
+//aqui esta todo lo que se puede cambiar
   const toggleEditMode = () => {
     setEditMode(!editMode);
-    if (!editMode && userData) {
-      // When entering edit mode, initialize editedData with current values
-      const initialEditData = {
-        direccion: userData.direccion || '',
-        zonaEscolar: userData.zonaEscolar || '',
-        sectorEscolar: userData.sectorEscolar || '',
-        modalidad: userData.modalidad || '',
-        nivelEducativo: userData.nivelEducativo || '',
-        tieneUSAER: userData.tieneUSAER === undefined ? false : userData.tieneUSAER,
-        numeroDocentes: userData.numeroDocentes || 0,
-        estudiantesPorGrupo: userData.estudiantesPorGrupo || 0,
-        controlAdministrativo: userData.controlAdministrativo || '',
-        estadoRegistro: userData.estadoRegistro || ''
-      };
+    const tipoUsuarioL = tipoUsuario.toLowerCase();
 
-      // Add director fields if they exist
-      if (userData.director) {
-        initialEditData.director_nombre = userData.director.nombre || '';
-        initialEditData.director_correoElectronico = userData.director.correoElectronico || '';
-        initialEditData.director_telefono = userData.director.telefono || '';
-        initialEditData.director_posibleCambioPlantel = 
-          userData.director.posibleCambioPlantel === undefined ? false : userData.director.posibleCambioPlantel;
+    if(tipoUsuarioL === 'escuela'){
+      if (!editMode && userData) {
+        // When entering edit mode, initialize editedData with current values
+        const initialEditData = {
+          direccion: userData.direccion || '',
+          zonaEscolar: userData.zonaEscolar || '',
+          sectorEscolar: userData.sectorEscolar || '',
+          modalidad: userData.modalidad || '',
+          nivelEducativo: userData.nivelEducativo || '',
+          tieneUSAER: userData.tieneUSAER === undefined ? false : userData.tieneUSAER,
+          numeroDocentes: userData.numeroDocentes || 0,
+          estudiantesPorGrupo: userData.estudiantesPorGrupo || 0,
+          controlAdministrativo: userData.controlAdministrativo || '',
+          estadoRegistro: userData.estadoRegistro || ''
+        };
+
+        // Add director fields if they exist
+        if (userData.director) {
+          initialEditData.director_nombre = userData.director.nombre || '';
+          initialEditData.director_correoElectronico = userData.director.correoElectronico || '';
+          initialEditData.director_telefono = userData.director.telefono || '';
+          initialEditData.director_posibleCambioPlantel = 
+            userData.director.posibleCambioPlantel === undefined ? false : userData.director.posibleCambioPlantel;
+        }
+
+        // Add supervisor fields if they exist
+        if (userData.supervisor) {
+          initialEditData.supervisor_nombre = userData.supervisor.nombre || '';
+          initialEditData.supervisor_correoElectronico = userData.supervisor.correoElectronico || '';
+          initialEditData.supervisor_telefono = userData.supervisor.telefono || '';
+          initialEditData.supervisor_posibleCambioZona = 
+            userData.supervisor.posibleCambioZona === undefined ? false : userData.supervisor.posibleCambioZona;
+          initialEditData.supervisor_medioContacto = userData.supervisor.medioContacto || 'whatsapp';
+          initialEditData.supervisor_antiguedadZona = userData.supervisor.antiguedadZona || 0;
+        }
+
+        // Add mesa directiva fields if they exist
+        if (userData.mesaDirectiva) {
+          initialEditData.mesaDirectiva_personasCantidad = userData.mesaDirectiva.personasCantidad || 0;
+        }
+        setEditedData(initialEditData);
       }
-
-      // Add supervisor fields if they exist
-      if (userData.supervisor) {
-        initialEditData.supervisor_nombre = userData.supervisor.nombre || '';
-        initialEditData.supervisor_correoElectronico = userData.supervisor.correoElectronico || '';
-        initialEditData.supervisor_telefono = userData.supervisor.telefono || '';
-        initialEditData.supervisor_posibleCambioZona = 
-          userData.supervisor.posibleCambioZona === undefined ? false : userData.supervisor.posibleCambioZona;
-        initialEditData.supervisor_medioContacto = userData.supervisor.medioContacto || 'whatsapp';
-        initialEditData.supervisor_antiguedadZona = userData.supervisor.antiguedadZona || 0;
+    }else if (tipoUsuarioL === 'aliado de persona fisica'){
+        if (!editMode && userData) {
+          const initialEditData = {
+            correoElectronico: userData.correoElectronico || '',
+            estadoRegistro: userData.estadoRegistro || ''
+          };
+          if (userData.persona_fisica) {
+            initialEditData.razon_persona = userData.persona_fisica.razon || '';
+            initialEditData.correo_persona = userData.persona_fisica.correoElectronico || '';
+            initialEditData.telefono_persona = userData.persona_fisica.telefono || '';
+          }
+          setEditedData(initialEditData);
+        }
+    }else if(tipoUsuarioL === 'aliado de persona moral'){
+        if(!editMode && userData){
+          const initialEditData = {
+            correoElectronico: userData.correoElectronico || '',
+            estadoRegistro: userData.estadoRegistro || ''
+          };
+          if (userData.persona_moral) {
+            initialEditData.area_persona = userData.persona_moral.area || '';
+            initialEditData.correo_persona = userData.persona_moral.correoElectronico || '';
+            initialEditData.telefono_persona = userData.persona_fisica.telefono || '';
+          }
+          if(userData.institucion){
+            initialEditData.giro_institucion = userData.institucion.giro || '';
+            initialEditData.domicilio_institucion = userData.institucion.domicilio || '';
+            initialEditData.telefono_institucion = userData.institucion.telefono || '';
+            initialEditData.paginaWeb_institucion = userData.institucion.paginaWeb || '';
+          }
+          if(userData.constancia_fisica){
+            initialEditData.regimen_constancia = userData.constancia_fisica.regimen || '';
+            initialEditData.domicilio_constancia = userData.constancia_fisica.domicilio || '';
+          }
+          if(userData.representante){
+            initialEditData.correo_representante = userData.representante.correo || '';
+            initialEditData.telefono_representante = userData.representante.telefono || '';
+            initialEditData.area_representante = userData.representante.area || '';
+          }
+          setEditedData(initialEditData);
+          
+        }
+    }else{
+      if (!editMode && userData) {
+        const initialEditData = {
+          correoElectronico: userData.correoElectronico || '',
+          estadoRegistro: userData.estadoRegistro || ''
+        };
       }
-
-      // Add mesa directiva fields if they exist
-      if (userData.mesaDirectiva) {
-        initialEditData.mesaDirectiva_personasCantidad = userData.mesaDirectiva.personasCantidad || 0;
-      }
-
       setEditedData(initialEditData);
-    }
+    } 
+    
   };
 
 
@@ -310,8 +329,6 @@ const handleSaveAllChanges = async () => {
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
             />
-            <button onClick={handleSaveClick}>Guardar</button>
-            <button onClick={() => setEditingField(null)}>Cancelar</button>
           </>
         ) : (
           <span onClick={() => handleEditClick(field)}>
@@ -574,12 +591,24 @@ const handleSaveAllChanges = async () => {
         tipoUsuario.toLowerCase() ==='aliado de persona fisica'?(
           <>
             <h1>Información del Aliado de Persona Fisica</h1>
+            {editMode ? (
+              <div className="edit-buttons">
+                <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
+                <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+              </div>
+            ) : (
+              <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
+            )}
             <div className="school-section">
               <h2>Información General</h2>
               <div className="school-info">
                 <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
-                    {renderNonEditableField('Correo', userData.correoElectronico)}
-                    {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+                    {editMode?
+                      renderEditableField('correoElectronico','Correo', userData.correoElectronico):
+                      renderNonEditableField('Correo', userData.correoElectronico)}
+                    {editMode?
+                      renderEditableField('estadoRegistro', 'Estado de Registro', userData.estadoRegistro):
+                      renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
               </div>
             </div>
             {/* Información de Persona Fisica*/}
@@ -588,9 +617,15 @@ const handleSaveAllChanges = async () => {
                   <h2>Información de Persona Fisica</h2>
                   <div className="info-section">
                     {renderNonEditableField('CURP', userData.persona_fisica.curp)}
-                    {renderNonEditableField('Razón', userData.persona_fisica.razon)}
-                    {renderNonEditableField('Correo Electrónico', userData.persona_fisica.correoElectronico)}
-                    {renderNonEditableField('Teléfono', userData.persona_fisica.telefono)}
+                    {editMode?
+                      renderEditableField('razon','Razón', userData.persona_fisica.razon)
+                      :renderNonEditableField('Razón', userData.persona_fisica.razon)}
+                    {editMode?
+                      renderEditableField('correoElectronico','Correo Electrónico', userData.persona_fisica.correoElectronico):
+                      renderNonEditableField('Correo Electrónico', userData.persona_fisica.correoElectronico)}
+                    {editMode?
+                      renderEditableField('telefono', 'Teléfono', userData.persona_fisica.telefono):
+                      renderNonEditableField('Teléfono', userData.persona_fisica.telefono)}
                   </div>
                 </div>
               )}
@@ -661,12 +696,24 @@ const handleSaveAllChanges = async () => {
             tipoUsuario.toLowerCase() === 'aliado de persona moral'?(
               <>
               <h1>Información del Aliado de Persona Moral</h1>
+              {editMode ? (
+              <div className="edit-buttons">
+                <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
+                <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+              </div>
+            ) : (
+              <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
+            )}
             <div className="school-section">
               <h2>Información General</h2>
               <div className="school-info">
                 <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
-                    {renderNonEditableField('Correo', userData.correoElectronico)}
-                    {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+                    {editMode?
+                      renderEditableField('correoElectronico','Correo', userData.correoElectronico):
+                      renderNonEditableField('Correo', userData.correoElectronico)}
+                    {editMode?
+                      renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                      renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
               </div>
             </div>
             {/* Información de Persona Moral*/}
@@ -675,9 +722,15 @@ const handleSaveAllChanges = async () => {
                   <h2>Información de Persona Moral</h2>
                   <div className="info-section">
                     {renderNonEditableField('RFC', userData.persona_moral.rfc)}
-                    {renderNonEditableField('Area', userData.persona_moral.area)}
-                    {renderNonEditableField('Correo Electrónico', userData.persona_moral.correoElectronico)}
-                    {renderNonEditableField('Teléfono', userData.persona_moral.telefono)}
+                    {editMode?
+                      renderEditableField('area','Area', userData.persona_moral.area):
+                      renderNonEditableField('Area', userData.persona_moral.area)}
+                    {editMode?
+                      renderEditableField('correoElectronico','Correo Electrónico', userData.persona_moral.correoElectronico):
+                      renderNonEditableField('Correo Electrónico', userData.persona_moral.correoElectronico)}
+                    {editMode?
+                      renderEditableField('telefono','Teléfono', userData.persona_moral.telefono):
+                      renderNonEditableField('Teléfono', userData.persona_moral.telefono)}
                   </div>
                 </div>
               )}
@@ -686,10 +739,18 @@ const handleSaveAllChanges = async () => {
                 <div className="director-section">
                   <h2>Información de Institución</h2>
                   <div className="info-section">
-                    {renderNonEditableField('Giro', userData.institucion.giro)}
-                    {renderNonEditableField('Domicilio', userData.institucion.domicilio)}
-                    {renderNonEditableField('Teléfono', userData.institucion.telefono)}
-                    {renderNonEditableField('Pagina Web', userData.institucion.paginaWeb)}
+                    {editMode?
+                      renderEditableField('giro','Giro', userData.institucion.giro):
+                      renderNonEditableField('Giro', userData.institucion.giro)}
+                    {editMode?
+                      renderEditableField('domicilio','Domicilio', userData.institucion.domicilio):
+                      renderNonEditableField('Domicilio', userData.institucion.domicilio)}
+                    {editMode?
+                      renderEditableField('telefono','Teléfono', userData.institucion.telefono):
+                      renderNonEditableField('Teléfono', userData.institucion.telefono)}
+                    {editMode?
+                      renderEditableField('paginaWeb','Pagina Web', userData.institucion.paginaWeb):
+                      renderNonEditableField('Pagina Web', userData.institucion.paginaWeb)}
                   </div>
                 </div>
               )}
@@ -706,24 +767,34 @@ const handleSaveAllChanges = async () => {
               )}
             {/* Información de Constancia*/}
             {userData.constancia_fisica && (
-                <div className="director-section">
-                  <h2>Información de Constancia Física</h2>
-                  <div className="info-section">
-                    {renderNonEditableField('Régimen', userData.constancia_fisica.regimen)}
-                    {renderNonEditableField('Domicilio', userData.constancia_fisica.domicilio)}
-                  </div>
+              <div className="director-section">
+                <h2>Información de Constancia Física</h2>
+                <div className="info-section">
+                  {editMode?
+                    renderEditableField('regimen','Régimen', userData.constancia_fisica.regimen):
+                    renderNonEditableField('Régimen', userData.constancia_fisica.regimen)}
+                  {editMode?
+                    renderEditableField('domicilio','Domicilio', userData.constancia_fisica.domicilio):
+                    renderNonEditableField('Domicilio', userData.constancia_fisica.domicilio)}
                 </div>
+              </div>
               )}
             {/* Información de Representante*/}
             {userData.representante && (
-                <div className="director-section">
-                  <h2>Información del Representante</h2>
-                  <div className="info-section">
-                    {renderNonEditableField('Correo Electrónico', userData.representante.correo)}
-                    {renderNonEditableField('Teléfono', userData.representante.telefono)}
-                    {renderNonEditableField('Area', userData.representante.area)}
-                  </div>
+              <div className="director-section">
+                <h2>Información del Representante</h2>
+                <div className="info-section">
+                  {editMode?
+                    renderEditableField('correo','Correo Electrónico', userData.representante.correo):
+                    renderNonEditableField('Correo Electrónico', userData.representante.correo)}
+                  {editMode?
+                    renderEditableField('telefono','Teléfono', userData.representante.telefono):
+                    renderNonEditableField('Teléfono', userData.representante.telefono)}
+                  {editMode?
+                    renderEditableField('area', 'Area', userData.representante.area):
+                    renderNonEditableField('Area', userData.representante.area)}
                 </div>
+              </div>
               )}
             
             {/*Apoyos */}
@@ -792,12 +863,24 @@ const handleSaveAllChanges = async () => {
             ):(
               <>
                 <h1>Información del Administrador</h1>
+                {editMode ? (
+                    <div className="edit-buttons">
+                      <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
+                      <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+                    </div>
+                  ) : (
+                    <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
+                  )}
                   <div className="school-section">
                     <h2>Información General</h2>
                     <div className="school-info">
                       <h3>{userData.nombre || 'Administrador'}</h3>
-                      {renderNonEditableField('Correo', userData.correoElectronico)}
-                      {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+                      {editMode?
+                        renderEditableField('correoElectronico','Correo', userData.correoElectronico):
+                        renderNonEditableField('Correo', userData.correoElectronico)}
+                      {editMode?
+                        renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                        renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
                     </div>
                   </div>
               </> 
