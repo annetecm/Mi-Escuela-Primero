@@ -3,6 +3,25 @@
   display: flex;
   flex-direction: column;
 }
+.school-needs-section {
+  max-height: 300px; /* Ajusta esta altura si necesitas más espacio */
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.school-needs-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.school-needs-section::-webkit-scrollbar-thumb {
+  background-color: #a5d6a7;
+  border-radius: 4px;
+}
+
+.school-needs-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
 .school-header {
   background-color: #019847;
@@ -334,4 +353,6 @@
   .school-edit-text {
     display: none;
   }
+
+
 }

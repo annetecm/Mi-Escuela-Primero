@@ -15,7 +15,8 @@ function InformacionUser() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
-  
+  const [editMode, setEditMode] = useState(false);
+  const [editedData, setEditedData] = useState({});
   //get del nombre del administrador
   useEffect(() => {
         const token = localStorage.getItem("token");
@@ -90,7 +91,7 @@ function InformacionUser() {
 
           const aliadoData = await aliadoResponse.json();
           setUserData(aliadoData);
-        }else if (tipoUsuarioL === 'aliado de persona moral'){ //falta
+        }else if (tipoUsuarioL === 'aliado de persona moral'){ 
           const aliadoResponse = await fetch(`http://localhost:5000/api/admin/aliado/moral/perfil/${identificador}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -179,6 +180,97 @@ function InformacionUser() {
       alert(`Error al actualizar: ${error.message}`);
     }
   };
+// Handle input change for edit mode
+const handleInputChange = (field, value) => {
+  setEditedData(prev => ({
+    ...prev,
+    [field]: value
+  }));
+};
+
+// Save all edited fields
+const handleSaveAllChanges = async () => {
+  try {
+    const endpoint = 'http://localhost:5000/api/admin/update-multiple';
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ 
+        cct: identificador,
+        data: editedData
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al actualizar los datos');
+    }
+
+    const result = await response.json();
+    
+    setUserData(prev => ({
+      ...prev,
+      ...editedData
+    }));
+    
+    setEditMode(false);
+    alert('Datos actualizados correctamente');
+
+  } catch (error) {
+    console.error('Error updating data:', error);
+    alert(`Error al actualizar: ${error.message}`);
+  }
+};
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setEditMode(!editMode);
+    if (!editMode && userData) {
+      // When entering edit mode, initialize editedData with current values
+      const initialEditData = {
+        direccion: userData.direccion || '',
+        zonaEscolar: userData.zonaEscolar || '',
+        sectorEscolar: userData.sectorEscolar || '',
+        modalidad: userData.modalidad || '',
+        nivelEducativo: userData.nivelEducativo || '',
+        tieneUSAER: userData.tieneUSAER === undefined ? false : userData.tieneUSAER,
+        numeroDocentes: userData.numeroDocentes || 0,
+        estudiantesPorGrupo: userData.estudiantesPorGrupo || 0,
+        controlAdministrativo: userData.controlAdministrativo || '',
+        estadoRegistro: userData.estadoRegistro || ''
+      };
+
+      // Add director fields if they exist
+      if (userData.director) {
+        initialEditData.director_nombre = userData.director.nombre || '';
+        initialEditData.director_correoElectronico = userData.director.correoElectronico || '';
+        initialEditData.director_telefono = userData.director.telefono || '';
+        initialEditData.director_posibleCambioPlantel = 
+          userData.director.posibleCambioPlantel === undefined ? false : userData.director.posibleCambioPlantel;
+      }
+
+      // Add supervisor fields if they exist
+      if (userData.supervisor) {
+        initialEditData.supervisor_nombre = userData.supervisor.nombre || '';
+        initialEditData.supervisor_correoElectronico = userData.supervisor.correoElectronico || '';
+        initialEditData.supervisor_telefono = userData.supervisor.telefono || '';
+        initialEditData.supervisor_posibleCambioZona = 
+          userData.supervisor.posibleCambioZona === undefined ? false : userData.supervisor.posibleCambioZona;
+        initialEditData.supervisor_medioContacto = userData.supervisor.medioContacto || 'whatsapp';
+        initialEditData.supervisor_antiguedadZona = userData.supervisor.antiguedadZona || 0;
+      }
+
+      // Add mesa directiva fields if they exist
+      if (userData.mesaDirectiva) {
+        initialEditData.mesaDirectiva_personasCantidad = userData.mesaDirectiva.personasCantidad || 0;
+      }
+
+      setEditedData(initialEditData);
+    }
+  };
+
 
   if (loading) {
     return <div className="loading">Cargando datos...</div>;
@@ -193,6 +285,21 @@ function InformacionUser() {
   }
 
   const renderEditableField = (field, label, value) => {
+    if (editMode) {
+      // In edit mode, show input fields
+      return (
+        <div className="info-field">
+          <strong>{label}:</strong>
+          <input
+            type="text"
+            value={editedData[field] !== undefined ? editedData[field] : (value || '')}
+            onChange={(e) => handleInputChange(field, e.target.value)}
+          />
+        </div>
+      );
+    }
+    
+    // Normal view mode
     return (
       <div className="info-field">
         <strong>{label}:</strong>
@@ -254,6 +361,14 @@ function InformacionUser() {
       {tipoUsuario.toLowerCase() === 'escuela' ? ( 
         <>
         <h1>Información de la Escuela</h1>
+        {editMode ? (
+              <div className="edit-buttons">
+                <button className="save-button" onClick={handleSaveAllChanges}>Guardar Cambios</button>
+                <button className="cancel-button" onClick={toggleEditMode}>Cancelar</button>
+              </div>
+            ) : (
+              <button className="edit-button" onClick={toggleEditMode}>Editar Información</button>
+            )}
           <div className="school-section">
             <h2>Información General</h2>
             <div className="school-info">
@@ -261,16 +376,37 @@ function InformacionUser() {
               
               {renderNonEditableField('CCT', userData.CCT)}
               {renderNonEditableField('Correo', userData.correoElectronico)}
-              {renderEditableField('direccion', 'Dirección', userData.direccion)}
-              {renderEditableField('zonaEscolar', 'Zona Escolar', userData.zonaEscolar)}
-              {renderEditableField('sectorEscolar', 'Sector Escolar', userData.sectorEscolar)}
-              {renderEditableField('modalidad', 'Modalidad', userData.modalidad)}
-              {renderEditableField('nivelEducativo', 'Nivel Educativo', userData.nivelEducativo)}
-              {renderEditableField('tieneUSAER', 'Tiene USAER', userData.tieneUSAER ? 'Sí' : 'No')}
-              {renderEditableField('numeroDocentes', 'Número de Docentes', userData.numeroDocentes)}
-              {renderEditableField('estudiantesPorGrupo', 'Estudiantes por Grupo', userData.estudiantesPorGrupo)}
-              {renderEditableField('controlAdministrativo', 'Control Administrativo', userData.controlAdministrativo)}
-              {renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
+              {editMode ?
+                renderEditableField('direccion', 'Dirección', userData.direccion):
+                renderNonEditableField('Dirección', userData.direccion)
+              }
+              {editMode?
+                renderEditableField('zonaEscolar', 'Zona Escolar', userData.zonaEscolar):
+                renderNonEditableField('Zona Escolar', userData.zonaEscolar)}
+              {editMode?
+                renderEditableField('sectorEscolar', 'Sector Escolar', userData.sectorEscolar):
+                renderNonEditableField('Sector Escolar', userData.sectorEscolar)}
+              {editMode?
+                renderEditableField('modalidad', 'Modalidad', userData.modalidad):
+                renderNonEditableField('Modalidad', userData.modalidad)}
+              {editMode? 
+                renderEditableField('nivelEducativo', 'Nivel Educativo', userData.nivelEducativo):
+                renderNonEditableField('Modalidad', userData.modalidad)}
+              {editMode?
+                renderEditableField('tieneUSAER', 'Tiene USAER', userData.tieneUSAER ? 'Sí' : 'No'):
+                renderNonEditableField('Tiene USAER', userData.tieneUSAER ? 'Sí' : 'No')}
+              {editMode?
+                renderEditableField('numeroDocentes', 'Número de Docentes', userData.numeroDocentes):
+                renderNonEditableField('Número de Docentes', userData.numeroDocentes)}
+              {editMode?
+                renderEditableField('estudiantesPorGrupo', 'Estudiantes por Grupo', userData.estudiantesPorGrupo):
+                renderNonEditableField('Estudiantes por Grupo', userData.estudiantesPorGrupo)}
+              {editMode?
+                renderEditableField('controlAdministrativo', 'Control Administrativo', userData.controlAdministrativo):
+                renderNonEditableField('Control Administrativo', userData.controlAdministrativo)}
+              {editMode?
+                renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
             </div>
           </div>
 
@@ -279,10 +415,18 @@ function InformacionUser() {
             <div className="director-section">
               <h2>Información del Director</h2>
               <div className="info-section">
-                {renderNonEditableField('Nombre', userData.director.nombre)}
-                {renderNonEditableField('Correo Electrónico', userData.director.correoElectronico)}
-                {renderNonEditableField('Teléfono', userData.director.telefono)}
-                {renderNonEditableField('Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No')}
+                {editMode?
+                  renderEditableField('nombre','Nombre', userData.director.nombre):
+                  renderNonEditableField('Nombre', userData.director.nombre)}
+                {editMode?
+                  renderEditableField('correoElectronico','Correo Electrónico', userData.director.correoElectronico):
+                  renderNonEditableField('Correo Electrónico', userData.director.correoElectronico)}
+                {editMode?
+                  renderEditableField('telefono', 'Teléfono', userData.director.telefono):
+                  renderNonEditableField('Teléfono', userData.director.telefono)}
+                {editMode?
+                  renderEditableField('posibleCambioPlantel','Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No'):
+                  renderNonEditableField('Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No')}
               </div>
             </div>
           )}
@@ -292,12 +436,25 @@ function InformacionUser() {
             <div className="supervisor-section">
               <h2>Información del Supervisor</h2>
               <div className="info-section">
-                {renderNonEditableField('Nombre', userData.supervisor.nombre)}
-                {renderNonEditableField('Correo Electrónico', userData.supervisor.correoElectronico)}
-                {renderNonEditableField('Teléfono', userData.supervisor.telefono)}
-                {renderNonEditableField('Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No')}
-                {renderNonEditableField('Medio de Contacto', userData.supervisor.medioContacto)}
-                {renderNonEditableField('Antigüedad en la Zona', userData.supervisor.antiguedadZona)}
+                {editMode?
+                  renderEditableField('nombre','Nombre', userData.supervisor.nombre):
+                  renderNonEditableField('Nombre', userData.supervisor.nombre)
+                }
+                {editMode?
+                  renderEditableField('correoElectronico','Correo Electrónico', userData.supervisor.correoElectronico):
+                  renderNonEditableField('Correo Electrónico', userData.supervisor.correoElectronico)}
+                {editMode?
+                  renderEditableField('telefono','Teléfono', userData.supervisor.telefono):
+                  renderNonEditableField('Teléfono', userData.supervisor.telefono)}
+                {editMode?
+                  renderEditableField('posibleCambioZona','Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No'):
+                  renderNonEditableField('Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No')}
+                {editMode?
+                  renderEditableField('medioContacto','Medio de Contacto', userData.supervisor.medioContacto || 'Whatsapp'):
+                  renderNonEditableField('Medio de Contacto', userData.supervisor.medioContacto || 'Whatsapp')}
+                {editMode?
+                  renderEditableField('antiguedadZona', 'Antigüedad en la Zona', userData.supervisor.antiguedadZona):
+                  renderNonEditableField('Antigüedad en la Zona', userData.supervisor.antiguedadZona)}
               </div>
             </div>
           )}
@@ -307,7 +464,9 @@ function InformacionUser() {
             <div className="mesa-directiva-section">
               <h2>Mesa Directiva</h2>
               <div className="info-section">
-                {renderNonEditableField('Cantidad de Personas', userData.mesaDirectiva.personasCantidad)}
+                {editMode?
+                  renderEditableField('personasCantidad','Cantidad de Personas', userData.mesaDirectiva.personasCantidad):
+                  renderNonEditableField('Cantidad de Personas', userData.mesaDirectiva.personasCantidad)}
               </div>
             </div>
           )}
@@ -396,13 +555,14 @@ function InformacionUser() {
                   <tbody>
                     {userData.conexiones.map((conexion, index) => (
                       <tr key={index}>
-                        <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
+                        <td onClick={() => navigate(`/administrador/conexiones/${conexion.id}`)}>🔍</td>
                         <td>{conexion.necesidadNombre || 'No disponible'}</td>
                         <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                        <td onClick={() => navigate(`/administrador/informacion/${conexion.aliadoId}/${conexion.tipoUsuario}`)}>{conexion.aliadoNombre || 'No disponible'}</td>
+                        <td onClick={() => navigate(`/administrador/informacion/${conexion.aliadoId}/${conexion.tipoUsuario}`)}>{(conexion.aliadoNombre + " 🔍" )|| 'No disponible'}</td>
                         <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                         <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                         <td>{conexion.estado}</td>
+                        
                       </tr>
                     ))}
                   </tbody>
@@ -483,10 +643,10 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
+                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍" )|| 'No disponible'}</td>
                           <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                           <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                           <td>{conexion.estado}</td>
@@ -615,10 +775,10 @@ function InformacionUser() {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/informacion/conexion/${conexion.id}`)}>{index}</td>
+                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
-                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{conexion.escuelaNombre || 'No disponible'}</td>
+                          <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍") || 'No disponible'}</td>
                           <td>{new Date(conexion.fechaInicio).toLocaleDateString()}</td>
                           <td>{conexion.fechaFin ? new Date(conexion.fechaFin).toLocaleDateString() : 'En curso'}</td>
                           <td>{conexion.estado}</td>

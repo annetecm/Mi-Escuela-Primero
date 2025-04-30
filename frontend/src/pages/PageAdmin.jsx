@@ -189,12 +189,15 @@ const AdminPage = () => {
                   >
                     &#8230;
                     </button>
+
                     {showMonitoreoMenu && (
-                      <div className="admin-dropdown-menu">
-                        <button className="admin-dropdown-item">Chats</button>
-                        <button className="admin-dropdown-item">Editar mi perfil</button>
-                        <button className="admin-dropdown-item" onClick={handleLogout}>Cerrar sesión</button> 
-                      </div>
+                    <div className="admin-dropdown-menu">
+                      <button className="admin-dropdown-item" onClick={() => navigate('/administrador/conexiones')}>
+                        Conexiones y chats
+                      </button>
+                      <button className="admin-dropdown-item">Editar mi perfil</button>
+                      <button className="admin-dropdown-item" onClick={handleLogout}>Cerrar sesión</button> 
+                    </div>
                   )}
               </div>
             </div>

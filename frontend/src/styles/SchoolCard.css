@@ -11,6 +11,28 @@
   right: 0;
   z-index: 100;
 }
+.schoolcard-school-content {
+  flex: 1;
+  min-width: 300px;
+  max-height: 400px;  /* Ajusta según tu diseño */
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Scrollbar estético (opcional) */
+.schoolcard-school-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.schoolcard-school-content::-webkit-scrollbar-thumb {
+  background-color: #a5d6a7;
+  border-radius: 4px;
+}
+
+.schoolcard-school-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
 .schoolcard-menu-button {
   background: none;
@@ -94,10 +116,6 @@ body, html, #root {
   flex-wrap: wrap;
 }
 
-.schoolcard-school-content {
-  flex: 1;
-  min-width: 300px;
-}
 
 .schoolcard-school-title {
   color: #2e7d32;
