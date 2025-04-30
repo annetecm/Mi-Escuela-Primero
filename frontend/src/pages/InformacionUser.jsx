@@ -198,7 +198,7 @@ const handleSaveAllChanges = async () => {
       if (!editMode && userData) {
         // When entering edit mode, initialize editedData with current values
         const initialEditData = {
-          direccion: userData.direccion || '',
+          direccion_escuela: userData.direccion || '',
           zonaEscolar: userData.zonaEscolar || '',
           sectorEscolar: userData.sectorEscolar || '',
           modalidad: userData.modalidad || '',
@@ -207,7 +207,7 @@ const handleSaveAllChanges = async () => {
           numeroDocentes: userData.numeroDocentes || 0,
           estudiantesPorGrupo: userData.estudiantesPorGrupo || 0,
           controlAdministrativo: userData.controlAdministrativo || '',
-          estadoRegistro: userData.estadoRegistro || ''
+          estadoRegistro_escuela: userData.estadoRegistro || ''
         };
 
         // Add director fields if they exist
@@ -239,26 +239,24 @@ const handleSaveAllChanges = async () => {
     }else if (tipoUsuarioL === 'aliado de persona fisica'){
         if (!editMode && userData) {
           const initialEditData = {
-            correoElectronico: userData.correoElectronico || '',
-            estadoRegistro: userData.estadoRegistro || ''
+            estadoRegistro_aliado_fisico: userData.estadoRegistro || ''
           };
           if (userData.persona_fisica) {
-            initialEditData.razon_persona = userData.persona_fisica.razon || '';
-            initialEditData.correo_persona = userData.persona_fisica.correoElectronico || '';
-            initialEditData.telefono_persona = userData.persona_fisica.telefono || '';
+            initialEditData.razon_persona_fisica = userData.persona_fisica.razon || '';
+            initialEditData.correo_persona_fisica = userData.persona_fisica.correoElectronico || '';
+            initialEditData.telefono_persona_fisica = userData.persona_fisica.telefono || '';
           }
           setEditedData(initialEditData);
         }
     }else if(tipoUsuarioL === 'aliado de persona moral'){
         if(!editMode && userData){
           const initialEditData = {
-            correoElectronico: userData.correoElectronico || '',
-            estadoRegistro: userData.estadoRegistro || ''
+            estadoRegistro_moral: userData.estadoRegistro || ''
           };
           if (userData.persona_moral) {
-            initialEditData.area_persona = userData.persona_moral.area || '';
-            initialEditData.correo_persona = userData.persona_moral.correoElectronico || '';
-            initialEditData.telefono_persona = userData.persona_fisica.telefono || '';
+            initialEditData.area_persona_moral = userData.persona_moral.area || '';
+            initialEditData.correo_persona_moral = userData.persona_moral.correoElectronico || '';
+            initialEditData.telefono_persona_moral = userData.persona_moral.telefono || '';
           }
           if(userData.institucion){
             initialEditData.giro_institucion = userData.institucion.giro || '';
@@ -267,10 +265,12 @@ const handleSaveAllChanges = async () => {
             initialEditData.paginaWeb_institucion = userData.institucion.paginaWeb || '';
           }
           if(userData.constancia_fisica){
+            initialEditData.razon_social_constancia = userData.constancia_fisica.razonSocial || '';
             initialEditData.regimen_constancia = userData.constancia_fisica.regimen || '';
             initialEditData.domicilio_constancia = userData.constancia_fisica.domicilio || '';
           }
           if(userData.representante){
+            initialEditData.nombre_representante = userData.representante.nombre|| '';
             initialEditData.correo_representante = userData.representante.correo || '';
             initialEditData.telefono_representante = userData.representante.telefono || '';
             initialEditData.area_representante = userData.representante.area || '';
@@ -281,8 +281,7 @@ const handleSaveAllChanges = async () => {
     }else{
       if (!editMode && userData) {
         const initialEditData = {
-          correoElectronico: userData.correoElectronico || '',
-          estadoRegistro: userData.estadoRegistro || ''
+          estadoRegistro_admin: userData.estadoRegistro || ''
         };
       }
       setEditedData(initialEditData);
@@ -394,7 +393,7 @@ const handleSaveAllChanges = async () => {
               {renderNonEditableField('CCT', userData.CCT)}
               {renderNonEditableField('Correo', userData.correoElectronico)}
               {editMode ?
-                renderEditableField('direccion', 'Dirección', userData.direccion):
+                renderEditableField('direccion_escuela', 'Dirección', userData.direccion):
                 renderNonEditableField('Dirección', userData.direccion)
               }
               {editMode?
@@ -408,7 +407,7 @@ const handleSaveAllChanges = async () => {
                 renderNonEditableField('Modalidad', userData.modalidad)}
               {editMode? 
                 renderEditableField('nivelEducativo', 'Nivel Educativo', userData.nivelEducativo):
-                renderNonEditableField('Modalidad', userData.modalidad)}
+                renderNonEditableField('Nivel Educativo', userData.nivelEducativo)}
               {editMode?
                 renderEditableField('tieneUSAER', 'Tiene USAER', userData.tieneUSAER ? 'Sí' : 'No'):
                 renderNonEditableField('Tiene USAER', userData.tieneUSAER ? 'Sí' : 'No')}
@@ -422,7 +421,7 @@ const handleSaveAllChanges = async () => {
                 renderEditableField('controlAdministrativo', 'Control Administrativo', userData.controlAdministrativo):
                 renderNonEditableField('Control Administrativo', userData.controlAdministrativo)}
               {editMode?
-                renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                renderEditableField('estadoRegistro_escuela','Estado de Registro', userData.estadoRegistro):
                 renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
             </div>
           </div>
@@ -433,16 +432,16 @@ const handleSaveAllChanges = async () => {
               <h2>Información del Director</h2>
               <div className="info-section">
                 {editMode?
-                  renderEditableField('nombre','Nombre', userData.director.nombre):
+                  renderEditableField('director_nombre','Nombre', userData.director.nombre):
                   renderNonEditableField('Nombre', userData.director.nombre)}
                 {editMode?
-                  renderEditableField('correoElectronico','Correo Electrónico', userData.director.correoElectronico):
+                  renderEditableField('director_correoElectronico','Correo Electrónico', userData.director.correoElectronico):
                   renderNonEditableField('Correo Electrónico', userData.director.correoElectronico)}
                 {editMode?
-                  renderEditableField('telefono', 'Teléfono', userData.director.telefono):
+                  renderEditableField('director_telefono', 'Teléfono', userData.director.telefono):
                   renderNonEditableField('Teléfono', userData.director.telefono)}
                 {editMode?
-                  renderEditableField('posibleCambioPlantel','Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No'):
+                  renderEditableField('director_posibleCambioPlantel','Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No'):
                   renderNonEditableField('Posible Cambio de Plantel', userData.director.posibleCambioPlantel ? 'Sí' : 'No')}
               </div>
             </div>
@@ -454,23 +453,23 @@ const handleSaveAllChanges = async () => {
               <h2>Información del Supervisor</h2>
               <div className="info-section">
                 {editMode?
-                  renderEditableField('nombre','Nombre', userData.supervisor.nombre):
+                  renderEditableField('supervisor_nombre','Nombre', userData.supervisor.nombre):
                   renderNonEditableField('Nombre', userData.supervisor.nombre)
                 }
                 {editMode?
-                  renderEditableField('correoElectronico','Correo Electrónico', userData.supervisor.correoElectronico):
+                  renderEditableField('supervisor_correoElectronico','Correo Electrónico', userData.supervisor.correoElectronico):
                   renderNonEditableField('Correo Electrónico', userData.supervisor.correoElectronico)}
                 {editMode?
-                  renderEditableField('telefono','Teléfono', userData.supervisor.telefono):
+                  renderEditableField('supervisor_telefono','Teléfono', userData.supervisor.telefono):
                   renderNonEditableField('Teléfono', userData.supervisor.telefono)}
                 {editMode?
-                  renderEditableField('posibleCambioZona','Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No'):
+                  renderEditableField('supervisor_posibleCambioZona','Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No'):
                   renderNonEditableField('Posible Cambio de Zona', userData.supervisor.posibleCambioZona ? 'Sí' : 'No')}
                 {editMode?
-                  renderEditableField('medioContacto','Medio de Contacto', userData.supervisor.medioContacto || 'Whatsapp'):
+                  renderEditableField('supervisor_medioContacto','Medio de Contacto', userData.supervisor.medioContacto || 'Whatsapp'):
                   renderNonEditableField('Medio de Contacto', userData.supervisor.medioContacto || 'Whatsapp')}
                 {editMode?
-                  renderEditableField('antiguedadZona', 'Antigüedad en la Zona', userData.supervisor.antiguedadZona):
+                  renderEditableField('supervisor_antiguedadZona', 'Antigüedad en la Zona', userData.supervisor.antiguedadZona):
                   renderNonEditableField('Antigüedad en la Zona', userData.supervisor.antiguedadZona)}
               </div>
             </div>
@@ -482,7 +481,7 @@ const handleSaveAllChanges = async () => {
               <h2>Mesa Directiva</h2>
               <div className="info-section">
                 {editMode?
-                  renderEditableField('personasCantidad','Cantidad de Personas', userData.mesaDirectiva.personasCantidad):
+                  renderEditableField('mesaDirectiva_personasCantidad','Cantidad de Personas', userData.mesaDirectiva.personasCantidad):
                   renderNonEditableField('Cantidad de Personas', userData.mesaDirectiva.personasCantidad)}
               </div>
             </div>
@@ -603,11 +602,9 @@ const handleSaveAllChanges = async () => {
               <h2>Información General</h2>
               <div className="school-info">
                 <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
+                    {renderNonEditableField('Correo', userData.correoElectronico)}
                     {editMode?
-                      renderEditableField('correoElectronico','Correo', userData.correoElectronico):
-                      renderNonEditableField('Correo', userData.correoElectronico)}
-                    {editMode?
-                      renderEditableField('estadoRegistro', 'Estado de Registro', userData.estadoRegistro):
+                      renderEditableField('estadoRegistro_aliado_fisico', 'Estado de Registro', userData.estadoRegistro):
                       renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
               </div>
             </div>
@@ -618,13 +615,13 @@ const handleSaveAllChanges = async () => {
                   <div className="info-section">
                     {renderNonEditableField('CURP', userData.persona_fisica.curp)}
                     {editMode?
-                      renderEditableField('razon','Razón', userData.persona_fisica.razon)
+                      renderEditableField('razon_persona_fisica','Razón', userData.persona_fisica.razon)
                       :renderNonEditableField('Razón', userData.persona_fisica.razon)}
                     {editMode?
-                      renderEditableField('correoElectronico','Correo Electrónico', userData.persona_fisica.correoElectronico):
+                      renderEditableField('correo_persona_fisica','Correo Electrónico', userData.persona_fisica.correoElectronico):
                       renderNonEditableField('Correo Electrónico', userData.persona_fisica.correoElectronico)}
                     {editMode?
-                      renderEditableField('telefono', 'Teléfono', userData.persona_fisica.telefono):
+                      renderEditableField('telefono_persona_fisica', 'Teléfono', userData.persona_fisica.telefono):
                       renderNonEditableField('Teléfono', userData.persona_fisica.telefono)}
                   </div>
                 </div>
@@ -708,11 +705,9 @@ const handleSaveAllChanges = async () => {
               <h2>Información General</h2>
               <div className="school-info">
                 <h3>{userData.nombre || 'Aliado de persona fisica'}</h3>
+                    {renderNonEditableField('Correo', userData.correoElectronico)}
                     {editMode?
-                      renderEditableField('correoElectronico','Correo', userData.correoElectronico):
-                      renderNonEditableField('Correo', userData.correoElectronico)}
-                    {editMode?
-                      renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                      renderEditableField('estadoRegistro_moral','Estado de Registro', userData.estadoRegistro):
                       renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
               </div>
             </div>
@@ -723,13 +718,13 @@ const handleSaveAllChanges = async () => {
                   <div className="info-section">
                     {renderNonEditableField('RFC', userData.persona_moral.rfc)}
                     {editMode?
-                      renderEditableField('area','Area', userData.persona_moral.area):
+                      renderEditableField('area_persona_moral','Area', userData.persona_moral.area):
                       renderNonEditableField('Area', userData.persona_moral.area)}
                     {editMode?
-                      renderEditableField('correoElectronico','Correo Electrónico', userData.persona_moral.correoElectronico):
+                      renderEditableField('correo_persona_moral','Correo Electrónico', userData.persona_moral.correoElectronico):
                       renderNonEditableField('Correo Electrónico', userData.persona_moral.correoElectronico)}
                     {editMode?
-                      renderEditableField('telefono','Teléfono', userData.persona_moral.telefono):
+                      renderEditableField('telefono_persona_moral','Teléfono', userData.persona_moral.telefono):
                       renderNonEditableField('Teléfono', userData.persona_moral.telefono)}
                   </div>
                 </div>
@@ -740,16 +735,16 @@ const handleSaveAllChanges = async () => {
                   <h2>Información de Institución</h2>
                   <div className="info-section">
                     {editMode?
-                      renderEditableField('giro','Giro', userData.institucion.giro):
+                      renderEditableField('giro_institucion','Giro', userData.institucion.giro):
                       renderNonEditableField('Giro', userData.institucion.giro)}
                     {editMode?
-                      renderEditableField('domicilio','Domicilio', userData.institucion.domicilio):
+                      renderEditableField('domicilio_institucion','Domicilio', userData.institucion.domicilio):
                       renderNonEditableField('Domicilio', userData.institucion.domicilio)}
                     {editMode?
-                      renderEditableField('telefono','Teléfono', userData.institucion.telefono):
+                      renderEditableField('telefono_institucion','Teléfono', userData.institucion.telefono):
                       renderNonEditableField('Teléfono', userData.institucion.telefono)}
                     {editMode?
-                      renderEditableField('paginaWeb','Pagina Web', userData.institucion.paginaWeb):
+                      renderEditableField('paginaWeb_institucion','Pagina Web', userData.institucion.paginaWeb):
                       renderNonEditableField('Pagina Web', userData.institucion.paginaWeb)}
                   </div>
                 </div>
@@ -770,11 +765,15 @@ const handleSaveAllChanges = async () => {
               <div className="director-section">
                 <h2>Información de Constancia Física</h2>
                 <div className="info-section">
+                {editMode?
+                    renderEditableField('razon_social_constancia','Razon Social', userData.constancia_fisica.razonSocial):
+                    renderNonEditableField('Razon Social', userData.constancia_fisica.razonSocial)}
+                  
                   {editMode?
-                    renderEditableField('regimen','Régimen', userData.constancia_fisica.regimen):
+                    renderEditableField('regimen_constancia','Régimen', userData.constancia_fisica.regimen):
                     renderNonEditableField('Régimen', userData.constancia_fisica.regimen)}
                   {editMode?
-                    renderEditableField('domicilio','Domicilio', userData.constancia_fisica.domicilio):
+                    renderEditableField('domicilio_constancia','Domicilio', userData.constancia_fisica.domicilio):
                     renderNonEditableField('Domicilio', userData.constancia_fisica.domicilio)}
                 </div>
               </div>
@@ -784,14 +783,18 @@ const handleSaveAllChanges = async () => {
               <div className="director-section">
                 <h2>Información del Representante</h2>
                 <div className="info-section">
+                {editMode?
+                    renderEditableField('nombre_representante','Nombre', userData.representante.nombre):
+                    renderNonEditableField('Nombre', userData.representante.nombre)}
+                  
                   {editMode?
-                    renderEditableField('correo','Correo Electrónico', userData.representante.correo):
+                    renderEditableField('correo_representante','Correo Electrónico', userData.representante.correo):
                     renderNonEditableField('Correo Electrónico', userData.representante.correo)}
                   {editMode?
-                    renderEditableField('telefono','Teléfono', userData.representante.telefono):
+                    renderEditableField('telefono_representante','Teléfono', userData.representante.telefono):
                     renderNonEditableField('Teléfono', userData.representante.telefono)}
                   {editMode?
-                    renderEditableField('area', 'Area', userData.representante.area):
+                    renderEditableField('area_representante', 'Area', userData.representante.area):
                     renderNonEditableField('Area', userData.representante.area)}
                 </div>
               </div>
@@ -875,11 +878,9 @@ const handleSaveAllChanges = async () => {
                     <h2>Información General</h2>
                     <div className="school-info">
                       <h3>{userData.nombre || 'Administrador'}</h3>
+                      {renderNonEditableField('Correo', userData.correoElectronico)}
                       {editMode?
-                        renderEditableField('correoElectronico','Correo', userData.correoElectronico):
-                        renderNonEditableField('Correo', userData.correoElectronico)}
-                      {editMode?
-                        renderEditableField('estadoRegistro','Estado de Registro', userData.estadoRegistro):
+                        renderEditableField('estadoRegistro_admin','Estado de Registro', userData.estadoRegistro):
                         renderNonEditableField('Estado de Registro', userData.estadoRegistro)}
                     </div>
                   </div>

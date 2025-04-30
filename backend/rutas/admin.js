@@ -537,6 +537,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     ),
     constancia_fisica AS(
       SELECT
+        "razonSocial" AS razon_social_constancia,
         "regimen" AS regimen_constancia,
         "domicilio" AS domicilio_constancia
       FROM "ConstanciaFisica"
@@ -544,6 +545,7 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     ),
     representante AS(
       SELECT
+        "nombreRep" AS nombre_representante,
         "correoRep" AS correo_representante,
         "telefonoRep" AS telefono_representante,
         "areaRep" AS area_representante
@@ -609,8 +611,10 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
       COALESCE(ep.numero_escritura, null) as numero_escritura,
       COALESCE(ep.notario_escritura, null) as notario_escritura,
       COALESCE(ep.ciudad_escritura, null) as ciudad_escritura,
+      COALESCE(cf.razon_social_constancia, null) as razon_social_constancia,
       COALESCE(cf.regimen_constancia, null) as regimen_constancia,
       COALESCE(cf.domicilio_constancia, null) as domicilio_constancia,
+      COALESCE(r.nombre_representante, null) as nombre_representante,
       COALESCE(r.correo_representante, null) as correo_representante,
       COALESCE(r.telefono_representante, null) as telefono_representante,
       COALESCE(r.area_representante, null) as area_representante,
@@ -671,12 +675,14 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
 
     // Constancia
     constancia_fisica: aliadoF.regimen_constancia ? {
+      razonSocial: aliadoF.razon_social_constancia,
       regimen: aliadoF.regimen_constancia,
       domicilio: aliadoF.domicilio_constancia
     } : null,
 
     // Representante
     representante: aliadoF.correo_representante ? {
+      nombre: aliadoF.nombre_representante,
       correo: aliadoF.correo_representante,
       telefono: aliadoF.telefono_representante,
       area: aliadoF.area_representante
@@ -700,8 +706,10 @@ router.get("/aliado/moral/perfil/:aliadoId", verifyToken, async(req,res)=>{
     delete responseData.numero_escritura;
     delete responseData.notario_escritura;
     delete responseData.ciudad_escritura;
+    delete responseData.razon_social_constancia;
     delete responseData.regimen_constancia;
     delete responseData.domicilio_constancia;
+    delete responseData.nombre_representante;
     delete responseData.correo_representante;
     delete responseData.telefono_representante;
     delete responseData.area_representante;
@@ -1316,46 +1324,51 @@ router.put('/update-multiple', verifyToken, async (req, res) => {
     switch (tipoUsuarioLower) {
       case 'escuela':
         console.log('Procesando actualización para escuela');
+        console.log(data);
         result = await updateEscuela(client, cct, data);
         updatedEntities.push('Escuela');
-
-        if(data.estadoRegistro){
-          await updateUsuario(client, cct, data);
-          updatedEntities.push('Usuario')
-        }
+        await updateUsuario(client, cct, data);
+        updatedEntities.push('Usuario');
+        await updateDirector(client, cct, data);
+        updatedEntities.push('Director');
+        await updateSupervisor(client, cct, data);
+        updatedEntities.push('Supervisor');
+        await updateMesaDirectiva(client, cct, data);
+        updatedEntities.push('MesaDirectiva');
         
-        if (data.prostbefomtiboflexiou || data.humba) {
-          await updateDirector(client, cct, data);
-          updatedEntities.push('Director');
-        }
-        
-        if (data.pseudoGamidoZona || data.medioContrato) {
-          await updateSupervisor(client, cct, data);
-          updatedEntities.push('Supervisor');
-        }
-        
-        if (data.personasdomidodi !== undefined) {
-          await updateMesaDirectiva(client, cct, data);
-          updatedEntities.push('MesaDirectiva');
-        }
         break;
 
       case 'aliado de persona fisica':
         console.log('Procesando actualización para aliado persona física');
+        console.log(data);
         result = await updateAliadoFisico(client, cct, data);
         updatedEntities.push('Persona_Fisica');
+        await updatePersonaFisica(client, cct, data);
+        updatedEntities.push('PersonaFisica');
+        
         break;
 
       case 'aliado de persona moral':
         console.log('Procesando actualización para aliado persona moral');
+        console.log(data);
         result = await updateAliadoMoral(client, cct, data);
         updatedEntities.push('Persona_Moral');
+        await updatePersonaMoral(client, cct, data);
+        updatedEntities.push('PersonaMoral');
+        await updateInstitucion(client, cct, data);
+        updatedEntities.push('Institucion');
+        await updateConstanciaFisica(client, cct, data);
+        updatedEntities.push('ConstanciaFisica');
+        await updateRepresentante(client, cct, data);
+        updatedEntities.push('Representante');
+        
         break;
 
       case 'administrador':
         console.log('Procesando actualización para administrador');
+        console.log(data);
         result = await updateAdministrador(client, cct, data);
-        updatedEntities.push('Administrador');
+        updatedEntities.push('Usuario');
         break;
 
       default:
@@ -1387,7 +1400,7 @@ router.put('/update-multiple', verifyToken, async (req, res) => {
 
 async function updateEscuela(client, cct, data) {
   const mainTableField = {
-    direccion: {bdName:'direccion', bdType:'string', frontType: 'string'} , // Nombre real en BD
+    direccion_escuela: {bdName:'direccion', bdType:'string', frontType: 'string'} , // Nombre real en BD
     zonaEscolar: {bdName:'zonaEscolar', bdType:'string',frontType:'string'},
     sectorEscolar: {bdName:'sectorEscolar', bdType:'string', frontType: 'string'},
     modalidad: {bdName:'modalidad', bdType:'string', frontType: 'string'},
@@ -1397,9 +1410,6 @@ async function updateEscuela(client, cct, data) {
     estudiantesPorGrupo: {bdName:'estudiantesPorGrupo', bdType:'integer', frontType: 'integer'},
     controlAdministrativo: {bdName:'controlAdministrativo', bdType:'string', frontType: 'string'}
   };
-
-  console.log('full query data')
-  console.log(data)
 
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
@@ -1424,7 +1434,7 @@ return { rowCount: 1 };
 
 async function updateUsuario(client, cct, data) {
   const mainTableField = {
-    estadoRegistro: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
+    estadoRegistro_escuela: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
     };
 
   const validFields = {};
@@ -1467,6 +1477,7 @@ async function updateDirector(client, cct, data) {
         validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
       }
     }
+    console.log("dentro director: ", data)
     console.log('checking info for query escuela')
     console.log(validFields)
 
@@ -1486,7 +1497,7 @@ async function updateSupervisor(client, cct, data) {
     supervisor_nombre:  {bdName:'nombre', bdType:'string', frontType: 'string'} ,
     supervisor_medioContacto:  {bdName:'medioContacto', bdType:'string', frontType: 'string'} ,
     supervisor_antiguedadZona:  {bdName:'antiguedadZona', bdType:'integer', frontType: 'integer'} ,
-    supervisor_correoElectronico:  {bdName:'correElectronico', bdType:'string', frontType: 'string'} ,
+    supervisor_correoElectronico:  {bdName:'correoElectronico', bdType:'string', frontType: 'string'} ,
     supervisor_telefono:  {bdName:'telefono', bdType:'string', frontType: 'string'},
     supervisor_posibleCambioZona :  {bdName:'posibleCambioZona', bdType:'string', frontType: 'boolean'}  
   };
@@ -1496,6 +1507,7 @@ async function updateSupervisor(client, cct, data) {
         validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
       }
     }
+    console.log("dentro supervisor: ", data)
     console.log('checking info for query escuela')
     console.log(validFields)
 
@@ -1511,10 +1523,6 @@ async function updateSupervisor(client, cct, data) {
 }
 
 async function updateMesaDirectiva(client, cct, data) {
-  if (data.personasdomidodi === undefined) {
-    return { rowCount: 0 };
-  }
-
   const mainTableField = {
     mesaDirectiva_personasCantidad: {bdName:'personasCantidad', bdType:'integer', frontType: 'integer'} 
     };
@@ -1537,184 +1545,227 @@ async function updateMesaDirectiva(client, cct, data) {
     );
   }
 }
-
+//para aliado fisico
 async function updateAliadoFisico(client, curp, data) {
-  console.log('Actualizando aliado persona física con CURP:', curp);
-  
-  // Actualizar datos de usuario si existen
-  if (data.correoElectronico || data.estadoRegistro) {
-    const usuarioUpdate = {};
-    if (data.correoElectronico !== undefined) usuarioUpdate.correoElectronico = data.correoElectronico;
-    if (data.estadoRegistro !== undefined) usuarioUpdate.estadoRegistro = data.estadoRegistro;
-    
-    if (Object.keys(usuarioUpdate).length > 0) {
+  const mainTableField = {
+    estadoRegistro_aliado_fisico: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
+    };
+
+  const validFields = {};
+  for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
+    if (data[frontendField] !== undefined) {
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+    }
+  }
+  console.log('checking info for query escuela')
+  console.log(validFields)
+
+  if (Object.keys(validFields).length > 0) {
+    await client.query(
+      `UPDATE "Usuario"
+      SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+      where "usuarioId" = (
+        select u."usuarioId"
+        from "Usuario" u
+        inner join "Aliado" e on u."usuarioId" = e."usuarioId"
+        WHERE e."aliadoId" = $${Object.keys(validFields).length + 1}
+        limit 1)`,
+      [...Object.values(validFields), curp]
+    );
+  }
+  return { rowCount: 1 };
+}
+async function updatePersonaFisica(client, curp, data) {
+  const fieldMap = {
+    razon_persona_fisica:{bdName:'razon', bdType:'string', frontType: 'string'} ,
+    correo_persona_fisica:  {bdName:'correoElectronico', bdType:'string', frontType: 'string'} ,
+    telefono_persona_fisica:  {bdName:'telefono', bdType:'string', frontType: 'string'} 
+    };
+  const validFields = {};
+    for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
+      if (data[frontendField] !== undefined) {
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      }
+    }
+    console.log("dentro persona fisica :", data);
+    console.log('checking info for query escuela')
+    console.log(validFields)
+
+  if (Object.keys(validFields).length > 0) {
       await client.query(
-        `UPDATE "Usuario" 
-         SET ${Object.keys(usuarioUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-         WHERE "usuarioId" = (SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $${Object.keys(usuarioUpdate).length + 1})`,
-        [...Object.values(usuarioUpdate), curp]
+        `UPDATE "PersonaFisica" 
+        SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+        WHERE "CURP" = $${Object.keys(validFields).length + 1}`,
+        [...Object.values(validFields), curp]
       );
     }
-  }
-
-  // Actualizar persona física
-  const personaFields = ['razon_persona', 'correo_persona', 'telefono_persona'];
-  const personaUpdate = {};
-  
-  personaFields.forEach(field => {
-    const dbField = field.replace('_persona', '');
-    if (data[field] !== undefined) {
-      personaUpdate[dbField] = data[field];
-    }
-  });
-
-  if (Object.keys(personaUpdate).length > 0) {
-    const result = await client.query(
-      `UPDATE "Persona_Fisica" 
-       SET ${Object.keys(personaUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-       WHERE "CURP" = $${Object.keys(personaUpdate).length + 1}
-       RETURNING *`,
-      [...Object.values(personaUpdate), curp]
-    );
-    
-    console.log(`Persona física actualizada. Filas afectadas: ${result.rowCount}`);
-    return result;
-  }
-
-  return { rowCount: 0 };
+  return { rowCount: 1 };
 }
-
+//para aliado moral
 async function updateAliadoMoral(client, rfc, data) {
-  console.log('Actualizando aliado persona moral con RFC:', rfc);
-  
-  // Actualizar datos de usuario si existen
-  if (data.correoElectronico || data.estadoRegistro) {
-    const usuarioUpdate = {};
-    if (data.correoElectronico !== undefined) usuarioUpdate.correoElectronico = data.correoElectronico;
-    if (data.estadoRegistro !== undefined) usuarioUpdate.estadoRegistro = data.estadoRegistro;
-    
-    if (Object.keys(usuarioUpdate).length > 0) {
+  const mainTableField = {
+    estadoRegistro_moral: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
+    };
+
+  const validFields = {};
+  for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
+    if (data[frontendField] !== undefined) {
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+    }
+  }
+  console.log('checking info for query aliado moral')
+  console.log(validFields)
+
+  if (Object.keys(validFields).length > 0) {
+    await client.query(
+      `UPDATE "Usuario"
+      SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+      where "usuarioId" = (
+        select u."usuarioId"
+        from "Usuario" u
+        inner join "Aliado" e on u."usuarioId" = e."usuarioId"
+        WHERE e."aliadoId" = $${Object.keys(validFields).length + 1}
+        limit 1)`,
+      [...Object.values(validFields), rfc]
+    );
+  }
+  return { rowCount: 1 };
+}
+async function updatePersonaMoral(client, rfc, data) {
+  const fieldMap = {
+    area_persona_moral:{bdName:'area', bdType:'string', frontType: 'string'} ,
+    correo_persona_moral:  {bdName:'correoElectronico', bdType:'string', frontType: 'string'} ,
+    telefono_persona_moral:  {bdName:'telefono', bdType:'string', frontType: 'string'} 
+    };
+  const validFields = {};
+    for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
+      if (data[frontendField] !== undefined) {
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      }
+    }
+    console.log('checking info for query persona moral')
+    console.log(validFields)
+
+  if (Object.keys(validFields).length > 0) {
       await client.query(
-        `UPDATE "Usuario" 
-         SET ${Object.keys(usuarioUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-         WHERE "usuarioId" = (SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $${Object.keys(usuarioUpdate).length + 1})`,
-        [...Object.values(usuarioUpdate), rfc]
+        `UPDATE "PersonaMoral" 
+        SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+        WHERE "RFC" = $${Object.keys(validFields).length + 1}`,
+        [...Object.values(validFields), rfc]
       );
     }
-  }
-
-  // Actualizar persona moral
-  const personaFields = ['area_persona', 'correo_persona', 'telefono_persona'];
-  const personaUpdate = {};
-  
-  personaFields.forEach(field => {
-    const dbField = field.replace('_persona', '');
-    if (data[field] !== undefined) {
-      personaUpdate[dbField] = data[field];
+  return { rowCount: 1 };
+}
+async function updateInstitucion(client, rfc, data) {
+  const fieldMap = {
+    giro_institucion:{bdName:'giro', bdType:'string', frontType: 'string'} ,
+    domicilio_institucion:  {bdName:'domicilio', bdType:'string', frontType: 'string'} ,
+    telefono_institucion:  {bdName:'telefono', bdType:'string', frontType: 'string'},
+    paginaWeb_institucion:  {bdName:'paginaWeb', bdType:'string', frontType: 'string'} 
+    };
+  const validFields = {};
+    for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
+      if (data[frontendField] !== undefined) {
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      }
     }
-  });
+    console.log('checking info for query persona moral')
+    console.log(validFields)
 
-  if (Object.keys(personaUpdate).length > 0) {
-    await client.query(
-      `UPDATE "Persona_Moral" 
-       SET ${Object.keys(personaUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-       WHERE "RFC" = $${Object.keys(personaUpdate).length + 1}`,
-      [...Object.values(personaUpdate), rfc]
-    );
-  }
-
-  // Actualizar institución
-  const institucionFields = [
-    'giro_institucion', 'domicilio_institucion', 
-    'telefono_institucion', 'paginaWeb_institucion'
-  ];
-  const institucionUpdate = {};
-  
-  institucionFields.forEach(field => {
-    const dbField = field.replace('_institucion', '');
-    if (data[field] !== undefined) {
-      institucionUpdate[dbField] = data[field];
+  if (Object.keys(validFields).length > 0) {
+      await client.query(
+        `UPDATE "Institucion" 
+        SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+        WHERE "RFC" = $${Object.keys(validFields).length + 1}`,
+        [...Object.values(validFields), rfc]
+      );
     }
-  });
-
-  if (Object.keys(institucionUpdate).length > 0) {
-    await client.query(
-      `UPDATE "Institucion" 
-       SET ${Object.keys(institucionUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-       WHERE "RFC" = $${Object.keys(institucionUpdate).length + 1}`,
-      [...Object.values(institucionUpdate), rfc]
-    );
-  }
-
-  // Actualizar constancia física
-  const constanciaFields = ['regimen_constancia', 'domicilio_constancia'];
-  const constanciaUpdate = {};
-  
-  constanciaFields.forEach(field => {
-    const dbField = field.replace('_constancia', '');
-    if (data[field] !== undefined) {
-      constanciaUpdate[dbField] = data[field];
+  return { rowCount: 1 };
+}
+async function updateConstanciaFisica(client, rfc, data) {
+  const fieldMap = {
+    razon_social_constancia:{bdName:'razonSocial', bdType:'string', frontType: 'string'},
+    regimen_constancia:{bdName:'regimen', bdType:'string', frontType: 'string'} ,
+    domicilio_constancia:  {bdName:'domicilio', bdType:'string', frontType: 'string'} 
+    };
+  const validFields = {};
+    for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
+      if (data[frontendField] !== undefined) {
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      }
     }
-  });
+    console.log('checking info for query persona moral')
+    console.log(validFields)
 
-  if (Object.keys(constanciaUpdate).length > 0) {
-    await client.query(
-      `UPDATE "Constancia_Fisica" 
-       SET ${Object.keys(constanciaUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-       WHERE "RFC" = $${Object.keys(constanciaUpdate).length + 1}`,
-      [...Object.values(constanciaUpdate), rfc]
-    );
-  }
-
-  // Actualizar representante
-  const representanteFields = [
-    'correo_representante', 'telefono_representante', 'area_representante'
-  ];
-  const representanteUpdate = {};
-  
-  representanteFields.forEach(field => {
-    const dbField = field.replace('_representante', '');
-    if (data[field] !== undefined) {
-      representanteUpdate[dbField] = data[field];
+  if (Object.keys(validFields).length > 0) {
+      await client.query(
+        `UPDATE "ConstanciaFisica" 
+        SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+        WHERE "RFC" = $${Object.keys(validFields).length + 1}`,
+        [...Object.values(validFields), rfc]
+      );
     }
-  });
+  return { rowCount: 1 };
+}
+async function updateRepresentante(client, rfc, data) {
+  const fieldMap = {
+    nombre_representante:{bdName:'nombreRep', bdType:'string', frontType: 'string'} ,
+    area_representante:{bdName:'areaRep', bdType:'string', frontType: 'string'} ,
+    correo_representante:  {bdName:'correoRep', bdType:'string', frontType: 'string'} ,
+    telefono_representante:  {bdName:'telefonoRep', bdType:'string', frontType: 'string'} 
+    };
+  const validFields = {};
+    for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
+      if (data[frontendField] !== undefined) {
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      }
+    }
+    console.log('checking info for query persona moral')
+    console.log(validFields)
 
-  if (Object.keys(representanteUpdate).length > 0) {
-    await client.query(
-      `UPDATE "Representante" 
-       SET ${Object.keys(representanteUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-       WHERE "RFC" = $${Object.keys(representanteUpdate).length + 1}`,
-      [...Object.values(representanteUpdate), rfc]
-    );
-  }
-
-  return { rowCount: 1 }; // Asumimos que al menos una tabla fue actualizada
+  if (Object.keys(validFields).length > 0) {
+      await client.query(
+        `UPDATE "Representante" 
+        SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+        WHERE "RFC" = $${Object.keys(validFields).length + 1}`,
+        [...Object.values(validFields), rfc]
+      );
+    }
+  return { rowCount: 1 };
 }
 
+//para administrador
 async function updateAdministrador(client, adminId, data) {
-  console.log('Actualizando administrador con ID:', adminId);
-  
-  // Actualizar datos de usuario si existen
-  if (data.correoElectronico || data.estadoRegistro) {
-    const usuarioUpdate = {};
-    if (data.correoElectronico !== undefined) usuarioUpdate.correoElectronico = data.correoElectronico;
-    if (data.estadoRegistro !== undefined) usuarioUpdate.estadoRegistro = data.estadoRegistro;
-    
-    if (Object.keys(usuarioUpdate).length > 0) {
-      const result = await client.query(
-        `UPDATE "Usuario" 
-         SET ${Object.keys(usuarioUpdate).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
-         WHERE "usuarioId" = (SELECT "usuarioId" FROM "Administrador" WHERE "administradorId" = $${Object.keys(usuarioUpdate).length + 1})
-         RETURNING *`,
-        [...Object.values(usuarioUpdate), adminId]
-      );
-      
-      console.log(`Datos de usuario actualizados. Filas afectadas: ${result.rowCount}`);
-      return result;
+  console.log("dentro: ", data);
+  const mainTableField = {
+    estadoRegistro_admin: {bdName:'estadoRegistro', bdType:'string', frontType: 'string'} 
+    };
+
+  console.log("original: ", mainTableField);
+  const validFields = {};
+  for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
+    if (data[frontendField] !== undefined) {
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
     }
   }
+  console.log('checking info for query admin')
+  console.log(validFields)
 
-  return { rowCount: 0 };
+  if (Object.keys(validFields).length > 0) {
+    await client.query(
+      `UPDATE "Usuario"
+      SET ${Object.keys(validFields).map((f, i) => `"${f}" = $${i + 1}`).join(', ')}
+      where "usuarioId" = (
+        select u."usuarioId"
+        from "Usuario" u
+        inner join "Administrador" e on u."usuarioId" = e."usuarioId"
+        WHERE e."administradorId" = $${Object.keys(validFields).length + 1}
+        limit 1)`,
+      [...Object.values(validFields), adminId]
+    );
+  }
+
+return { rowCount: 1 };
 }
 
 module.exports = router;
