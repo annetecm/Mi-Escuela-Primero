@@ -776,7 +776,7 @@ const handleSaveAllChanges = async () => {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
+                          <td onClick={() => navigate(`/administrador/conexiones/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍" )|| 'No disponible'}</td>
@@ -951,7 +951,7 @@ const handleSaveAllChanges = async () => {
                     <tbody>
                       {userData.conexiones.map((conexion, index) => (
                         <tr key={index}>
-                          <td onClick={() => navigate(`/administrador/conexion/${conexion.id}`)}>🔍</td>
+                          <td onClick={() => navigate(`/administrador/conexiones/${conexion.id}`)}>🔍</td>
                           <td>{conexion.necesidadNombre || 'No disponible'}</td>
                           <td>{conexion.apoyoNombre || 'No disponible'}</td>
                           <td onClick={() => navigate(`/administrador/informacion/${conexion.CCT}/Escuela`)}>{(conexion.escuelaNombre + " 🔍") || 'No disponible'}</td>

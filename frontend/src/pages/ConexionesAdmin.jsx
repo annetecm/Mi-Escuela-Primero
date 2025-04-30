@@ -198,13 +198,13 @@ export default function ConexionesAdmin() {
                   <button
                     className="chat-button"
                     style={{
-                      marginTop: '1rem',
+                      margin: '1rem',
                       padding: '0.5rem 1rem',
                       backgroundColor: '#28a745',
                       color: 'white',
                       border: 'none',
                       borderRadius: '5px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     }}
                   
                     onClick={() => navigate(`/administrador/evidencia/${conexion.conexionId}`, {
