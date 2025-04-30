@@ -342,6 +342,8 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
         u."nombre" AS nombre_escuela,
         u."usuarioId",
         e."CCT",
+        e."latitud",
+        e."longitud",
         COALESCE(SUM(
           CASE 
             WHEN n."nombre" = ANY($1::text[])
@@ -364,9 +366,10 @@ router.get('/escuelas-recomendadas', verifyToken, async (req, res) => {
           WHERE "estado" = 'pendiente' OR "estado" = 'finalizado'
         )
       WHERE u."estadoRegistro" = 'aprobado'
-      GROUP BY u."nombre", u."usuarioId", e."CCT"
+      GROUP BY u."nombre", u."usuarioId", e."CCT", e."latitud", e."longitud"
       ORDER BY puntaje DESC;
     `, [apoyoArray]);
+    
 
     return res.json(result.rows);
   } catch (err) {
