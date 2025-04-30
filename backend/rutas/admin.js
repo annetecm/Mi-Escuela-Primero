@@ -107,7 +107,7 @@ router.get("/todasConexiones", verifyToken, async(req,res)=>{
   
   try{
     const result = await pool.query(`
-    WITH admin_data AS (
+    WITH conexion_data AS (
       SELECT json_agg(
         json_build_object(
           'id', e."administradorId", 
@@ -1191,9 +1191,268 @@ router.get('/perfil/admin', verifyToken, async (req, res) => {
     }
   });
 
+//eliminar usuario
+router.delete('/eliminar', verifyToken, async (req, res) => {
+  const { identificador, tipoUsuario } = req.body;
+  const client = await pool.connect();
+  console.log(identificador)
+  const tipoUsuarioLower = tipoUsuario.toLowerCase().trim();
 
+  try {
+    await client.query('BEGIN');
+    console.log(`Iniciando eliminación en cascada de ${tipoUsuarioLower} con ID: ${identificador}`);
+    
+    let result;
+    let deletedEntities = [];
 
+    switch (tipoUsuarioLower.toLowerCase()) {
+      case 'escuela':
+        // Obtener usuarioId primero
+        const escuelaData = await client.query(`
+          SELECT "usuarioId" FROM "Escuela" WHERE "CCT" = $1
+        `, [identificador]);
+        if (escuelaData.rows.length === 0) {
+          throw new Error('Escuela no encontrada');
+        }
+        const usuarioIdEscuela = escuelaData.rows[0].usuarioId;
 
+        // Eliminar todo lo relacionado con el CCT
+        await client.query(`
+          DELETE FROM "Notificacion" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "CCT" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "ReporteAvance" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "CCT" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Chat" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "CCT" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Conexion" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Necesidad" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Director" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "MesaDirectiva" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Supervisor" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "TramiteGobierno" WHERE "CCT" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "ApoyoPrevio" WHERE "CCT" = $1
+        `, [identificador]);
+        
+        // Eliminar la escuela
+        result = await client.query(`
+          DELETE FROM "Escuela" WHERE "CCT" = $1 RETURNING *
+        `, [identificador]);
+        deletedEntities.push('Escuela');
+
+        // Eliminar usuario asociado
+        await eliminarUsuarioCascada(client, usuarioIdEscuela);
+        deletedEntities.push('Usuario');
+        break;
+
+      case 'aliado de persona fisica':
+        // Obtener usuarioId primero
+        const aliadoFisicoData = await client.query(`
+          SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $1
+        `, [identificador]);
+        if (aliadoFisicoData.rows.length === 0) {
+          throw new Error('Aliado persona física no encontrado');
+        }
+        const usuarioIdAliadoFisico = aliadoFisicoData.rows[0].usuarioId;
+
+        // Eliminar todo lo relacionado con el CURP (aliadoId)
+        await client.query(`
+          DELETE FROM "Notificacion" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "ReporteAvance" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+    
+        await client.query(`
+          DELETE FROM "Chat" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Conexion" WHERE "aliadoId" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Apoyo" WHERE "aliadoId" = $1
+        `, [identificador]);
+        
+        // Eliminar persona física
+        result = await client.query(`
+          DELETE FROM "PersonaFisica" WHERE "CURP" = $1 RETURNING *
+        `, [identificador]);
+        deletedEntities.push('PersonaFisica');
+
+        // Eliminar aliado
+        await client.query(`
+          DELETE FROM "Aliado" WHERE "aliadoId" = $1
+        `, [identificador]);
+        deletedEntities.push('Aliado');
+
+        // Eliminar usuario asociado
+        await eliminarUsuarioCascada(client, usuarioIdAliadoFisico);
+        deletedEntities.push('Usuario');
+        break;
+
+      case 'aliado de persona moral':
+        // Obtener usuarioId primero
+        const aliadoMoralData = await client.query(`
+          SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $1
+        `, [identificador]);
+        if (aliadoMoralData.rows.length === 0) {
+          throw new Error('Aliado persona moral no encontrado');
+        }
+        const usuarioIdAliadoMoral = aliadoMoralData.rows[0].usuarioId;
+
+        // Eliminar todo lo relacionado con el RFC (aliadoId)
+        await client.query(`
+          DELETE FROM "Notificacion" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "ReporteAvance" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+        
+        await client.query(`
+          DELETE FROM "Chat" 
+          WHERE "conexionId" IN (SELECT "conexionId" FROM "Conexion" WHERE "aliadoId" = $1)
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Conexion" WHERE "aliadoId" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Apoyo" WHERE "aliadoId" = $1
+        `, [identificador]);
+        
+        // Eliminar relaciones específicas de persona moral
+        await client.query(`
+          DELETE FROM "Representante" WHERE "RFC" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "ConstanciaFisica" WHERE "RFC" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "EscrituraPublica" WHERE "RFC" = $1
+        `, [identificador]);
+
+        await client.query(`
+          DELETE FROM "Institucion" WHERE "RFC" = $1
+        `, [identificador]);
+        
+        // Eliminar persona moral
+        result = await client.query(`
+          DELETE FROM "PersonaMoral" WHERE "RFC" = $1 RETURNING *
+        `, [identificador]);
+        deletedEntities.push('PersonaMoral');
+
+        // Eliminar aliado
+        await client.query(`
+          DELETE FROM "Aliado" WHERE "aliadoId" = $1
+        `, [identificador]);
+        deletedEntities.push('Aliado');
+
+        // Eliminar usuario asociado
+        await eliminarUsuarioCascada(client, usuarioIdAliadoMoral);
+        deletedEntities.push('Usuario');
+        break;
+
+      case 'administrador':
+        // Obtener usuarioId primero
+        const adminData = await client.query(`
+          SELECT "usuarioId" FROM "Administrador" WHERE "administradorId" = $1
+        `, [identificador]);
+        if (adminData.rows.length === 0) {
+          throw new Error('Administrador no encontrado');
+        }
+        const usuarioIdAdmin = adminData.rows[0].usuarioId;
+
+        // Eliminar administrador
+        result = await client.query(`
+          DELETE FROM "Administrador" WHERE "administradorId" = $1 RETURNING *
+        `, [identificador]);
+        deletedEntities.push('Administrador');
+
+        // Eliminar usuario asociado
+        await eliminarUsuarioCascada(client, usuarioIdAdmin);
+        deletedEntities.push('Usuario');
+        break;
+
+      default:
+        throw new Error(`Tipo de usuario no válido: ${tipoUsuario}`);
+    }
+
+    await client.query('COMMIT');
+    console.log('Eliminación en cascada completada con éxito');
+
+    res.status(200).json({
+      success: true,
+      message: `${tipoUsuarioLower} eliminado en cascada correctamente`,
+      deletedEntities: deletedEntities,
+      details: result ? result.rows : null
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error en la eliminación en cascada:', error);
+
+    res.status(500).json({
+      success: false,
+      message: `Error al eliminar ${tipoUsuarioLower} en cascada`,
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// Función optimizada para eliminar usuario con todo lo relacionado
+async function eliminarUsuarioCascada(client, usuarioId) {
+  // Eliminar documentos primero
+  await client.query(`
+    DELETE FROM "Documento" WHERE "usuarioId" = $1
+  `, [usuarioId]);
+  
+  // Luego eliminar el usuario
+  await client.query(`
+    DELETE FROM "Usuario" WHERE "usuarioId" = $1
+  `, [usuarioId]);
+}
 // Register admin
 router.post("/", async (req, res) => {
   
