@@ -125,10 +125,6 @@
     cursor: pointer;
   }
   
-  .info-field span:hover {
-    color: #439846;
-    text-decoration: underline;
-  }
   
   /*el input field*/
   .info-field input {
