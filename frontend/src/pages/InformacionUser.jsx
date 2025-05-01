@@ -659,7 +659,7 @@ const handleSaveAllChanges = async () => {
                 <table className="conexiones-table">
                   <thead>
                     <tr>
-                      <th>Index</th>
+                      <th></th>
                       <th>Nombre de Necesidad</th>
                       <th>Nombre del Apoyo</th>
                       <th>Nombre del Aliado</th>
@@ -764,7 +764,7 @@ const handleSaveAllChanges = async () => {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
-                        <th>Index</th>
+                        <th> </th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
                         <th>Nombre de la Escuela</th>
@@ -939,7 +939,7 @@ const handleSaveAllChanges = async () => {
                   <table className="conexiones-table">
                     <thead>
                       <tr>
-                        <th>Index</th>
+                        <th></th>
                         <th>Nombre de Necesidad</th>
                         <th>Nombre del Apoyo</th>
                         <th>Nombre de la Escuela</th>

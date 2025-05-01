@@ -102,41 +102,6 @@ router.get("/info/conexion/:conexionId", verifyToken, async(req, res) => {
   }
 });
 
-//todas las conexiones
-router.get("/todasConexiones", verifyToken, async(req,res)=>{
-  
-  try{
-    const result = await pool.query(`
-    WITH conexion_data AS (
-      SELECT json_agg(
-        json_build_object(
-          'id', e."administradorId", 
-          'nombre', u."nombre",
-          'correoElectronico', u."correoElectronico"
-        )
-      ) AS informacion
-      FROM "Administrador" e
-      JOIN "Usuario" u ON e."usuarioId" = u."usuarioId"
-      WHERE u."estadoRegistro" = 'aprobado'
-    )
-    SELECT 
-      COALESCE(ed.informacion, '[]'::json) as informacion
-    FROM admin_data ed
-    `);
-    
-    const administrador = result.rows[0];
-    
-    const responseData = {
-      informacion: Array.isArray(administrador.informacion) ? administrador.informacion : []
-    };
-    
-    return res.json(responseData);
-  } catch (err) {
-    console.error('Error al obtener perfil de admin:', err);
-    return res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
-
 //obtener todas las escuelas 
 router.get("/todasEscuelas", verifyToken, async (req, res) => {
   try {
@@ -975,7 +940,6 @@ router.get("/escuela/perfil/:CCT", verifyToken, async (req, res) => {
   }
 });
 
-//no borrar
 //obtener informmacion a partir del identificador
 router.get("/administrador/informacion/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
@@ -2088,7 +2052,5 @@ async function updateAdministrador(client, adminId, data) {
 
 return { rowCount: 1 };
 }
-
-
 
 module.exports = router;

@@ -189,7 +189,7 @@ export default function ConexionesAdmin() {
                   {renderNonEditableField('Apoyo', conexion.apoyoNombre)}
                   {renderNonEditableField('Fecha de Inicio', conexion.fechaInicio)}
                   {renderNonEditableField('Fecha de Fin', conexion.fechaFin)}
-                  {renderNonEditableField('Estado', conexion.estado + " 🖊️")}
+                  {renderNonEditableField('Estado', conexion.estado )}
 
                   <button
                     className="chat-button"
