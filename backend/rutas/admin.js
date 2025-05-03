@@ -20,7 +20,6 @@ router.post("/test-route", (req, res) => {
 });
 
 //obtener informacion de la conexion
-// Route for fetching specific connection data by conexionId
 router.get("/info/conexion/:conexionId", verifyToken, async(req, res) => {
   // Get the conexionId from URL parameters
   const conexionId = req.params.conexionId;
@@ -251,7 +250,6 @@ router.get("/todosadmin", verifyToken, async(req,res)=>{
 });
 
 //obtener perfil de otros administradores
-//no se que tan efectivo sea este formato
 router.get("/administrador/perfil/:adminId", verifyToken, async(req,res)=>{
   //se pasa el administradorId
   const adminId= req.params.adminId;
@@ -1167,11 +1165,9 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
     console.log(`Iniciando eliminación en cascada de ${tipoUsuarioLower} con ID: ${identificador}`);
     
     let result;
-    let deletedEntities = [];
 
     switch (tipoUsuarioLower.toLowerCase()) {
       case 'escuela':
-        // Obtener usuarioId primero
         const escuelaData = await client.query(`
           SELECT "usuarioId" FROM "Escuela" WHERE "CCT" = $1
         `, [identificador]);
@@ -1228,15 +1224,12 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
         result = await client.query(`
           DELETE FROM "Escuela" WHERE "CCT" = $1 RETURNING *
         `, [identificador]);
-        deletedEntities.push('Escuela');
 
         // Eliminar usuario asociado
         await eliminarUsuarioCascada(client, usuarioIdEscuela);
-        deletedEntities.push('Usuario');
         break;
 
       case 'aliado de persona fisica':
-        // Obtener usuarioId primero
         const aliadoFisicoData = await client.query(`
           SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $1
         `, [identificador]);
@@ -1274,21 +1267,17 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
         result = await client.query(`
           DELETE FROM "PersonaFisica" WHERE "CURP" = $1 RETURNING *
         `, [identificador]);
-        deletedEntities.push('PersonaFisica');
 
         // Eliminar aliado
         await client.query(`
           DELETE FROM "Aliado" WHERE "aliadoId" = $1
         `, [identificador]);
-        deletedEntities.push('Aliado');
 
         // Eliminar usuario asociado
         await eliminarUsuarioCascada(client, usuarioIdAliadoFisico);
-        deletedEntities.push('Usuario');
         break;
 
       case 'aliado de persona moral':
-        // Obtener usuarioId primero
         const aliadoMoralData = await client.query(`
           SELECT "usuarioId" FROM "Aliado" WHERE "aliadoId" = $1
         `, [identificador]);
@@ -1342,21 +1331,17 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
         result = await client.query(`
           DELETE FROM "PersonaMoral" WHERE "RFC" = $1 RETURNING *
         `, [identificador]);
-        deletedEntities.push('PersonaMoral');
 
         // Eliminar aliado
         await client.query(`
           DELETE FROM "Aliado" WHERE "aliadoId" = $1
         `, [identificador]);
-        deletedEntities.push('Aliado');
 
         // Eliminar usuario asociado
         await eliminarUsuarioCascada(client, usuarioIdAliadoMoral);
-        deletedEntities.push('Usuario');
         break;
 
       case 'administrador':
-        // Obtener usuarioId primero
         const adminData = await client.query(`
           SELECT "usuarioId" FROM "Administrador" WHERE "administradorId" = $1
         `, [identificador]);
@@ -1369,11 +1354,9 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
         result = await client.query(`
           DELETE FROM "Administrador" WHERE "administradorId" = $1 RETURNING *
         `, [identificador]);
-        deletedEntities.push('Administrador');
 
         // Eliminar usuario asociado
         await eliminarUsuarioCascada(client, usuarioIdAdmin);
-        deletedEntities.push('Usuario');
         break;
 
       default:
@@ -1381,12 +1364,10 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
     }
 
     await client.query('COMMIT');
-    console.log('Eliminación en cascada completada con éxito');
 
     res.status(200).json({
       success: true,
       message: `${tipoUsuarioLower} eliminado en cascada correctamente`,
-      deletedEntities: deletedEntities,
       details: result ? result.rows : null
     });
 
@@ -1404,14 +1385,12 @@ router.delete('/eliminar', verifyToken, async (req, res) => {
   }
 });
 
-// Función optimizada para eliminar usuario con todo lo relacionado
+// Función para el eleiminar usuario
 async function eliminarUsuarioCascada(client, usuarioId) {
-  // Eliminar documentos primero
   await client.query(`
     DELETE FROM "Documento" WHERE "usuarioId" = $1
   `, [usuarioId]);
   
-  // Luego eliminar el usuario
   await client.query(`
     DELETE FROM "Usuario" WHERE "usuarioId" = $1
   `, [usuarioId]);
@@ -1424,7 +1403,7 @@ router.delete('/eliminar-conexion', verifyToken, async (req, res) => {
 
   try {
     await client.query('BEGIN');
-    console.log(`Iniciando eliminación en cascada de conexión con ID: ${conexionId}`);
+    console.log(`Iniciando eliminación de conexión con ID: ${conexionId}`);
 
     // Verificar primero si existe la conexión
     const conexionExistente = await client.query(
@@ -1449,27 +1428,26 @@ router.delete('/eliminar-conexion', verifyToken, async (req, res) => {
       DELETE FROM "Chat" WHERE "conexionId" = $1
     `, [conexionId]);
 
-    // Finalmente eliminar la conexión principal
     const result = await client.query(`
       DELETE FROM "Conexion" WHERE "conexionId" = $1 RETURNING *
     `, [conexionId]);
 
     await client.query('COMMIT');
-    console.log('Eliminación en cascada de conexión completada con éxito');
+    console.log('Eliminación  completada con éxito');
 
     res.status(200).json({
       success: true,
-      message: 'Conexión eliminada en cascada correctamente',
+      message: 'Conexión eliminada correctamente',
       deletedConexion: result.rows[0]
     });
 
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error('Error en la eliminación en cascada de conexión:', error);
+    console.error('Error en la eliminación de conexión:', error);
 
     res.status(500).json({
       success: false,
-      message: 'Error al eliminar la conexión en cascada',
+      message: 'Error al eliminar la conexión',
       error: error.message
     });
   } finally {
@@ -1595,9 +1573,7 @@ router.put('/update-multiple', verifyToken, async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    console.log('Iniciando transacción para actualización múltiple');
 
-    // Normalizar tipo de usuario
     const tipoUsuarioLower = tipoUsuario.toLowerCase().trim();
     console.log(`Tipo de usuario: ${tipoUsuarioLower}, ID: ${cct}`);
 
@@ -1683,7 +1659,7 @@ router.put('/update-multiple', verifyToken, async (req, res) => {
 
 async function updateEscuela(client, cct, data) {
   const mainTableField = {
-    direccion_escuela: {bdName:'direccion', bdType:'string', frontType: 'string'} , // Nombre real en BD
+    direccion_escuela: {bdName:'direccion', bdType:'string', frontType: 'string'} , 
     zonaEscolar: {bdName:'zonaEscolar', bdType:'string',frontType:'string'},
     sectorEscolar: {bdName:'sectorEscolar', bdType:'string', frontType: 'string'},
     modalidad: {bdName:'modalidad', bdType:'string', frontType: 'string'},
@@ -1697,7 +1673,7 @@ async function updateEscuela(client, cct, data) {
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
   console.log('checking info for query escuela')
@@ -1723,10 +1699,10 @@ async function updateUsuario(client, cct, data) {
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
-  console.log('checking info for query escuela')
+  console.log('checking info for query usuario')
   console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1757,11 +1733,11 @@ async function updateDirector(client, cct, data) {
     const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
     console.log("dentro director: ", data)
-    console.log('checking info for query escuela')
+    console.log('checking info for query director')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1787,11 +1763,11 @@ async function updateSupervisor(client, cct, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
     console.log("dentro supervisor: ", data)
-    console.log('checking info for query escuela')
+    console.log('checking info for query supervisor')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1813,10 +1789,10 @@ async function updateMesaDirectiva(client, cct, data) {
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
-  console.log('checking info for query escuela')
+  console.log('checking info for mesa directiva')
   console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1839,10 +1815,10 @@ async function updateAliadoFisico(client, curp, data) {
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
       usedFields[frontendField]= data[frontendField]
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
-  console.log('checking info for query escuela')
+  console.log('checking info for query aliado fisico')
   console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1869,11 +1845,10 @@ async function updatePersonaFisica(client, curp, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
-    console.log("dentro persona fisica :", data);
-    console.log('checking info for query escuela')
+    console.log('checking info for query persona fisica')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1895,7 +1870,7 @@ async function updateAliadoMoral(client, rfc, data) {
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
   console.log('checking info for query aliado moral')
@@ -1925,7 +1900,7 @@ async function updatePersonaMoral(client, rfc, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
     console.log('checking info for query persona moral')
@@ -1951,10 +1926,10 @@ async function updateInstitucion(client, rfc, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
-    console.log('checking info for query persona moral')
+    console.log('checking info for query insitucion')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -1976,10 +1951,10 @@ async function updateConstanciaFisica(client, rfc, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
-    console.log('checking info for query persona moral')
+    console.log('checking info for query constancia fisica')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -2002,10 +1977,10 @@ async function updateRepresentante(client, rfc, data) {
   const validFields = {};
     for (const [frontendField, fieldvalues] of Object.entries(fieldMap)) {
       if (data[frontendField] !== undefined) {
-        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+        validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
       }
     }
-    console.log('checking info for query persona moral')
+    console.log('checking info for query representante')
     console.log(validFields)
 
   if (Object.keys(validFields).length > 0) {
@@ -2030,7 +2005,7 @@ async function updateAdministrador(client, adminId, data) {
   const validFields = {};
   for (const [frontendField, fieldvalues] of Object.entries(mainTableField)) {
     if (data[frontendField] !== undefined) {
-      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); // aquí se llama a funcion que debe cmoer convertTypeFunction(frontendField,fieldvalues.bdtype)
+      validFields[fieldvalues.bdName] = convertType(data[frontendField],fieldvalues.frontType,fieldvalues.bdType); 
     }
   }
   console.log('checking info for query admin')

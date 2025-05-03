@@ -226,7 +226,7 @@ const EliminarUsuario = async () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ 
-          identificador: identificador,  // ← Cambiado de 'cct' a 'identificador'
+          identificador: identificador,  
           tipoUsuario: tipoUsuario
         }),
       });
@@ -250,7 +250,6 @@ const EliminarUsuario = async () => {
 // Save all edited fields
 const handleSaveAllChanges = async () => {
   try {
-    // Add the tipoUsuario to the request
     const response = await fetch('http://localhost:5000/api/admin/update-multiple', {
       method: 'PUT',
       headers: {
@@ -260,7 +259,7 @@ const handleSaveAllChanges = async () => {
       body: JSON.stringify({ 
         cct: identificador,
         data: editedData,
-        tipoUsuario: tipoUsuario // Include the user type in the request
+        tipoUsuario: tipoUsuario 
       }),
     });
 
@@ -270,12 +269,6 @@ const handleSaveAllChanges = async () => {
     }
 
     const result = await response.json();
-    
-    // Update userData state with the edited data
-    /*setUserData(prev => ({
-      ...prev,
-      ...editedData
-    }));*/
     
     setEditMode(false);
     alert('Datos actualizados correctamente');
@@ -287,7 +280,6 @@ const handleSaveAllChanges = async () => {
   }
 };
 
-// Toggle edit mode
 //aqui esta todo lo que se puede cambiar
   const toggleEditMode = () => {
     setEditMode(!editMode);
@@ -403,7 +395,6 @@ const handleSaveAllChanges = async () => {
 
   const renderEditableField = (field, label, value) => {
     if (editMode) {
-      // In edit mode, show input fields
       return (
         <div className="info-field">
           <strong>{label}:</strong>
@@ -416,7 +407,6 @@ const handleSaveAllChanges = async () => {
       );
     }
     
-    // Normal view mode
     return (
       <div className="info-field">
         <strong>{label}:</strong>
