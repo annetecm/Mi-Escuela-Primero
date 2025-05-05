@@ -257,8 +257,6 @@ const AdminPage = () => {
         <div className="admin-content-area">
           <div className="admin-table-container">
             <h2 className="admin-table-title">Cuentas sin aprobar</h2>
-            {/*Cambiar todo a que den los no aprobados*/}
-            
             <table className="admin-data-table">
               <thead>
                 <tr>

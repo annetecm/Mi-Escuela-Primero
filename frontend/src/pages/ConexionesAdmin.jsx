@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../styles/InformationUser.css";
 import logo from '../assets/logo.png';
 import profile from '../assets/profile.png';
@@ -189,19 +189,10 @@ export default function ConexionesAdmin() {
                   {renderNonEditableField('Apoyo', conexion.apoyoNombre)}
                   {renderNonEditableField('Fecha de Inicio', conexion.fechaInicio)}
                   {renderNonEditableField('Fecha de Fin', conexion.fechaFin)}
-                  {renderNonEditableField('Estado', conexion.estado + " 🖊️")}
+                  {renderNonEditableField('Estado', conexion.estado )}
 
                   <button
                     className="chat-button"
-                    style={{
-                      marginTop: '1rem',
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer'
-                    }}
                     onClick={() => {
                       localStorage.removeItem("tipo");
                       localStorage.removeItem("aliadoId");
@@ -213,16 +204,6 @@ export default function ConexionesAdmin() {
                   </button>
                   <button
                     className="chat-button"
-                    style={{
-                      margin: '1rem',
-                      padding: '0.5rem 1rem',
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '5px',
-                      cursor: 'pointer',
-                    }}
-                  
                     onClick={() => navigate(`/administrador/evidencia/${conexion.conexionId}`, {
                       state: { CCT: conexion.CCT }
                     })}

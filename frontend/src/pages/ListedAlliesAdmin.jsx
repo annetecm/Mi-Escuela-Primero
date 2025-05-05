@@ -10,21 +10,6 @@ export default function ListedSchools() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [adminData, setAdminData] = useState({ nombre: '', avatarUrl: '' });
-  const [editingField, setEditingField] = useState(null);
-  const [newValue, setNewValue] = useState('');
-
-  // Handle edit click
-  const handleEditClick = (field) => {
-    setEditingField(field);
-    // Set the current value to the field being edited
-    setNewValue(''); // You would set this to the current value
-  };
-
-  // Handle save click
-  const handleSaveClick = () => {
-    // Save logic here
-    setEditingField(null);
-  };
 
   //get del nombre del administrador
   useEffect(() => {
@@ -86,29 +71,6 @@ export default function ListedSchools() {
 
     fetchUserData();
   }, []);
-
-  const renderEditableField = (field, label, value) => {
-    return (
-      <div className="info-field">
-        <strong>{label}:</strong>
-        {editingField === field ? (
-          <>
-            <input
-              type="text"
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-            />
-            <button onClick={handleSaveClick}>Guardar</button>
-            <button onClick={() => setEditingField(null)}>Cancelar</button>
-          </>
-        ) : (
-          <span onClick={() => handleEditClick(field)}>
-            {value !== undefined && value !== null ? value.toString() : 'No disponible'}
-          </span>
-        )}
-      </div>
-    );
-  };
 
   const renderNonEditableField = (label, value) => {
     return (

@@ -323,4 +323,13 @@
     background-color: #0b7dda;
   }
   
-  
+  .chat-button{
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    margin-right:0.5em;
+    background-color:#28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
